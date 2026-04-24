@@ -364,7 +364,7 @@ export default function CoreNodeJourney() {
             </button>
             
             <div style={{ width: '100%', height: '450px', backgroundColor: '#0a0a0a', borderRadius: '35px', marginBottom: '50px', overflow: 'hidden', border: '1px solid #1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-               <img src="/jacob_profile.png" alt="Jacob Lovell - The Architect" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+               <img src="/Jacob_Profile.png" alt="Jacob Lovell - The Architect" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
 
             <h2 style={{ fontSize: '64px', fontWeight: 950, marginBottom: '5px', letterSpacing: '-0.04em', textTransform: 'uppercase' }}>THE ARCHITECT</h2>
@@ -447,7 +447,7 @@ export default function CoreNodeJourney() {
             </button>
             
             <div style={{ width: '100%', height: '450px', backgroundColor: '#0a0a0a', borderRadius: '35px', marginBottom: '50px', overflow: 'hidden', border: '1px solid #1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-               <img src="/Emily_Profile.png" alt="Emily Lovell - The Librarian" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+               <img src="/Emily_Profile.PNG" alt="Emily Lovell - The Librarian" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
 
             <h2 style={{ fontSize: '64px', fontWeight: 950, marginBottom: '5px', letterSpacing: '-0.04em', textTransform: 'uppercase' }}>THE LIBRARIAN</h2>
