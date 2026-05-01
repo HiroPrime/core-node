@@ -316,7 +316,7 @@ export default function CoreNodeJourney() {
             </div>
             
             <div className="w-full h-[250px] sm:h-[350px] md:h-[450px] bg-[#0a0a0a] rounded-[1.5rem] md:rounded-[2rem] mb-8 md:mb-12 overflow-hidden border border-[#1a1a1a] mt-4 md:mt-0">
-               <img src="/Jacob_Profile.png" alt="Jacob Lovell - The Architect" className="w-full h-full object-cover object-top" />
+               <img src="/Jacob_Profile.png" alt="Jacob Lovell - The Architect" className="w-full h-full object-cover object-mid" />
             </div>
 
             <h2 className="text-5xl sm:text-6xl md:text-7xl font-black mb-2 tracking-tight uppercase">THE ARCHITECT</h2>
