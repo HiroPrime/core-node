@@ -52,7 +52,7 @@ export default function ConstellationGrid() {
   const shipAngle = useRef(0);
   const flightMode = useRef<FlightMode>('mouse');
   const activeKeys = useRef({ up: false, down: false, left: false, right: false });
-  const requestRef = useRef<number>();
+  const requestRef = useRef<number>(0);
   
   const nodesRef = useRef(gridNodes);
   useEffect(() => {
