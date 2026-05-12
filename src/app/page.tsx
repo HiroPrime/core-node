@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 import { useEffect, useRef, useState } from 'react';
 import { Activity } from "lucide-react";
@@ -59,7 +60,7 @@ export default function ConstellationGrid() {
   }, [gridNodes]);
 
   // DOM REFS
-  const screenRef = useRef<HTMLDivElement>(null); // NEW: Controls the global camera shake
+  const screenRef = useRef<HTMLDivElement>(null); 
   const worldRef = useRef<HTMLDivElement>(null);
   const bgRef = useRef<HTMLDivElement>(null);
   const shipRef = useRef<HTMLDivElement>(null);
@@ -247,12 +248,10 @@ export default function ConstellationGrid() {
       let shakeY = 0;
 
       if (speed > 2) {
-        // Dynamic rumble based on speed
         const rumbleIntensity = speed * 0.25; 
         shakeX = (Math.random() - 0.5) * rumbleIntensity;
         shakeY = (Math.random() - 0.5) * rumbleIntensity;
 
-        // Occasional violent backfire jolt when pushing the engine
         if (speed > 8 && Math.random() < 0.01) { 
           shakeX += (Math.random() > 0.5 ? 1 : -1) * (15 + Math.random() * 10);
           shakeY += (Math.random() > 0.5 ? 1 : -1) * (15 + Math.random() * 10);
