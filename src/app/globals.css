@@ -17,11 +17,17 @@ body {
   font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow: hidden; /* Lock scrollbars for 2D game environment */
+  overflow-x: hidden;
 }
 
 button {
-  all: unset;
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
   box-sizing: border-box;
   display: inline-flex;
   align-items: center;
