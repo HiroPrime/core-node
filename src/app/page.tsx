@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 import { useEffect, useRef, useState } from 'react';
-import { Activity, ExternalLink } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 
 // GAME CONSTANTS
 const BOUNDARY = 4000; 
@@ -585,10 +585,7 @@ export default function ConstellationGrid() {
                       <p className="text-[10px] text-gray-500 font-black tracking-widest uppercase mb-1">Mass</p>
                       <p className="text-2xl font-black" style={{ color: activeNode.color }}>{activeNode.level}</p>
                     </div>
-                    <div className="flex-1 bg-black/50 p-3 rounded-xl border border-white/5 flex flex-col items-center justify-center">
-                      <p className="text-[10px] text-gray-500 font-black tracking-widest uppercase mb-1 flex items-center gap-1"><Activity size={10}/> Population</p>
-                      <p className="text-xl font-bold text-white tracking-widest">{activeNode.exp.toLocaleString()}</p>
-                    </div>
+                    {/* Population HUD hidden while /api/stats wiring is in progress */}
                   </div>
 
                   <a
