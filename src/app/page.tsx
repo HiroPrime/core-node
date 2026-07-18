@@ -1,13 +1,18 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 import { useEffect, useRef, useState } from 'react';
-import { Activity } from "lucide-react";
+import { Activity, ExternalLink } from "lucide-react";
 
 // GAME CONSTANTS
-const BOUNDARY = 2000; 
+const BOUNDARY = 4000; 
 const FRICTION = 0.96;
 const ACCEL = 0.6;
 const MAX_SPEED = 12;
+// Former full zoom-out is the standard view; zoom in/out from there.
+const DEFAULT_ZOOM = 0.25;
+const MIN_ZOOM = 0.08;
+const MAX_ZOOM = 1.75;
+const ZOOM_SENSITIVITY = 0.0015;
 
 type NodeStatus = 'hidden' | 'faint' | 'anomaly' | 'powered';
 type FlightMode = 'mouse' | 'keyboard';
@@ -26,15 +31,24 @@ interface NodeData {
   clicks: number;
   requiredClicks: number;
   imageLayers: string[];
-  userHasClicked: boolean; 
+  userHasClicked: boolean;
+  exploreUrl: string;
 }
 
-// DAY ZERO REGISTRY: Total Blackout. Core requires Director Ignition (Ctrl+Shift+E).
+// FULL GRID ONLINE: All nodes powered with Core constellation links active.
 const INITIAL_NODES: NodeData[] = [
-  { id: 'core', name: 'Nexus Core', x: 0, y: 0, color: '#FF5F1F', glow: 'rgba(255,95,31,0.5)', statusText: 'MOTHERSHIP', level: 1, exp: 0, statusState: 'hidden', clicks: 0, requiredClicks: 3, imageLayers: ['/planets/core-planet.png'], userHasClicked: false },
-  { id: 'prime', name: 'PrimePortal', x: -800, y: -600, color: '#3b82f6', glow: 'rgba(59,130,246,0.5)', statusText: 'THE ALAMO', level: 1, exp: 0, statusState: 'hidden', clicks: 0, requiredClicks: 3, imageLayers: ['/planets/prime-planet.png'], userHasClicked: false },
-  { id: 'grimm', name: 'Grimm Fracture', x: 1000, y: -300, color: '#ef4444', glow: 'rgba(239,68,68,0.5)', statusText: 'BROADCAST TOWER', level: 1, exp: 0, statusState: 'hidden', clicks: 0, requiredClicks: 3, imageLayers: ['/planets/grimm-planet.png'], userHasClicked: false },
-  { id: 'shipyard', name: 'Nexus Prime', x: -400, y: 1200, color: '#4b5563', glow: 'rgba(75,85,99,0.3)', statusText: 'OFFLINE / QUARANTINED', level: 1, exp: 0, statusState: 'hidden', clicks: 0, requiredClicks: 3, imageLayers: ['/planets/shipyard-planet.png'], userHasClicked: false },
+  { id: 'core', name: 'Core Node', x: 0, y: 0, color: '#FF5F1F', glow: 'rgba(255,95,31,0.5)', statusText: 'CENTRAL NODE', level: 19, exp: 0, statusState: 'powered', clicks: 0, requiredClicks: 3, imageLayers: ['/planets/core-planet.png'], userHasClicked: false, exploreUrl: 'https://corenode.nexus/planet' },
+  { id: 'prime', name: 'Prime Portal', x: -1600, y: -1200, color: '#3b82f6', glow: 'rgba(59,130,246,0.5)', statusText: 'TCG ANALYTICS', level: 34, exp: 0, statusState: 'powered', clicks: 0, requiredClicks: 3, imageLayers: ['/planets/prime-planet.png'], userHasClicked: false, exploreUrl: 'https://primeportal.nexus' },
+  { id: 'grimm', name: 'Grimm Fracture', x: 2000, y: -600, color: '#ef4444', glow: 'rgba(239,68,68,0.5)', statusText: 'AI GENERATIVE WEB COMIC', level: 6, exp: 0, statusState: 'powered', clicks: 0, requiredClicks: 3, imageLayers: ['/planets/grimm-planet.png'], userHasClicked: false, exploreUrl: 'https://grimmfracture.nexus' },
+  { id: 'shipyard', name: 'Nexus Prime', x: -800, y: 2400, color: '#a855f7', glow: 'rgba(168,85,247,0.5)', statusText: 'LIVE', level: 15, exp: 0, statusState: 'powered', clicks: 0, requiredClicks: 3, imageLayers: ['/planets/shipyard-planet.png'], userHasClicked: false, exploreUrl: 'https://nexusprime.nexus' },
+  { id: 'savepoint', name: 'Save Point', x: 1600, y: 1400, color: '#FF00FF', glow: 'rgba(255,0,255,0.5)', statusText: 'FREE ARCADE (RETRO)', level: 4, exp: 0, statusState: 'powered', clicks: 0, requiredClicks: 3, imageLayers: ['/planets/savepoint-planet.png'], userHasClicked: false, exploreUrl: 'https://savepoint.nexus' },
+];
+
+const CONNECTIONS: { from: string; to: string }[] = [
+  { from: 'core', to: 'prime' },
+  { from: 'core', to: 'grimm' },
+  { from: 'core', to: 'shipyard' },
+  { from: 'core', to: 'savepoint' },
 ];
 
 export default function ConstellationGrid() {
@@ -53,14 +67,45 @@ export default function ConstellationGrid() {
   const flightMode = useRef<FlightMode>('mouse');
   const activeKeys = useRef({ up: false, down: false, left: false, right: false });
   const requestRef = useRef<number>(0);
+  const zoomRef = useRef(DEFAULT_ZOOM);
   
   const nodesRef = useRef(gridNodes);
   useEffect(() => {
     nodesRef.current = gridNodes;
   }, [gridNodes]);
 
+  // Pull live Population from each site's public /api/stats (via Core aggregator)
+  useEffect(() => {
+    let cancelled = false;
+
+    const pullPopulation = async () => {
+      try {
+        const res = await fetch('/api/population');
+        if (!res.ok) return;
+        const data = await res.json() as {
+          nodes?: Record<string, { population?: number; metric?: string | null; ok?: boolean }>;
+        };
+        if (cancelled || !data.nodes) return;
+
+        setGridNodes(prev => prev.map(node => {
+          const stats = data.nodes?.[node.id];
+          if (!stats?.ok || typeof stats.population !== 'number') return node;
+          return { ...node, exp: stats.population };
+        }));
+      } catch {
+        // Keep last known values if a site is unreachable
+      }
+    };
+
+    pullPopulation();
+    const interval = setInterval(pullPopulation, 60_000);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, []);
+
   // DOM REFS
-  const screenRef = useRef<HTMLDivElement>(null); 
   const worldRef = useRef<HTMLDivElement>(null);
   const bgRef = useRef<HTMLDivElement>(null);
   const shipRef = useRef<HTMLDivElement>(null);
@@ -124,12 +169,24 @@ export default function ConstellationGrid() {
       if (['d', 'arrowright'].includes(key)) activeKeys.current.right = false;
     };
 
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const nextZoom = zoomRef.current * Math.exp(-e.deltaY * ZOOM_SENSITIVITY);
+      zoomRef.current = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, nextZoom));
+    };
+
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
+    window.addEventListener('wheel', handleWheel, { passive: false });
     
     // PHYSICS LOOP
     const updatePhysics = () => {
       let currentAction = 'idle';
+      const zoom = zoomRef.current;
+      // Zoomed in → slower; zoomed out → faster travel
+      const speedScale = Math.min(2.5, Math.max(0.35, DEFAULT_ZOOM / zoom));
+      const accel = ACCEL * speedScale;
+      const maxSpeed = MAX_SPEED * speedScale;
 
       const k = activeKeys.current;
       const isKeyboardActive = k.up || k.down || k.left || k.right;
@@ -147,8 +204,8 @@ export default function ConstellationGrid() {
 
           const inputDist = Math.sqrt(kx * kx + ky * ky);
           if (inputDist > 0) {
-            const ax = (kx / inputDist) * ACCEL;
-            const ay = (ky / inputDist) * ACCEL;
+            const ax = (kx / inputDist) * accel;
+            const ay = (ky / inputDist) * accel;
             shipVel.current.x += ax;
             shipVel.current.y += ay;
 
@@ -175,8 +232,8 @@ export default function ConstellationGrid() {
 
         if (distance > 5) {
           const speedFactor = Math.min(1, distance / 100);
-          const ax = (dx / distance) * ACCEL * speedFactor;
-          const ay = (dy / distance) * ACCEL * speedFactor;
+          const ax = (dx / distance) * accel * speedFactor;
+          const ay = (dy / distance) * accel * speedFactor;
           shipVel.current.x += ax;
           shipVel.current.y += ay;
 
@@ -207,9 +264,9 @@ export default function ConstellationGrid() {
       }
 
       const speed = Math.sqrt(shipVel.current.x ** 2 + shipVel.current.y ** 2);
-      if (speed > MAX_SPEED) {
-        shipVel.current.x = (shipVel.current.x / speed) * MAX_SPEED;
-        shipVel.current.y = (shipVel.current.y / speed) * MAX_SPEED;
+      if (speed > maxSpeed) {
+        shipVel.current.x = (shipVel.current.x / speed) * maxSpeed;
+        shipVel.current.y = (shipVel.current.y / speed) * maxSpeed;
       }
 
       let nextX = shipPos.current.x + shipVel.current.x;
@@ -241,32 +298,13 @@ export default function ConstellationGrid() {
       }
       setActiveNode(closestNode);
 
-      // ==========================================
-      // ENGINE SHAKE & BACKFIRE MECHANICS
-      // ==========================================
-      let shakeX = 0;
-      let shakeY = 0;
-
-      if (speed > 2) {
-        const rumbleIntensity = speed * 0.25; 
-        shakeX = (Math.random() - 0.5) * rumbleIntensity;
-        shakeY = (Math.random() - 0.5) * rumbleIntensity;
-
-        if (speed > 8 && Math.random() < 0.01) { 
-          shakeX += (Math.random() > 0.5 ? 1 : -1) * (15 + Math.random() * 10);
-          shakeY += (Math.random() > 0.5 ? 1 : -1) * (15 + Math.random() * 10);
-        }
-      }
-
-      // RENDER TRANSFORMS
-      if (screenRef.current) {
-        screenRef.current.style.transform = `translate(${shakeX}px, ${shakeY}px)`;
-      }
+      // RENDER TRANSFORMS — scale world around the ship; vessel stays screen-fixed
       if (worldRef.current) {
-        worldRef.current.style.transform = `translate(${-shipPos.current.x}px, ${-shipPos.current.y}px)`;
+        worldRef.current.style.transform = `scale(${zoom}) translate(${-shipPos.current.x}px, ${-shipPos.current.y}px)`;
       }
       if (bgRef.current) {
-        bgRef.current.style.backgroundPosition = `${-shipPos.current.x * 0.5}px ${-shipPos.current.y * 0.5}px`;
+        bgRef.current.style.backgroundPosition = `${-shipPos.current.x * 0.5 * zoom}px ${-shipPos.current.y * 0.5 * zoom}px`;
+        bgRef.current.style.transform = `scale(${1 + (1 - zoom) * 0.15})`;
       }
       
       if (shipRef.current) {
@@ -284,6 +322,7 @@ export default function ConstellationGrid() {
       clearTimeout(dexTimeout);
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
+      window.removeEventListener('wheel', handleWheel);
     };
   }, []);
 
@@ -294,10 +333,11 @@ export default function ConstellationGrid() {
 
     const screenCenterX = window.innerWidth / 2;
     const screenCenterY = window.innerHeight / 2;
+    const zoom = zoomRef.current;
     
     targetPos.current = {
-      x: shipPos.current.x + (e.clientX - screenCenterX),
-      y: shipPos.current.y + (e.clientY - screenCenterY)
+      x: shipPos.current.x + (e.clientX - screenCenterX) / zoom,
+      y: shipPos.current.y + (e.clientY - screenCenterY) / zoom
     };
   };
 
@@ -332,8 +372,7 @@ export default function ConstellationGrid() {
   return (
     <main className="bg-[#030303] h-screen w-screen overflow-hidden text-white font-sans selection:bg-[#FF5F1F] selection:text-white relative cursor-crosshair" onClick={handleMapClick}>
       
-      {/* GLOBAL SCREEN WRAPPER - Absorbs the engine shakes */}
-      <div ref={screenRef} className="absolute inset-0 w-full h-full will-change-transform">
+      <div className="absolute inset-0 w-full h-full">
         
         {/* INFINITE PARALLAX BACKGROUND */}
         <div ref={bgRef} className="absolute inset-0 parallax-bg opacity-30 pointer-events-none scale-[1.05]" />
@@ -342,6 +381,41 @@ export default function ConstellationGrid() {
         <div className="absolute top-1/2 left-1/2 w-0 h-0 pointer-events-none">
           <div ref={worldRef} className="absolute w-0 h-0 transition-none will-change-transform">
             
+            {/* CONSTELLATION CONNECTIONS */}
+            <svg
+              className="absolute overflow-visible pointer-events-none"
+              style={{ left: 0, top: 0, width: 1, height: 1 }}
+            >
+              {CONNECTIONS.map(({ from, to }) => {
+                const fromNode = gridNodes.find(n => n.id === from);
+                const toNode = gridNodes.find(n => n.id === to);
+                if (!fromNode || !toNode) return null;
+                if (fromNode.statusState === 'hidden' || toNode.statusState === 'hidden') return null;
+                if (fromNode.statusState !== 'powered' || toNode.statusState !== 'powered') return null;
+
+                return (
+                  <line
+                    key={`${from}-${to}`}
+                    x1={fromNode.x}
+                    y1={fromNode.y}
+                    x2={toNode.x}
+                    y2={toNode.y}
+                    stroke={fromNode.color}
+                    strokeWidth="1.5"
+                    strokeOpacity="0.35"
+                    strokeDasharray="6 10"
+                  >
+                    <animate
+                      attributeName="stroke-opacity"
+                      values="0.2;0.55;0.2"
+                      dur="3s"
+                      repeatCount="indefinite"
+                    />
+                  </line>
+                );
+              })}
+            </svg>
+
             {/* RENDER NODES */}
             {gridNodes.map((node) => {
               if (node.statusState === 'hidden') return null;
@@ -508,14 +582,29 @@ export default function ConstellationGrid() {
 
                   <div className="flex gap-4 mt-4 w-full pt-4 border-t border-white/10">
                     <div className="flex-1 bg-black/50 p-3 rounded-xl border border-white/5 flex flex-col items-center">
-                      <p className="text-[10px] text-gray-500 font-black tracking-widest uppercase mb-1">Level</p>
+                      <p className="text-[10px] text-gray-500 font-black tracking-widest uppercase mb-1">Mass</p>
                       <p className="text-2xl font-black" style={{ color: activeNode.color }}>{activeNode.level}</p>
                     </div>
                     <div className="flex-1 bg-black/50 p-3 rounded-xl border border-white/5 flex flex-col items-center justify-center">
-                      <p className="text-[10px] text-gray-500 font-black tracking-widest uppercase mb-1 flex items-center gap-1"><Activity size={10}/> Network EXP</p>
+                      <p className="text-[10px] text-gray-500 font-black tracking-widest uppercase mb-1 flex items-center gap-1"><Activity size={10}/> Population</p>
                       <p className="text-xl font-bold text-white tracking-widest">{activeNode.exp.toLocaleString()}</p>
                     </div>
                   </div>
+
+                  <a
+                    href={activeNode.exploreUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-5 inline-flex items-center justify-center gap-2 w-full px-6 py-3 rounded-full font-black text-sm uppercase tracking-widest transition-all hover:scale-[1.02]"
+                    style={{
+                      backgroundColor: activeNode.color,
+                      color: '#050505',
+                      boxShadow: `0 0 24px ${activeNode.glow}`,
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    Explore <ExternalLink size={16} />
+                  </a>
                 </>
               )}
             </div>
