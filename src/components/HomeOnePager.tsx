@@ -1,6 +1,7 @@
 "use client";
 
 import ArcadeSpaceBackdrop from "@/components/ArcadeSpaceBackdrop";
+import CoreNodeLogo from "@/components/CoreNodeLogo";
 import { ExternalLink } from "lucide-react";
 
 const SISTER_NODES = [
@@ -10,7 +11,7 @@ const SISTER_NODES = [
   { name: "Save Point", status: "FREE ARCADE (RETRO)", href: "https://savepoint.nexus", color: "#FF00FF" },
 ];
 
-export default function PlanetOnePager() {
+export default function HomeOnePager() {
   return (
     <main
       className="relative min-h-dvh text-white overflow-x-hidden"
@@ -23,27 +24,31 @@ export default function PlanetOnePager() {
         <ArcadeSpaceBackdrop />
 
         <div className="relative z-10 px-6 pb-16 pt-28 md:px-12 md:pb-20 md:pt-0 max-w-5xl mx-auto w-full">
+          <div className="mb-6 md:mb-8">
+            <CoreNodeLogo width={280} className="md:hidden" />
+            <CoreNodeLogo width={340} className="hidden md:flex" />
+          </div>
+
           <p
-            className="text-[11px] md:text-xs font-bold uppercase tracking-[0.35em] text-[#FF5F1F] mb-4"
+            className="text-[11px] md:text-xs font-bold uppercase tracking-[0.35em] text-[#FF5F1F]/90 mb-3"
             style={{ fontFamily: "var(--font-orbitron), sans-serif" }}
           >
             Nexus Constellation
           </p>
-          <h1
-            className="text-5xl sm:text-6xl md:text-8xl font-black tracking-tight leading-[0.95] mb-5"
-            style={{
-              fontFamily: "var(--font-orbitron), sans-serif",
-              textShadow: "0 0 40px rgba(255,95,31,0.45)",
-            }}
-          >
-            CORE NODE
-          </h1>
-          <p className="max-w-md text-base md:text-lg text-white/70 leading-relaxed mb-8">
+          <h1 className="sr-only">Core Node</h1>
+          <p className="max-w-md text-base md:text-lg text-white/70 leading-relaxed mb-3">
             Central command of the constellation — the living hub where every Nexus world connects.
           </p>
+          <p
+            className="text-[11px] md:text-xs font-bold uppercase tracking-[0.28em] text-white/45 mb-8"
+            style={{ fontFamily: "var(--font-orbitron), sans-serif" }}
+          >
+            By BASICHIRO
+          </p>
+
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
             <a
-              href="/"
+              href="/map"
               className="inline-flex items-center justify-center px-8 py-3.5 rounded-full font-black text-sm uppercase tracking-widest bg-[#FF5F1F] text-[#050505] shadow-[0_0_28px_rgba(255,95,31,0.45)] hover:scale-[1.02] transition-transform"
               style={{ fontFamily: "var(--font-orbitron), sans-serif" }}
             >
@@ -152,9 +157,11 @@ export default function PlanetOnePager() {
 
       <footer className="relative z-10 border-t border-white/10 px-6 py-8 md:px-12">
         <div className="max-w-3xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-[10px] uppercase tracking-[0.25em] text-white/35 font-bold">
-          <span style={{ fontFamily: "var(--font-orbitron), sans-serif" }}>Core Node // 2026</span>
-          <a href="/" className="hover:text-white/70 transition-colors">
-            Return to map
+          <span style={{ fontFamily: "var(--font-orbitron), sans-serif" }}>
+            © 2026 Core Node · By BASICHIRO
+          </span>
+          <a href="/map" className="hover:text-white/70 transition-colors">
+            Enter map
           </a>
         </div>
       </footer>
