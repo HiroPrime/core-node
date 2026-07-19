@@ -95,6 +95,18 @@ export default function NexusAuthModal({ open, onClose, user, onUserChange }: Pr
     if (url.includes("type=recovery") || url.includes("reset=true")) {
       setView("update_password");
     }
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("auth_error")) {
+      setMessage({ type: "error", text: "Sign-in failed. Please try again." });
+      setView("login");
+      params.delete("auth_error");
+      const qs = params.toString();
+      window.history.replaceState(
+        {},
+        "",
+        `${window.location.pathname}${qs ? `?${qs}` : ""}${window.location.hash}`
+      );
+    }
   }, []);
 
   useEffect(() => {
@@ -114,11 +126,12 @@ export default function NexusAuthModal({ open, onClose, user, onUserChange }: Pr
     try {
       if (provider) {
         const oauthOptions: {
+          redirectTo: string;
           queryParams?: { prompt: string };
-        } = {};
-        if (provider === "discord" && action === "login") {
-          oauthOptions.queryParams = { prompt: "none" };
-        }
+        } = {
+          // Always return to the host the user started on (local / preview / prod).
+          redirectTo: `${window.location.origin}/auth/callback`,
+        };
         const { error } = await supabase.auth.signInWithOAuth({
           provider,
           options: oauthOptions,
@@ -180,8 +193,10 @@ export default function NexusAuthModal({ open, onClose, user, onUserChange }: Pr
           resetForm();
         }
       } else if (action === "reset") {
+        const siteOrigin =
+          process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") || window.location.origin;
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: `${window.location.origin}/?reset=true`,
+          redirectTo: `${siteOrigin}/?reset=true`,
         });
         if (error) throw error;
         setMessage({ type: "success", text: "Reset link sent. Check your email." });
