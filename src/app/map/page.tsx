@@ -2,9 +2,11 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { User } from "@supabase/supabase-js";
 import { ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
 import ArcadeSpaceBackdrop from "@/components/ArcadeSpaceBackdrop";
 import CoreNodeLogo from "@/components/CoreNodeLogo";
+import NexusAuthModal, { NexusAuthTrigger } from "@/components/NexusAuthModal";
 
 interface NodeData {
   id: string;
@@ -44,8 +46,27 @@ export default function ConstellationGrid() {
   const [isMounted, setIsMounted] = useState(false);
   const [nodes, setNodes] = useState<NodeData[]>(NODES);
   const [index, setIndex] = useState(0);
+  const [user, setUser] = useState<User | null>(null);
+  const [authOpen, setAuthOpen] = useState(false);
   const lockRef = useRef(false);
   const touchStartY = useRef<number | null>(null);
+
+  const trackExplore = useCallback(async (planetId: string, exploreUrl: string) => {
+    try {
+      await fetch("/api/track/explore", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ planetId }),
+      });
+    } catch {
+      // Tracking is best-effort
+    }
+    if (planetId === "core") {
+      window.location.href = exploreUrl;
+    } else {
+      window.open(exploreUrl, "_blank", "noopener,noreferrer");
+    }
+  }, []);
 
   const active = nodes[index];
   const camera = useMemo(() => ({ x: active.x, y: active.y }), [active.x, active.y]);
@@ -169,6 +190,16 @@ export default function ConstellationGrid() {
           <CoreNodeLogo width={240} className="md:hidden drop-shadow-[0_0_12px_rgba(255,95,31,0.35)]" />
           <CoreNodeLogo width={280} className="hidden md:flex drop-shadow-[0_0_12px_rgba(255,95,31,0.35)]" />
         </a>
+
+        <div className="absolute top-3 right-3 md:top-5 md:right-5 z-30">
+          <NexusAuthTrigger user={user} onOpen={() => setAuthOpen(true)} />
+        </div>
+        <NexusAuthModal
+          open={authOpen}
+          onClose={() => setAuthOpen(false)}
+          user={user}
+          onUserChange={setUser}
+        />
 
         <div className="absolute top-1/2 left-1/2 w-0 h-0 z-10">
           <div
@@ -325,10 +356,9 @@ export default function ConstellationGrid() {
             </div>
           </div>
 
-          <a
-            href={active.exploreUrl}
-            target={active.id === "core" ? undefined : "_blank"}
-            rel={active.id === "core" ? undefined : "noreferrer"}
+          <button
+            type="button"
+            onClick={() => void trackExplore(active.id, active.exploreUrl)}
             className="mt-4 inline-flex items-center justify-center gap-2 w-full max-w-sm px-6 py-3.5 rounded-full font-black text-sm uppercase tracking-widest transition-transform hover:scale-[1.02]"
             style={{
               backgroundColor: active.color,
@@ -337,7 +367,7 @@ export default function ConstellationGrid() {
             }}
           >
             Explore <ExternalLink size={16} />
-          </a>
+          </button>
 
           <p className="mt-2 text-[10px] text-white/30 font-bold uppercase tracking-[0.2em]">
             {index + 1} / {nodes.length}

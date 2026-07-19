@@ -1,7 +1,10 @@
 "use client";
 
+import { useState } from "react";
+import type { User } from "@supabase/supabase-js";
 import ArcadeSpaceBackdrop from "@/components/ArcadeSpaceBackdrop";
 import CoreNodeLogo from "@/components/CoreNodeLogo";
+import NexusAuthModal, { NexusAuthTrigger } from "@/components/NexusAuthModal";
 import { ExternalLink } from "lucide-react";
 
 const SISTER_NODES = [
@@ -12,6 +15,9 @@ const SISTER_NODES = [
 ];
 
 export default function HomeOnePager() {
+  const [user, setUser] = useState<User | null>(null);
+  const [authOpen, setAuthOpen] = useState(false);
+
   return (
     <main
       className="relative min-h-dvh text-white overflow-x-hidden"
@@ -19,6 +25,16 @@ export default function HomeOnePager() {
         fontFamily: "var(--font-space), ui-sans-serif, system-ui, sans-serif",
       }}
     >
+      <div className="fixed top-4 right-4 z-40 md:top-6 md:right-8">
+        <NexusAuthTrigger user={user} onOpen={() => setAuthOpen(true)} />
+      </div>
+      <NexusAuthModal
+        open={authOpen}
+        onClose={() => setAuthOpen(false)}
+        user={user}
+        onUserChange={setUser}
+      />
+
       {/* HERO — full-bleed arcade universe */}
       <section className="relative min-h-dvh flex flex-col justify-end md:justify-center overflow-hidden">
         <ArcadeSpaceBackdrop />
