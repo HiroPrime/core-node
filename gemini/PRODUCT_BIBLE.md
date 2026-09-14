@@ -1,10 +1,22 @@
 # Core Node — Product Bible (CANON)
 
+**SUPERSEDED 2026-09-08.** Public face is the **press one-pager** (`src/components/PressPage.tsx`). Librarian. Paper and ink. **BasicHiro & Mora Fae**, equal type. Not an arcade hub. Not a constellation map. `/map` redirects home.
+
+**Public copy rule:** visitors see the book and the imprint. Do not put production status on the page (lettering, chapter in progress). Do not explain Mora-the-character vs Mora Fae. Equal type. One imprint.
+
+Holding rules: `../nexus-prime/CONSTITUTION.md`.
+
+Do not restore the planet carousel as the homepage.
+
+---
+
+# Archive — old hub canon (do not ship)
+
 **Format:** Progressive Web App / Constellation Hub  
 **Creator:** BasicHiro (Human Command — Development & Creative)  
 **Label:** Central Node of the Core Node / Nexus constellation  
 **Domain:** corenode.nexus  
-**Status:** Active — home one-pager + map carousel shipping; Population telemetry wiring in progress  
+**Status:** Retired from `/` 2026-09-07  
 
 ---
 
