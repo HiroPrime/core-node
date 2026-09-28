@@ -173,7 +173,7 @@ a { color: inherit; text-decoration: none; }
   height: min(42vw, 520px);
   min-height: 280px;
   object-fit: cover;
-  object-position: right center;
+  object-position: center center;
 }
 
 .join-band-front {

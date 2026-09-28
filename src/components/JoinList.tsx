@@ -9,7 +9,7 @@ export function JoinList() {
   return (
     <section className="join-band" aria-labelledby="keep-up">
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img className="join-band-bg" src="/charlie/keep-up.jpg" alt="" />
+      <img className="join-band-bg" src="/charlie/keep-up.png" alt="" />
       <div className="join-band-front">
         <h2 id="keep-up">Keep up with me</h2>
         {done ? (
