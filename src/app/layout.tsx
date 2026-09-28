@@ -1,38 +1,31 @@
-import './globals.css'
-import type { Metadata } from 'next'
-import { Fraunces, Inter_Tight, Source_Serif_4 } from 'next/font/google'
+import type { Metadata } from "next";
+import { Outfit, Nunito } from "next/font/google";
+import { Chrome } from "@/components/Chrome";
+import "./globals.css";
 
-const fraunces = Fraunces({
-  subsets: ['latin'],
-  variable: '--font-display',
-  axes: ['opsz', 'SOFT', 'WONK'],
-})
+const display = Outfit({
+  subsets: ["latin"],
+  variable: "--font-display",
+  weight: ["700", "800"],
+});
 
-const sourceSerif = Source_Serif_4({
-  subsets: ['latin'],
-  variable: '--font-body',
-  weight: ['400', '600'],
-})
-
-const interTight = Inter_Tight({
-  subsets: ['latin'],
-  variable: '--font-kicker',
-  weight: ['500', '600'],
-})
+const body = Nunito({
+  subsets: ["latin"],
+  variable: "--font-body",
+  weight: ["400", "600", "700"],
+});
 
 export const metadata: Metadata = {
-  title: 'Core Node',
-  description: 'Goddess in Disguise. BasicHiro & Mora Fae.',
-}
+  title: "Charlie · Jacob · BasicHiro",
+  description: "Non-binary solo developer. Vibe coding with Cursor. Local Comfy.",
+};
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${fraunces.variable} ${sourceSerif.variable} ${interTight.variable}`}>
-      <body>{children}</body>
+    <html lang="en">
+      <body className={`${display.variable} ${body.variable}`}>
+        <Chrome>{children}</Chrome>
+      </body>
     </html>
-  )
+  );
 }

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Core Node",
-  description: "A press. BasicHiro & Mora Fae.",
+  description: "My personal Core Node.",
 };
 
 export default function MapLayout({ children }: { children: React.ReactNode }) {
