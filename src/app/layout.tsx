@@ -18,6 +18,10 @@ const body = Nunito({
 export const metadata: Metadata = {
   title: "Charlie · Jacob · BasicHiro",
   description: "Non-binary solo developer. Vibe coding with Cursor. Local Comfy.",
+  icons: {
+    icon: [{ url: "/icon", type: "image/png" }],
+    apple: [{ url: "/apple-icon", type: "image/png" }],
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
