@@ -437,3 +437,58 @@
   height: min(94%, 470px);
   aspect-ratio: 648 / 968;
 }
+
+/* The halo follows the object, not the orb. A rounded rectangle cut to the
+   card / memory card silhouette sits behind the tilt, so the glow hugs the
+   artwork instead of blooming out as a circle around it. Sized a touch larger
+   than the cutout, softened, and it floats with the object. */
+.ns-art-glow {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 9%;
+  filter: blur(clamp(24px, 5vw, 44px));
+  opacity: 0.5;
+  pointer-events: none;
+  transition: opacity 400ms ease;
+}
+
+.ns-orb:hover .ns-art-glow,
+.ns-orb:focus-visible .ns-art-glow {
+  opacity: 0.75;
+}
+
+.ns-art--card .ns-art-glow,
+.ns-art--memory .ns-art-glow {
+  height: calc(min(94%, 470px) * 1.1);
+}
+
+.ns-art--card .ns-art-glow {
+  aspect-ratio: 703 / 968;
+}
+
+.ns-art--memory .ns-art-glow {
+  aspect-ratio: 648 / 968;
+}
+
+/* Phones: the card's dark frame disappears against the dark stage, so at the
+   same canvas height the Dex card reads smaller than the memory card in the
+   hand (the memory card's shell is bright to its own edge). On small screens
+   the card gets a small lift so the two objects read the same size on a
+   phone; the desktop framing — where they already read as matched — is left
+   alone. */
+@media (max-width: 640px) {
+  .ns-art--card .ns-art-img,
+  .ns-art--card .ns-art-edge {
+    height: min(101.5%, 508px);
+  }
+
+  .ns-art--card .ns-art-sheen {
+    height: min(101.5%, 508px);
+  }
+
+  .ns-art--card .ns-art-glow {
+    height: calc(min(101.5%, 508px) * 1.1);
+  }
+}

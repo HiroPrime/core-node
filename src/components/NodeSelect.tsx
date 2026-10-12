@@ -191,14 +191,15 @@ export function NodeSelect() {
             aria-label={`Open the ${active.name} briefing`}
             key={active.id}
           >
-            <span className="ns-orb-glow" style={{ background: active.glow }} aria-hidden />
             {active.artifact ? (
               /* A real object on the stage — the Dex promo card or the Save
                  Point memory card. Cutout PNG, tilted in 3D. The thickness is
                  stacked darkened copies of the same cutout sitting behind the
-                 face, so the silhouette always matches the artwork. */
+                 face, so the silhouette always matches the artwork. The halo is
+                 a rounded rectangle cut to the object, not a circle around it. */
               <span className={`ns-art ns-art--${active.artifact}`}>
                 <span className="ns-art-float">
+                  <span className="ns-art-glow" style={{ background: active.glow }} aria-hidden />
                   <span className="ns-art-tilt">
                     {Array.from({ length: 9 }, (_, i) => (
                       <img
@@ -216,13 +217,16 @@ export function NodeSelect() {
                 </span>
               </span>
             ) : (
-              <span className="ns-orb-shell">
-                <img className="ns-orb-img" src={active.planet} alt="" draggable={false} />
-                {/* Specular streak across the glass */}
-                <span className="ns-orb-shine" aria-hidden />
-                {/* Rim light, so the glass reads as glass and not a disc */}
-                <span className="ns-orb-rim" style={{ borderColor: `${active.color}66` }} aria-hidden />
-              </span>
+              <>
+                <span className="ns-orb-glow" style={{ background: active.glow }} aria-hidden />
+                <span className="ns-orb-shell">
+                  <img className="ns-orb-img" src={active.planet} alt="" draggable={false} />
+                  {/* Specular streak across the glass */}
+                  <span className="ns-orb-shine" aria-hidden />
+                  {/* Rim light, so the glass reads as glass and not a disc */}
+                  <span className="ns-orb-rim" style={{ borderColor: `${active.color}66` }} aria-hidden />
+                </span>
+              </>
             )}
           </button>
         </div>

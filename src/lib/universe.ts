@@ -38,6 +38,13 @@ export interface UniverseNode {
    * cutouts on the stage. Anything without this stays in the round glass orb.
    */
   artifact?: "card" | "memory";
+  /**
+   * Full-frame art for the briefing page — a comic cover, a poster. The art
+   * runs to its own edge, so the page frames it as-is: no cutout, no keying.
+   */
+  hero?: string;
+  /** Alt text for the hero art. */
+  heroAlt?: string;
   /** null for the Core — it has no product, it has a person. */
   exploreUrl: string | null;
   /** Position on the constellation plane. */
@@ -150,6 +157,8 @@ export const NODES: UniverseNode[] = [
     glow: "rgba(239,68,68,0.5)",
     mass: 6,
     planet: "/planets/grimm-planet.png",
+    hero: "/nodes/grimm-fracture-comic.jpg",
+    heroAlt: "Grimm Fracture #1 cover — two figures breaking through a cracked wall",
     exploreUrl: null,
     x: 2000,
     y: -600,
