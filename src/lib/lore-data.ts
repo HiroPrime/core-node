@@ -97,3 +97,16 @@ export const COPY_BANK = [
   "I'm a non-binary solo developer.",
   "Every Node is something I built. Some are live. Some are benched. All of them are mine.",
 ];
+
+/**
+ * The story behind the rack. Shown at the top of the Stack page, before any of
+ * the hardware — because the machines only make sense once you know who runs
+ * them and why. Written from the Operator's own words.
+ */
+export const STACK_STORY = [
+  "This is not a data center. It's a desk, two boxes, and one person.",
+  "I'm not a trained coder. I'm a product owner and a designer first — my hours go into the product, the UI, the UX. The part a customer actually touches and decides to love.",
+  "And it's just me. So AI isn't a gimmick in this house; it's how one person covers the ground of a team. Every machine in this rack exists to make my hands stronger.",
+  "All of it runs on my own computer, on my own power, until it starts paying its way. No cloud bills, no gatekeepers, no permission.",
+  "And I'm not finished. The rack keeps growing because I keep learning — finding more leverage, building more of the things people need and want.",
+];
