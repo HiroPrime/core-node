@@ -277,22 +277,6 @@
   letter-spacing: -0.01em;
 }
 
-/* Full-frame art on a briefing — a comic cover hanging on the page. It keeps
-   its own proportions; nothing is cut or keyed, the page just frames it. */
-.brief-hero {
-  margin: 38px auto 0;
-  max-width: 720px;
-}
-
-.brief-hero img {
-  display: block;
-  width: 100%;
-  height: auto;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  box-shadow: 0 40px 90px -40px rgba(0, 0, 0, 0.9);
-}
-
 .brief-block {
   display: grid;
   gap: 16px;

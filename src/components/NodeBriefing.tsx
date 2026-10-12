@@ -84,12 +84,6 @@ export function NodeBriefing({ id }: { id: string }) {
             ) : null}
           </header>
 
-          {node.hero ? (
-            <figure className="brief-hero">
-              <img src={node.hero} alt={node.heroAlt ?? `${node.name} art`} />
-            </figure>
-          ) : null}
-
           <section className="brief-block">
             <h2>What it is</h2>
             <p className="brief-what">{node.brief.what}</p>
