@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 """
+SUPERSEDED - public/planets/prime-portal-card.png is now cut from the photo of
+the printed card by scripts/cut_node_artifacts.py. Kept for the record; running
+this would put the painted stand-in back over the shipped asset.
+
 PRIME PORTAL - the Dex promo card.
 
     "<comfy python>" scripts/make_dex_card.py

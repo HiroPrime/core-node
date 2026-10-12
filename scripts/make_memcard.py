@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 """
+SUPERSEDED - public/planets/savepoint-memcard.png is now cut from the render by
+scripts/cut_node_artifacts.py. Kept for the record; running this would put the
+painted stand-in back over the shipped asset.
+
 SAVE POINT - the memory card.
 
     "<comfy python>" scripts/make_memcard.py

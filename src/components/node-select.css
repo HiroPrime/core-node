@@ -404,8 +404,8 @@
 
 .ns-art--memory .ns-art-img,
 .ns-art--memory .ns-art-edge {
-  width: min(92%, 500px);
-  height: auto;
+  height: min(94%, 470px);
+  width: auto;
 }
 
 /* The extrusion itself. */
@@ -430,10 +430,10 @@
 
 .ns-art--card .ns-art-sheen {
   height: min(94%, 470px);
-  aspect-ratio: 1000 / 1400;
+  aspect-ratio: 703 / 968;
 }
 
 .ns-art--memory .ns-art-sheen {
-  width: min(92%, 500px);
-  aspect-ratio: 4 / 3;
+  height: min(94%, 470px);
+  aspect-ratio: 648 / 968;
 }
