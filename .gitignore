@@ -30,6 +30,9 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
+# dev server logs (captured so a silent exit can't hide)
+/logs
+
 # env files (can opt-in for committing if needed)
 .env*
 

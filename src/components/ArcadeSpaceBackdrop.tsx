@@ -345,7 +345,10 @@ export default function ArcadeSpaceBackdrop({ className = "" }: { className?: st
   }, []);
 
   return (
-    <div className={`absolute inset-0 overflow-hidden ${className}`}>
+    // fixed, not absolute: the universe must fill the viewport and stay put while
+    // the page scrolls, instead of stretching to the height of whatever content
+    // happens to sit on top of it.
+    <div className={`fixed inset-0 overflow-hidden ${className}`}>
       <div
         className="absolute inset-0"
         style={{

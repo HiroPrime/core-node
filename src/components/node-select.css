@@ -1,0 +1,309 @@
+/*
+ * Node select — the level select.
+ *
+ * Two doors, one screen, no scroll. Header, stage, footer are all sized in
+ * viewport units and laid out with flex so the planet can be genuinely large
+ * (~60% of the screen) while the whole thing still lands above the fold on a
+ * 360px-tall phone.
+ */
+
+.ns-screen {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  overflow: hidden;
+  background: #050505;
+  color: var(--voice);
+  /* Stop iOS rubber-banding the single screen. */
+  overscroll-behavior: none;
+  touch-action: pan-y;
+}
+
+/* ---------- Header ---------- */
+
+.ns-head {
+  position: relative;
+  z-index: 30;
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: clamp(12px, 2.4vh, 22px) clamp(16px, 4vw, 40px);
+}
+
+.ns-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  color: var(--gold);
+  transition: opacity 140ms ease;
+}
+
+.ns-brand:hover {
+  opacity: 0.75;
+}
+
+.ns-brand-text {
+  font-family: var(--font-pixel), "Courier New", monospace;
+  font-size: clamp(8px, 1.4vw, 10px);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
+.ns-step {
+  margin: 0;
+  color: var(--mute);
+}
+
+/* ---------- Stage ---------- */
+
+.ns-stage {
+  position: relative;
+  z-index: 20;
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  padding: clamp(4px, 1.4vh, 16px) clamp(52px, 11vw, 96px);
+  /* The orb sizes itself against the stage, not the viewport. */
+  container-type: size;
+}
+
+/* The whole stage is the orb's box, and nothing else decides the height. */
+.ns-orb-wrap {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+.ns-orb {
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  /* 60% of the stage, capped so a wide desktop is not absurd. */
+  width: min(60cqw, 60cqh, 520px);
+  height: min(60cqw, 60cqh, 520px);
+  aspect-ratio: 1;
+  animation: ns-rise 620ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.ns-orb:hover,
+.ns-orb:focus-visible {
+  transform: scale(1.035);
+}
+
+.ns-orb:focus-visible {
+  outline: 1px solid var(--gold);
+  outline-offset: 14px;
+}
+
+@keyframes ns-rise {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Atmospheric bloom behind the glass. */
+.ns-orb-glow {
+  position: absolute;
+  inset: -26%;
+  border-radius: 50%;
+  filter: blur(46px);
+  opacity: 0.5;
+  pointer-events: none;
+  transition: opacity 400ms ease;
+}
+
+.ns-orb:hover .ns-orb-glow {
+  opacity: 0.75;
+}
+
+/* The glass itself. */
+.ns-orb-shell {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 26%, rgba(255, 255, 255, 0.09), transparent 58%);
+  backdrop-filter: blur(3px);
+  /* Inner shade + drop shadow: the two things that make a circle read as a sphere. */
+  box-shadow:
+    inset 0 2px 3px rgba(255, 255, 255, 0.3),
+    inset 0 -18px 40px rgba(0, 0, 0, 0.55),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.07),
+    0 26px 60px -12px rgba(0, 0, 0, 0.85),
+    0 0 70px -10px rgba(227, 148, 26, 0.28);
+  transition: box-shadow 400ms ease;
+}
+
+.ns-orb:hover .ns-orb-shell {
+  box-shadow:
+    inset 0 2px 4px rgba(255, 255, 255, 0.38),
+    inset 0 -18px 40px rgba(0, 0, 0, 0.5),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.1),
+    0 30px 70px -12px rgba(0, 0, 0, 0.9),
+    0 0 96px -8px rgba(227, 148, 26, 0.4);
+}
+
+.ns-orb-img {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.95;
+  animation: ns-float 8s ease-in-out infinite;
+}
+
+@keyframes ns-float {
+  0%,
+  100% {
+    transform: translateY(-1.5%) scale(1);
+  }
+  50% {
+    transform: translateY(1.5%) scale(1.02);
+  }
+}
+
+/* The specular streak. Top-left, as light does. */
+.ns-orb-shine {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: 50%;
+  background: linear-gradient(
+    146deg,
+    rgba(255, 255, 255, 0.34) 0%,
+    rgba(255, 255, 255, 0.09) 22%,
+    transparent 42%
+  );
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+/* ---------- Footer / caption ---------- */
+
+.ns-foot {
+  position: relative;
+  z-index: 30;
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(2px, 0.7vh, 7px);
+  padding: 0 clamp(16px, 5vw, 40px) clamp(14px, 3vh, 30px);
+  text-align: center;
+}
+
+.ns-node-kicker {
+  margin: 0;
+  font-family: var(--font-pixel), "Courier New", monospace;
+  font-size: clamp(7px, 1.3vw, 9px);
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  animation: ns-fade 400ms ease both;
+}
+
+@keyframes ns-fade {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.select-name {
+  margin: 0;
+  font-family: var(--font-pixel), "Courier New", monospace;
+  font-size: clamp(15px, 3.6vw, 30px);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  animation: ns-fade 440ms ease both;
+}
+
+.ns-title {
+  margin: 0;
+  color: var(--mute);
+  font-size: clamp(11px, 2vw, 14px);
+  animation: ns-fade 480ms ease both;
+}
+
+.ns-go {
+  margin-top: clamp(6px, 1.6vh, 14px);
+  padding: clamp(9px, 1.8vh, 14px) clamp(20px, 4.6vw, 32px);
+  border: none;
+  border-radius: 999px;
+  color: #08060a;
+  font-family: var(--font-pixel), "Courier New", monospace;
+  font-size: clamp(8px, 1.6vw, 10px);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    filter 160ms ease;
+}
+
+.ns-go:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.12);
+}
+
+.select-dots {
+  display: flex;
+  gap: 10px;
+  margin-top: clamp(8px, 1.8vh, 16px);
+}
+
+.ns-hint {
+  margin: clamp(6px, 1.4vh, 12px) 0 0;
+  color: var(--mute);
+  font-family: var(--font-pixel), "Courier New", monospace;
+  font-size: clamp(7px, 1.3vw, 9px);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ns-orb,
+  .ns-orb-img,
+  .ns-node-kicker,
+  .select-name,
+  .ns-title {
+    animation: none;
+  }
+}
+
+/* Rim light in the Node's own colour. */
+.ns-orb-rim {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border: 1.5px solid;
+  border-radius: 50%;
+  box-shadow: inset 0 0 22px rgba(0, 0, 0, 0.6);
+  pointer-events: none;
+}

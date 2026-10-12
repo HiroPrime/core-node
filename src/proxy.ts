@@ -4,7 +4,7 @@ import { SITE_ID, VISITOR_COOKIE } from "@/lib/site-ids";
 
 const ONE_YEAR = 60 * 60 * 24 * 365;
 
-export async function middleware(request: NextRequest) {
+export default async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (

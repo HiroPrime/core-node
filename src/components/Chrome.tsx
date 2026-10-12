@@ -2,8 +2,9 @@ import Link from "next/link";
 import { CoreNodeLogo } from "@/components/CoreNodeLogo";
 
 const LINKS = [
-  { href: "/", label: "Me" },
-  { href: "#working-on", label: "Working on" },
+  { href: "/", label: "Press Start" },
+  { href: "/select", label: "Nodes" },
+  { href: "/stack", label: "Stack" },
 ];
 
 export function Chrome({ children }: { children?: React.ReactNode }) {
