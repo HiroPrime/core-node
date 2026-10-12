@@ -6,9 +6,14 @@
  */
 
 export const OPERATOR = {
-  names: ["Charlie", "Jacob", "BasicHiro"],
+  /** The standard name. Jacob and Charlie are the same person and both are true. */
+  name: "BasicHiro",
+  alsoKnownAs: ["Jacob", "Charlie"],
+  names: ["BasicHiro", "Jacob", "Charlie"],
   penName: "BasicHiro",
   role: "Non-binary solo developer. Product designer first, developer second.",
+  /** One line of who this is. Goes at the top of the Rack and the manifesto. */
+  intro: "I'm BasicHiro — a non-binary solo developer and AI vibe coder.",
   creed: "Free. Break the Server. Flood the Queue. Put her to work.",
   email: "basichiro@corenode.nexus",
   linkedin: "https://www.linkedin.com/in/jacobclovell",
@@ -29,7 +34,7 @@ export interface MachineGroup {
 export const MACHINERY: MachineGroup[] = [
   {
     group: "The Forge",
-    note: "Where every picture is made. Local, on her own iron.",
+    note: "Where every picture is made. Local, on my own iron.",
     machines: [
       {
         name: "The Furnace",
@@ -39,7 +44,7 @@ export const MACHINERY: MachineGroup[] = [
       { name: "The Scribe", reality: "Haiku. Writes words. Never touches a pixel." },
       {
         name: "The Home Brains",
-        reality: "Ollama. Models on her own iron. No cloud, no permission, no bill.",
+        reality: "Ollama. Models on my own iron. No cloud, no permission, no bill.",
       },
       {
         name: "The Rig",
@@ -53,19 +58,18 @@ export const MACHINERY: MachineGroup[] = [
     group: "The Desk",
     note: "Where talking becomes building.",
     machines: [
-      { name: "The Chair", reality: "Cursor. Speech in, products out." },
+      { name: "The Chair", reality: "Cline. Speech in, products out." },
       { name: "The Wire", reality: "Next.js and React, front to back." },
       { name: "The Skin", reality: "Tailwind. The house wears one palette: void and gold." },
     ],
   },
   {
     group: "The House",
-    note: "What remembers, what charges, what tells her phone.",
+    note: "What remembers and what charges.",
     machines: [
       { name: "The Ledger", reality: "Supabase. What the house remembers." },
       { name: "The Toll", reality: "Stripe." },
       { name: "The Messenger", reality: "Resend." },
-      { name: "The Ping", reality: "ntfy. Every approval arrives as a tap on her phone." },
       { name: "The Gate", reality: "Vercel. The only thing between the desk and the public." },
     ],
   },
@@ -73,8 +77,8 @@ export const MACHINERY: MachineGroup[] = [
     group: "The Machines",
     note: "Two boxes, two jobs.",
     machines: [
-      { name: "The Omen", reality: "The GPU machine. Draws. Does not run Cursor while it draws." },
-      { name: "The EliteDesk", reality: "The conductor's desk. Cursor, browser, and the grade." },
+      { name: "The Omen", reality: "The GPU machine." },
+      { name: "The EliteDesk", reality: "The desk box. Everything but the drawing happens here." },
     ],
   },
 ];
@@ -82,12 +86,12 @@ export const MACHINERY: MachineGroup[] = [
 export const CREED = [
   { line: "Free until it Works.", note: "No account needed to see it work." },
   {
-    line: "She Approves, Denies, or Adjusts.",
-    note: "Nothing ships to a customer until she sends it.",
+    line: "The Taste Is Mine.",
+    note: "The machines make the work. I decide what is good enough to go out.",
   },
   { line: "One page at a time.", note: "Small first, then grow. Not an empire on day one." },
   { line: "Pictures are Comfy only.", note: "No substitutes." },
-  { line: "Nothing goes out until she hits the button.", note: "That is the whole rule." },
+  { line: "Nothing goes out until I hit the button.", note: "That is the whole rule." },
 ];
 
 export const COPY_BANK = [

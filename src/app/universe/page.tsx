@@ -3,13 +3,13 @@ import Link from "next/link";
 import ArcadeSpaceBackdrop from "@/components/ArcadeSpaceBackdrop";
 import { CircuitGrid } from "@/components/CircuitGrid";
 import { ControllerBadge } from "@/components/ControllerBadge";
-import { CREED } from "@/lib/lore-data";
+import { CREED, OPERATOR } from "@/lib/lore-data";
 import { MANIFESTO } from "@/lib/universe";
 
 export const metadata: Metadata = {
   title: "My Universe — BasicHiro",
   description:
-    "The manifesto. Why I do what I do — product designer first, developer second, and an AI vibe coder who talks more than she types.",
+    "The manifesto. Why I do what I do — product designer first, developer second, an AI vibe coder who talks more than types.",
 };
 
 /**
@@ -33,8 +33,9 @@ export default function UniversePage() {
           <p className="arcade-kicker">My Universe</p>
           <h1 className="page-title">Why I do what I do</h1>
           <p className="page-lede">
-            The Nexus is not a portfolio. It is a machine that builds itself, one Node
-            at a time, with a person at the center who mostly talks.
+            {OPERATOR.intro} The Nexus is not a portfolio — it is a machine that
+            builds itself, one Node at a time, with a person at the center who
+            mostly talks.
           </p>
         </header>
 

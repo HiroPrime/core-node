@@ -10,13 +10,13 @@ and the language the site should speak.
 The Nexus is not a portfolio. It is a machine that builds itself, one Node at a time,
 and a person at the center of it who mostly talks.
 
-She does not sit down and type a spec. She talks, the machine listens, and the page
-comes out looking like the thing she already had in her head. That is the whole method.
-Everything else — the circuits, the Nodes, the Queue — is just the machinery that made
-that possible, given names so it feels like a place instead of a folder.
+The method is not to sit down and type a spec. The Operator talks, the machine listens,
+and the page comes out looking like the thing already in the head. That is the whole
+method. Everything else — the circuits, the Nodes, the Queue — is just the machinery
+that made that possible, given names so it feels like a place instead of a folder.
 
-**The Core is her.** Core Node is not a company. It is the one surface that is allowed
-to be only her.
+**The Core is the Operator.** Core Node is not a company. It is the one surface that is
+allowed to be only one person. On the site, that voice is always first person: I, my, me.
 
 ---
 
@@ -34,12 +34,12 @@ what talks to what, what feeds what, what is still benched in the dark.
 
 ## The Operator
 
-**BasicHiro** is the pen name on public work. **Charlie** and **Jacob** are the same
-person and both are true. She is non-binary. She is a solo developer. She is a product
-designer first and a developer second, and she is proud that she codes by talking.
+**BasicHiro** is the standard name. **Charlie** and **Jacob** are the same person and
+both are true. Non-binary, solo. A product designer first and a developer second, and
+proud to code by talking.
 
-Speech in, products out. She talks more than she types. Every word she has ever sent
-this machine started as her voice.
+Speech in, products out. More talking than typing — every word ever sent to this
+machine started as a voice.
 
 ---
 
@@ -53,7 +53,7 @@ a person.
 ### Save Point — the Identity Studio
 Where a Character gets made. You get a First Look — cinematic on top, T-pose underneath
 — and from that one body every later page is cut. Sheets, Rerolls, one page at a time,
-her grade before anything moves. Qwen paints it. Haiku writes the words. Both jobs are
+the Operator's grade before anything moves. Qwen paints it. Haiku writes the words. Both jobs are
 different and neither one does the other's work.
 
 It runs on the Omen, the GPU box, with the watcher awake and Comfy on **8188** only.
@@ -85,17 +85,17 @@ The tech stack, named as the parts of the world it actually is.
 | The Queue | The Comfy generation queue. Jobs waiting their turn. The thing you flood. |
 | The Painter | Qwen-Image-Edit-2511. Paints faces, bodies, and every cut. |
 | The Scribe | Haiku. Writes words. Never touches a pixel. |
-| The Home Brains | Ollama. Models running on her own iron. No cloud, no permission, no bill. |
+| The Home Brains | Ollama. Models running on local iron. No cloud, no permission, no bill. |
 | The Rig | ControlNet, InstantX, Multiple-Angles, LoRAs. The harness that keeps a Character looking like the same Character. |
 | The Cut | Sharp. Crops, pads, and plates. |
-| The Chair | Cursor. The place where talking becomes building. |
+| The Chair | Cline. The place where talking becomes building. |
 | The Ledger | Supabase. What the house remembers. |
 | The Toll | Stripe. |
 | The Messenger | Resend. |
-| The Ping | ntfy. Every approval arrives as a tap on her phone. |
-| The Wire | Vercel. The only thing standing between the desk and the public. |
-| The Omen | The GPU machine. Draws. Does not run Cursor while it draws. |
-| The EliteDesk | The conductor's desk. Cursor, browser, and the grade. |
+| The Wire | Next.js and React, front to back. |
+| The Gate | Vercel. The only thing standing between the desk and the public. |
+| The Omen | The GPU machine. |
+| The EliteDesk | The desk box. Everything but the drawing happens here. |
 
 ---
 
@@ -104,10 +104,10 @@ The tech stack, named as the parts of the world it actually is.
 **Free. Break the Server. Flood the Queue. Put her to work.**
 
 - Free until it Works.
-- She Approves, Denies, or Adjusts. Nothing ships to a customer until she sends it.
+- The Taste Is Mine. The machines make the work; I decide what is good enough to go out.
 - One page at a time. Small first, then grow. Not an empire on day one.
 - Pictures are Comfy only. No substitutes.
-- Nothing goes out until she hits the button.
+- Nothing goes out until I hit the button.
 
 ---
 
@@ -116,7 +116,7 @@ The tech stack, named as the parts of the world it actually is.
 Short lines, in her spoken voice, ready to drop into the site.
 
 - "This is not a company page. This is me."
-- "I vibe code with Cursor and paint with local Comfy."
+- "I vibe code with Cline and paint with local Comfy."
 - "I talk more than I type, and then we make the thing."
 - "I'm a non-binary solo developer."
 - "Hey. I'm Jacob. I'm Charlie. I'm BasicHiro."
@@ -132,6 +132,7 @@ Short lines, in her spoken voice, ready to drop into the site.
 - Mixed case. Never lowercase "founder twitter."
 - Capitalize the words that matter: Free, Server, Queue, Character, First Look, Sheet,
   Reroll, Launch, Break, Core, Node, Grid, Universe.
-- Her spoken voice, clean grammar. Not a brand intern.
-- Short. She is listening, not reading a novel.
-- She is she. The Operator is real, not a mascot.
+- First person. The site speaks as the Operator: I, my, me. Never third person, never a
+  biographer, never a brand intern.
+- Short. This is spoken, not read like a novel.
+- "Her" is for the machines (put her to work). The Operator is "me".

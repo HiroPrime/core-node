@@ -94,7 +94,7 @@ export const NODES: UniverseNode[] = [
         "Qwen-Image-Edit-2511 — The Painter. Faces, bodies, every cut.",
         "Haiku — The Scribe. Writes words. Never touches a pixel.",
         "The Rig — ControlNet, InstantX, Multiple-Angles, LoRAs. Keeps a Character looking like the same Character.",
-        "One page at a time. Her grade before anything moves.",
+        "One page at a time. My grade before anything moves.",
       ],
       audience:
         "Anyone who wants a character that is actually theirs. Gamers, TTRPG players, and creators who need one body that stays consistent.",
@@ -216,23 +216,23 @@ export const MANIFESTO: ManifestoSection[] = [
     heading: "The premise",
     lines: [
       "The Nexus is not a portfolio. It is a machine that builds itself, one Node at a time, and a person at the center of it who mostly talks.",
-      "She does not sit down and type a spec. She talks, the machine listens, and the page comes out looking like the thing she already had in her head. That is the whole method.",
-      "The Core is her. Core Node is not a company. It is the one surface that is allowed to be only her.",
+      "I don't sit down and type a spec. I talk, the machine listens, and the page comes out looking like the thing I already had in my head. That is the whole method.",
+      "The Core is me. Core Node is not a company. It is the one surface that is allowed to be only me.",
     ],
   },
   {
     heading: "The method",
     lines: [
-      "Speech in, products out. She talks more than she types. Every word she has ever sent this machine started as her voice.",
-      "She is a product designer first and a developer second, and she is proud that she codes by talking.",
+      "Speech in, products out. I talk more than I type. Every word I have ever sent this machine started as my voice.",
+      "I am a product designer first and a developer second, and I am proud that I code by talking.",
     ],
   },
   {
     heading: "Why I do what I do",
     lines: [
-      "Because the expensive part of building was never the code. It was getting the thing in her head into the world without losing it on the way through.",
-      "Local iron, her own models, her own taste. No cloud permission slip, no bill that changes the decision. Free until it Works, then Break the Server, Flood the Queue, and put her to work.",
-      "Every Node is something she built. Some are live. Some are benched. All of them are hers.",
+      "Because the expensive part of building was never the code. It was getting the thing in my head into the world without losing it on the way through.",
+      "Local iron, my own models, my own taste. No cloud permission slip, no bill that changes the decision. Free until it Works, then Break the Server, Flood the Queue, and put her to work.",
+      "Every Node is something I built. Some are live. Some are benched. All of them are mine.",
     ],
   },
 ];

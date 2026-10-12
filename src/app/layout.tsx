@@ -25,8 +25,9 @@ const pixel = Press_Start_2P({
 });
 
 export const metadata: Metadata = {
-  title: "Charlie · Jacob · BasicHiro",
-  description: "Non-binary solo developer. Vibe coding with Cursor. Local Comfy.",
+  title: "BasicHiro — Core Node",
+  description:
+    "BasicHiro — a non-binary solo developer and AI vibe coder. Product designer first, developer second.",
   icons: {
     icon: [{ url: "/icon", type: "image/png" }],
     apple: [{ url: "/apple-icon", type: "image/png" }],

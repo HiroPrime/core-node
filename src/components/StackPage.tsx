@@ -5,7 +5,6 @@ import Link from "next/link";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import ArcadeSpaceBackdrop from "@/components/ArcadeSpaceBackdrop";
 import { CircuitGrid } from "@/components/CircuitGrid";
-import { CoreNodeLogo } from "@/components/CoreNodeLogo";
 import { CREED, MACHINERY, OPERATOR, STACK_STORY } from "@/lib/lore-data";
 import "./stack-rack.css";
 
@@ -17,8 +16,9 @@ import "./stack-rack.css";
  * inside the world, and the real part number underneath.
  *
  * Above the rack, the story — because the machines only make sense once you know
- * who runs them: not a trained coder, a product person who multiplies herself
- * with AI and runs the whole house on her own boxes until it pays its way.
+ * who runs them. Not a trained coder: a product person who multiplies with AI
+ * and runs the whole house on one desk until it pays its way. The Operator line
+ * from the old page lives up top now, where the name belongs.
  */
 
 /** Bay accent per group. The LED and the plate take this color. */
@@ -37,19 +37,15 @@ export function StackPage() {
 
       <div className="arcade-inner is-scrolling">
         <header className="brief">
-          <div className="ns-head" style={{ position: "static", padding: 0 }}>
-            <Link href="/" className="ns-brand" aria-label="Back to Core Node">
-              <CoreNodeLogo size={24} />
-              <span className="ns-brand-text">Core Node</span>
-            </Link>
-            <span className="arcade-kicker">Options</span>
-          </div>
+          <Link href="/" className="page-back arcade-label">
+            &#8592; Press Start
+          </Link>
 
           <p className="arcade-kicker roomy-top">The Machinery</p>
           <h1 className="brief-title">The Rack</h1>
           <p className="brief-what" style={{ color: "var(--mute)", fontSize: 19 }}>
-            Every machine in the house, bolted in. A name inside the world, a real
-            part number outside it.
+            {OPERATOR.intro} This is the rack that runs my house — every machine
+            that turns one person into a studio.
           </p>
         </header>
 
@@ -88,7 +84,7 @@ export function StackPage() {
           );
         })}
 
-        <section className="stack-group">
+        <section className="stack-group" style={{ borderBottom: "none" }}>
           <h2>The Creed</h2>
           <p className="stack-note">Five rules. They do not bend.</p>
           <ul className="creed">
@@ -99,27 +95,6 @@ export function StackPage() {
               </li>
             ))}
           </ul>
-        </section>
-
-        <section className="stack-group" style={{ borderBottom: "none" }}>
-          <h2>The Operator</h2>
-          <p className="stack-note">{OPERATOR.creed}</p>
-          <div className="machine">
-            <p className="machine-name">Also known as</p>
-            <p className="machine-reality">{OPERATOR.names.join(" · ")}</p>
-          </div>
-          <div className="machine">
-            <p className="machine-name">What I do</p>
-            <p className="machine-reality">{OPERATOR.role}</p>
-          </div>
-          <div className="machine">
-            <p className="machine-name">Reach me</p>
-            <p className="machine-reality">
-              <a href={`mailto:${OPERATOR.email}`} style={{ color: "var(--gold)" }}>
-                {OPERATOR.email}
-              </a>
-            </p>
-          </div>
         </section>
 
         <div className="brief-actions">
