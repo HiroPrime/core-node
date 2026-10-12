@@ -11,9 +11,10 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  height: 100dvh;
+  /* Minus the chrome header, so the level select lands exactly above the fold. */
+  height: calc(100dvh - var(--chrome-h));
   overflow: hidden;
-  background: #050505;
+  background: transparent;
   color: var(--voice);
   /* Stop iOS rubber-banding the single screen. */
   overscroll-behavior: none;

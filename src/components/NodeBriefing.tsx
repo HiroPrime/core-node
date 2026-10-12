@@ -37,7 +37,7 @@ export function NodeBriefing({ id }: { id: string }) {
         <div className="arcade-inner">
           <div className="brief">
             <h1 className="brief-title">No such Node</h1>
-            <p className="mt-4" style={{ color: "var(--mute)" }}>
+            <p className="tight-top" style={{ color: "var(--mute)" }}>
               Nothing answers to that name in the Grid.
             </p>
             <div className="brief-actions">
@@ -69,7 +69,7 @@ export function NodeBriefing({ id }: { id: string }) {
             </span>
           </div>
 
-          <header className="brief-head mt-8">
+          <header className="brief-head roomy-top">
             <p
               className="status-pill"
               style={{ color: STATUS_COLOR[node.status], borderColor: STATUS_COLOR[node.status] }}
@@ -130,7 +130,7 @@ export function NodeBriefing({ id }: { id: string }) {
           </div>
 
           {!node.exploreUrl && blocked ? (
-            <p className="mt-4 arcade-kicker">{blocked}</p>
+            <p className="arcade-kicker tight-top">{blocked}</p>
           ) : null}
         </div>
       </div>

@@ -5,13 +5,18 @@
   --voice: #f4f0e6;
   --mute: #8a8474;
   --line: #1c1c1c;
+  /* The sticky header's real height: 22px pad + 40px mark + 22px pad.
+     Full-screen pages subtract it so they land exactly above the fold. */
+  --chrome-h: 84px;
 }
 
 * { box-sizing: border-box; }
 
 html, body {
   margin: 0;
-  background: var(--void);
+  /* Deep space, not black: the fixed universe backdrop covers the viewport on
+     every page, and this is only the safety net underneath it. */
+  background: #07060f;
   color: var(--voice);
   font-family: var(--font-body), "Nunito", sans-serif;
   font-size: 18px;
@@ -29,11 +34,24 @@ a { color: inherit; text-decoration: none; }
   justify-content: space-between;
   gap: 16px;
   padding: 22px 28px;
-  background: var(--void);
+  /* Transparent: the universe runs behind the menu too. No black bars. */
+  background: transparent;
 }
 
 .chrome-mark { display: flex; align-items: center; }
 .chrome-mark:hover { opacity: 0.85; }
+
+/* The mark row inside CoreNodeLogo: flex, so the svg and the wordmark sit on
+   one line. It was Tailwind utilities before, which compile to nothing here. */
+.mark-row {
+  display: flex;
+  align-items: center;
+  gap: 0.55em;
+}
+
+.mark-row svg {
+  flex-shrink: 0;
+}
 
 .chrome-nav {
   display: flex;

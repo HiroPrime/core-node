@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 export default function UniversePage() {
   return (
     <main className="arcade">
-      <ArcadeSpaceBackdrop className="opacity-50" />
+      <ArcadeSpaceBackdrop className="is-faint" />
       <CircuitGrid />
 
       <div className="arcade-inner is-scrolling">

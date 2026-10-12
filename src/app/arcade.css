@@ -7,7 +7,9 @@
 
 .arcade {
   position: relative;
-  min-height: 100dvh;
+  /* The header sits above in flow, so full-height pages subtract it and land
+     exactly above the fold. */
+  min-height: calc(100dvh - var(--chrome-h));
   /* No fill. ArcadeSpaceBackdrop and CircuitGrid are both position:fixed and
      already cover the viewport; a background here would sit above them. */
   background: transparent;
@@ -54,8 +56,9 @@
   justify-content: center;
   /* dvh, not vh: mobile browser chrome shrinks the real viewport and a vh
      hero pushes the menu off the bottom of the screen. Also height, not
-     min-height — the screen must fit exactly, never trigger a scrollbar. */
-  height: 100dvh;
+     min-height — the screen must fit exactly, never trigger a scrollbar.
+     Subtracting the chrome header keeps it above the fold underneath it. */
+  height: calc(100dvh - var(--chrome-h));
   text-align: center;
   padding: clamp(16px, 3vh, 40px) 0 clamp(14px, 2.5vh, 28px);
   gap: 0;
@@ -736,3 +739,68 @@
   font-size: clamp(16px, 2.2vw, 20px);
   line-height: 1.55;
 }
+
+/* ---------- The universe (full-viewport backdrop) ----------
+ *
+ * These are plain classes on purpose. The house CSS is hand-written and has no
+ * Tailwind layer, so utility classes like `fixed`/`inset-0` compile to nothing —
+ * every bit of the backdrop's positioning has to live here to be real.
+ */
+
+.universe {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+}
+
+/* Dim variations for pages where the copy needs to win. */
+.universe.is-dim {
+  opacity: 0.8;
+}
+
+.universe.is-faint {
+  opacity: 0.5;
+}
+
+.universe-sky {
+  position: absolute;
+  inset: 0;
+}
+
+.universe-canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.universe-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.07;
+}
+
+/* The circuit plane sits over the universe, under the content. */
+.circuit-grid {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+.circuit-layer {
+  position: absolute;
+  inset: 0;
+}
+
+/* Small spacing helpers. The house CSS has no Tailwind layer, so spacing that
+   used to arrive as `mt-4`/`mt-8` utilities has to be real CSS to exist at all. */
+.tight-top {
+  margin-top: 16px;
+}
+
+.roomy-top {
+  margin-top: 32px;
+}
+

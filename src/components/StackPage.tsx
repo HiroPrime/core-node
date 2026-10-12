@@ -32,8 +32,8 @@ export function StackPage() {
             <span className="arcade-kicker">Options</span>
           </div>
 
-          <h1 className="brief-title mt-8">The Machinery</h1>
-          <p className="brief-what mt-4" style={{ color: "var(--mute)", fontSize: 19 }}>
+          <h1 className="brief-title roomy-top">The Machinery</h1>
+          <p className="brief-what tight-top" style={{ color: "var(--mute)", fontSize: 19 }}>
             Every piece has a name inside the world and a real name outside it. This is
             both.
           </p>

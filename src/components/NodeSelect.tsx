@@ -165,7 +165,7 @@ export function NodeSelect() {
 
   return (
     <main className="ns-screen" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
-      <ArcadeSpaceBackdrop className="opacity-80" />
+      <ArcadeSpaceBackdrop className="is-dim" />
 
       {/* Header — brand, and the way back. */}
       <header className="ns-head">

@@ -136,14 +136,16 @@ export default function ArcadeSpaceBackdrop({ className = "" }: { className?: st
     let t = 0;
 
     const resize = () => {
-      const parent = canvas.parentElement;
-      w = parent?.clientWidth || window.innerWidth;
-      h = parent?.clientHeight || window.innerHeight;
+      // Measure the viewport itself. Measuring the wrapper was the bug: before
+      // layout settled, the parent could read ~150px tall and the backdrop got
+      // baked into a strip at the top of the page.
+      w = window.innerWidth;
+      h = window.innerHeight;
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       canvas.width = Math.floor(w * dpr);
       canvas.height = Math.floor(h * dpr);
-      canvas.style.width = `${w}px`;
-      canvas.style.height = `${h}px`;
+      // No inline CSS sizing here on purpose: .universe-canvas stretches to the
+      // viewport in CSS, so coverage holds even mid-resize.
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
       stars = Array.from({ length: Math.floor((w * h) / 2800) }, () => ({
@@ -345,25 +347,26 @@ export default function ArcadeSpaceBackdrop({ className = "" }: { className?: st
   }, []);
 
   return (
-    // fixed, not absolute: the universe must fill the viewport and stay put while
-    // the page scrolls, instead of stretching to the height of whatever content
-    // happens to sit on top of it.
-    <div className={`fixed inset-0 overflow-hidden ${className}`}>
+    // The universe itself: pinned to the viewport, so it sits behind every page
+    // at every scroll position and size. Classes are plain CSS on purpose —
+    // there is no Tailwind layer in this project to compile `fixed`/`inset-0`.
+    <div className={`universe ${className}`}>
       <div
-        className="absolute inset-0"
+        className="universe-sky"
         style={{
           background:
-            "radial-gradient(ellipse 90% 70% at 50% 40%, #141028 0%, #07060f 45%, #030303 100%)",
+            "radial-gradient(ellipse 90% 70% at 50% 40%, #16122e 0%, #0a0918 48%, #050410 100%)",
         }}
       />
-      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" aria-hidden />
+      <canvas ref={canvasRef} className="universe-canvas" aria-hidden />
       <div
-        className="absolute inset-0 pointer-events-none opacity-[0.07]"
+        className="universe-grid"
         style={{
           backgroundImage:
             "linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)",
           backgroundSize: "48px 48px",
           maskImage: "radial-gradient(ellipse at center, black 30%, transparent 80%)",
+          WebkitMaskImage: "radial-gradient(ellipse at center, black 30%, transparent 80%)",
         }}
       />
     </div>

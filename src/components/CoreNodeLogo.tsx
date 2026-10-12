@@ -15,10 +15,10 @@ export function CoreNodeLogo({
 
   return (
     <div
-      className={`flex items-center gap-[0.55em] ${className}`}
+      className={`mark-row ${className}`}
       style={width ? { width } : undefined}
     >
-      <svg width={mark} height={mark} viewBox="0 0 64 64" aria-hidden className="shrink-0">
+      <svg width={mark} height={mark} viewBox="0 0 64 64" aria-hidden>
         <circle cx="32" cy="32" r="22" fill="none" stroke="#e3941a" strokeWidth="2.2" />
         <circle cx="32" cy="32" r="8" fill="none" stroke="#e3941a" strokeWidth="2" />
         <circle cx="32" cy="10" r="3.4" fill="#e3941a" />

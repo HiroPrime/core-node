@@ -10,14 +10,15 @@
  */
 export function CircuitGrid({ className = "" }: { className?: string }) {
   return (
-    // fixed, not absolute: the circuit plane is the floor of the whole site, so it
-    // pins to the viewport and stays put while content scrolls over it.
-    <div className={`pointer-events-none fixed inset-0 ${className}`} aria-hidden>
+    // Plain CSS classes, not Tailwind utilities: this project has no Tailwind
+    // layer, so `fixed`/`inset-0` would compile to nothing. .circuit-grid pins
+    // to the viewport in arcade.css so the plane is the floor of the whole site.
+    <div className={`circuit-grid ${className}`} aria-hidden>
       {/* Base plane. Deliberately no solid fill: this layer sits ON TOP of the
           arcade space canvas, so an opaque background here would hide the whole
           universe. Only a faint gold bloom, then the traces over live pixels. */}
       <div
-        className="absolute inset-0"
+        className="circuit-layer"
         style={{
           background:
             "radial-gradient(ellipse 80% 60% at 50% 42%, rgba(227,148,26,0.06) 0%, transparent 62%)",
@@ -26,7 +27,7 @@ export function CircuitGrid({ className = "" }: { className?: string }) {
 
       {/* Traces — horizontal and vertical, like a board */}
       <div
-        className="circuit-traces absolute inset-0"
+        className="circuit-traces circuit-layer"
         style={{
           backgroundImage:
             "linear-gradient(rgba(227,148,26,0.11) 1px, transparent 1px), linear-gradient(90deg, rgba(227,148,26,0.11) 1px, transparent 1px)",
@@ -40,7 +41,7 @@ export function CircuitGrid({ className = "" }: { className?: string }) {
 
       {/* Thicker trunk lines — where signal thickens and something got built */}
       <div
-        className="circuit-trunks absolute inset-0"
+        className="circuit-trunks circuit-layer"
         style={{
           backgroundImage:
             "linear-gradient(rgba(227,148,26,0.2) 2px, transparent 2px), linear-gradient(90deg, rgba(227,148,26,0.2) 2px, transparent 2px)",
@@ -53,12 +54,12 @@ export function CircuitGrid({ className = "" }: { className?: string }) {
       />
 
       {/* Signal running the traces */}
-      <div className="circuit-signal-h absolute inset-0" />
-      <div className="circuit-signal-v absolute inset-0" />
+      <div className="circuit-signal-h circuit-layer" />
+      <div className="circuit-signal-v circuit-layer" />
 
       {/* Nodes on the grid — solder pads */}
       <div
-        className="circuit-pads absolute inset-0"
+        className="circuit-pads circuit-layer"
         style={{
           backgroundImage:
             "radial-gradient(circle, rgba(227,148,26,0.5) 1.4px, transparent 1.6px)",
