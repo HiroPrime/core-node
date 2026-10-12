@@ -77,9 +77,11 @@ export function NodeBriefing({ id }: { id: string }) {
               {node.statusText}
             </p>
             <h1 className="brief-title">{node.name}</h1>
-            <p className="brief-what" style={{ color: "var(--mute)", fontSize: 18 }}>
-              {node.title}
-            </p>
+            {node.title ? (
+              <p className="brief-what" style={{ color: "var(--mute)", fontSize: 18 }}>
+                {node.title}
+              </p>
+            ) : null}
           </header>
 
           <section className="brief-block">

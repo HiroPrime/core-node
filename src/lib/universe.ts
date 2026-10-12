@@ -68,9 +68,9 @@ export const NODES: UniverseNode[] = [
   {
     id: "savepoint",
     name: "Save Point",
-    title: "the Identity Studio",
+    title: "",
     status: "LIVE",
-    statusText: "IDENTITY STUDIO",
+    statusText: "Character Consistency",
     color: "#FF00FF",
     glow: "rgba(255,0,255,0.5)",
     mass: 4,
@@ -104,9 +104,9 @@ export const NODES: UniverseNode[] = [
   {
     id: "prime",
     name: "Prime Portal",
-    title: "the Observatory",
+    title: "",
     status: "LIVE",
-    statusText: "TCG ANALYTICS",
+    statusText: "TCG Search and Data Club",
     color: "#2ee6d6",
     glow: "rgba(46,230,214,0.5)",
     mass: 34,
@@ -115,7 +115,7 @@ export const NODES: UniverseNode[] = [
     x: -1600,
     y: -1200,
     brief: {
-      what: "TCG analytics. Pokemon, search, and the analytics beast. A deck that reads itself. The other half of the desk, and live as a product — which is not the same as done.",
+      what: "TCG search and data club. Pokemon, search, and the analytics beast. A deck that reads itself. The other half of the desk, and live as a product — which is not the same as done.",
       stack: [
         "Next 16.1",
         "React 19.2",

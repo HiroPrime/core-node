@@ -50,7 +50,7 @@ The central hub. Where the Grid is mapped and where the Operator sits. Home of t
 press-start screen, the Node select, and the Stack. This world has no product. It has
 a person.
 
-### Save Point — the Identity Studio
+### Save Point — Character Consistency
 Where a Character gets made. You get a First Look — cinematic on top, T-pose underneath
 — and from that one body every later page is cut. Sheets, Rerolls, one page at a time,
 the Operator's grade before anything moves. Qwen paints it. Haiku writes the words. Both jobs are
@@ -61,8 +61,8 @@ Nothing else is allowed to start that forge.
 
 **Free until it Works.** Then: Break the Server. Flood the Queue. Put her to work.
 
-### Prime Portal — the Observatory
-TCG analytics. Pokemon, search, and the analytics beast. A deck that reads itself.
+### Prime Portal — TCG Search and Data Club
+TCG search and data club. Pokemon, search, and the analytics beast. A deck that reads itself.
 Recharts is the scrying glass. This is the other half of the desk, and it is live as a
 product, which is not the same as done.
 

@@ -4,7 +4,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import ArcadeSpaceBackdrop from "@/components/ArcadeSpaceBackdrop";
 import { ControllerBadge } from "@/components/ControllerBadge";
-import { CoreNodeLogo } from "@/components/CoreNodeLogo";
 import { SELECT_SPOTS, STATUS_LABEL, getNode } from "@/lib/universe";
 import "./node-select.css";
 
@@ -167,12 +166,9 @@ export function NodeSelect() {
     <main className="ns-screen" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
       <ArcadeSpaceBackdrop className="is-dim" />
 
-      {/* Header — brand, and the way back. */}
-      <header className="ns-head">
-        <a href="/" className="ns-brand" aria-label="Back to Core Node">
-          <CoreNodeLogo size={26} />
-          <span className="ns-brand-text">Core Node</span>
-        </a>
+      {/* Header — just the counter. The chrome header above already carries the
+          mark and the nav; a second logo here read as a second menu. */}
+      <header className="ns-head" style={{ justifyContent: "flex-end" }}>
         <p className="ns-step arcade-label">
           {String(index + 1).padStart(2, "0")} / {String(SPOTS.length).padStart(2, "0")}
         </p>
@@ -216,7 +212,7 @@ export function NodeSelect() {
         <h1 className="select-name" key={active.id}>
           {active.name}
         </h1>
-        <p className="ns-title">{active.title}</p>
+        {active.title ? <p className="ns-title">{active.title}</p> : null}
 
         <button
           type="button"
