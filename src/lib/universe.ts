@@ -74,7 +74,7 @@ export const NODES: UniverseNode[] = [
     color: "#FF00FF",
     glow: "rgba(255,0,255,0.5)",
     mass: 4,
-    planet: "/planets/prime-planet2.png",
+    planet: "/planets/savepoint-planet.png",
     exploreUrl: "https://savepoint.nexus",
     x: 1600,
     y: 1400,
