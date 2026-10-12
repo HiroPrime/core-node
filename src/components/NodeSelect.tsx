@@ -213,7 +213,6 @@ export function NodeSelect() {
                       />
                     ))}
                     <img className="ns-art-img" src={active.planet} alt="" draggable={false} />
-                    <span className="ns-art-sheen" aria-hidden />
                   </span>
                 </span>
               </span>

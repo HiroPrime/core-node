@@ -394,8 +394,7 @@
    sizes resolve against the tilt box itself and never against an auto-sized
    grid track. (That is how the card ended up hanging off the bottom.) */
 .ns-art-img,
-.ns-art-edge,
-.ns-art-sheen {
+.ns-art-edge {
   position: absolute;
   inset: 0;
   margin: auto;
@@ -428,35 +427,6 @@
 .ns-art-edge {
   filter: brightness(0.28) saturate(0.55);
   pointer-events: none;
-}
-
-/* Glass sheen across the face. */
-.ns-art-sheen {
-  pointer-events: none;
-  border-radius: 5%;
-  background: linear-gradient(
-    148deg,
-    rgba(255, 255, 255, 0.22) 0%,
-    rgba(255, 255, 255, 0.05) 34%,
-    transparent 54%
-  );
-  mix-blend-mode: screen;
-  transform: translateZ(1px);
-}
-
-.ns-art--card .ns-art-sheen {
-  height: min(94%, 470px);
-  aspect-ratio: 703 / 968;
-}
-
-.ns-art--memory .ns-art-sheen {
-  height: min(94%, 470px);
-  aspect-ratio: 648 / 968;
-}
-
-.ns-art--cover .ns-art-sheen {
-  height: min(94%, 470px);
-  aspect-ratio: 1696 / 2528;
 }
 
 /* The halo follows the object, not the orb. A rounded rectangle cut to the
@@ -507,10 +477,6 @@
 @media (max-width: 640px) {
   .ns-art--card .ns-art-img,
   .ns-art--card .ns-art-edge {
-    height: min(101.5%, 508px);
-  }
-
-  .ns-art--card .ns-art-sheen {
     height: min(101.5%, 508px);
   }
 
