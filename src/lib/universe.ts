@@ -33,11 +33,12 @@ export interface UniverseNode {
   mass: number;
   planet: string;
   /**
-   * How the select screen stages the planet image. "card" and "memory" are
-   * physical objects — a promo card and a memory card — shown as floating 3D
-   * cutouts on the stage. Anything without this stays in the round glass orb.
+   * How the select screen stages the planet image. "card", "memory" and
+   * "cover" are physical objects — a promo card, a memory card, a comic
+   * cover — shown as floating 3D slabs on the stage (full-bleed art needs no
+   * cutout). Anything without this stays in the round glass orb.
    */
-  artifact?: "card" | "memory";
+  artifact?: "card" | "memory" | "cover";
   /**
    * Full-frame art for the briefing page — a comic cover, a poster. The art
    * runs to its own edge, so the page frames it as-is: no cutout, no keying.
@@ -156,18 +157,20 @@ export const NODES: UniverseNode[] = [
     color: "#ef4444",
     glow: "rgba(239,68,68,0.5)",
     mass: 6,
-    planet: "/planets/grimm-planet.png",
+    planet: "/nodes/grimm-fracture-comic.jpg",
+    artifact: "cover",
     hero: "/nodes/grimm-fracture-comic.jpg",
     heroAlt: "Grimm Fracture #1 cover — two figures breaking through a cracked wall",
     exploreUrl: null,
     x: 2000,
     y: -600,
     brief: {
-      what: "AI generative web comic. The files stay on the shelf. The Node is cold and it is not on the desk. It is not gone, it is resting.",
-      stack: ["The Furnace", "The Painter", "The Scribe"],
+      what: "AI generative web comic. The art is Gemini's, not the Furnace's. The files stay on the shelf. The Node is cold and it is not on the desk. It is not gone, it is resting.",
+      stack: ["Gemini (the art)", "BasicHiro (the story)"],
       pieces: [
-        "Pages generated the same way Save Point cuts them.",
-        "Parked, on purpose. One page at a time still applies.",
+        "Pages made with Gemini, not Comfy. Borrowed light, same one-page-at-a-time rule.",
+        "Parked, on purpose. The files are on the shelf.",
+        "If it wakes up it comes back through the Furnace — consistent characters are solved now.",
       ],
       audience: "Nobody yet. That is the point of benched.",
     },
@@ -213,13 +216,15 @@ export function getNode(id: string): UniverseNode | undefined {
 }
 
 /**
- * Only these two are on the Level Select. The other Nodes exist in the world and
- * have briefings, but the select screen is a door, not an index — so it shows
- * what a visitor can actually walk into.
+ * The doors on the Level Select. The live Nodes are walk-ins; Grimm Fracture is
+ * benched but its door is left open on purpose — people can still walk in and
+ * read what it is. The rest of the Grid has briefings but no door: the select
+ * screen is a door, not an index.
  */
 export const SELECT_SPOTS: { id: string; x: number; y: number }[] = [
   { id: "prime", x: -470, y: -30 },
   { id: "savepoint", x: 470, y: 30 },
+  { id: "grimm", x: 0, y: -470 },
 ];
 
 /** The manifesto page. Sourced straight from content/lore.md — no invented facts. */

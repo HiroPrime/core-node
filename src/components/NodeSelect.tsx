@@ -10,10 +10,11 @@ import "./node-select.css";
 /**
  * NodeSelect — the level select.
  *
- * Two doors, one screen. The selected planet sits dead centre in a round glass
- * shell and takes up roughly 60% of the viewport; the other one waits behind an
- * arrow. Everything — header, planet, caption, dots — is sized in viewport units
- * so the whole screen lands above the fold on a phone, no scrolling at any width.
+ * Three doors, one screen. The selected Node sits dead centre — a planet in its
+ * round glass orb, or the real object (the Dex card, the memory card, the
+ * comic) floating on the stage. The others wait behind the arrows. Everything —
+ * header, stage, caption, dots — is sized in viewport units so the whole screen
+ * lands above the fold on a phone, no scrolling at any width.
  *
  * Input is deliberately redundant: click, wheel, touch, arrows, or a pad.
  */
@@ -25,7 +26,7 @@ const STATUS_COLOR: Record<string, string> = {
 };
 
 /** How far each thickness copy sits behind the one in front, in px. */
-const ART_DEPTH: Record<"card" | "memory", number> = { card: 0.9, memory: 1.8 };
+const ART_DEPTH: Record<"card" | "memory" | "cover", number> = { card: 0.9, memory: 1.8, cover: 0.9 };
 
 /** Resolve the select spots against the Node table, skipping anything missing. */
 const SPOTS = SELECT_SPOTS.map((spot) => getNode(spot.id)).filter(

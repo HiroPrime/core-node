@@ -1,10 +1,10 @@
 /*
  * Node select — the level select.
  *
- * Two doors, one screen, no scroll. Header, stage, footer are all sized in
- * viewport units and laid out with flex so the planet can be genuinely large
- * (~60% of the screen) while the whole thing still lands above the fold on a
- * 360px-tall phone.
+ * Three doors, one screen, no scroll. Header, stage, footer are all sized in
+ * viewport units and laid out with flex so the stage object can be genuinely
+ * large (~60% of the screen) while the whole thing still lands above the fold
+ * on a 360px-tall phone.
  */
 
 .ns-screen {
@@ -370,6 +370,11 @@
   transform: rotateY(-22deg) rotateX(16deg);
 }
 
+/* The comic hangs near-upright, a thin slab like the card. */
+.ns-art--cover .ns-art-tilt {
+  transform: rotateY(-17deg) rotateX(7deg);
+}
+
 .ns-orb.is-artifact:hover .ns-art--card .ns-art-tilt,
 .ns-orb.is-artifact:focus-visible .ns-art--card .ns-art-tilt {
   transform: rotateY(-25deg) rotateX(5deg) scale(1.02);
@@ -378,6 +383,11 @@
 .ns-orb.is-artifact:hover .ns-art--memory .ns-art-tilt,
 .ns-orb.is-artifact:focus-visible .ns-art--memory .ns-art-tilt {
   transform: rotateY(-30deg) rotateX(12deg) scale(1.02);
+}
+
+.ns-orb.is-artifact:hover .ns-art--cover .ns-art-tilt,
+.ns-orb.is-artifact:focus-visible .ns-art--cover .ns-art-tilt {
+  transform: rotateY(-25deg) rotateX(5deg) scale(1.02);
 }
 
 /* Every layer sits dead centre: absolute + auto margins, so the percentage
@@ -404,6 +414,12 @@
 
 .ns-art--memory .ns-art-img,
 .ns-art--memory .ns-art-edge {
+  height: min(94%, 470px);
+  width: auto;
+}
+
+.ns-art--cover .ns-art-img,
+.ns-art--cover .ns-art-edge {
   height: min(94%, 470px);
   width: auto;
 }
@@ -438,6 +454,11 @@
   aspect-ratio: 648 / 968;
 }
 
+.ns-art--cover .ns-art-sheen {
+  height: min(94%, 470px);
+  aspect-ratio: 1696 / 2528;
+}
+
 /* The halo follows the object, not the orb. A rounded rectangle cut to the
    card / memory card silhouette sits behind the tilt, so the glow hugs the
    artwork instead of blooming out as a circle around it. Sized a touch larger
@@ -460,7 +481,8 @@
 }
 
 .ns-art--card .ns-art-glow,
-.ns-art--memory .ns-art-glow {
+.ns-art--memory .ns-art-glow,
+.ns-art--cover .ns-art-glow {
   height: calc(min(94%, 470px) * 1.1);
 }
 
@@ -470,6 +492,10 @@
 
 .ns-art--memory .ns-art-glow {
   aspect-ratio: 648 / 968;
+}
+
+.ns-art--cover .ns-art-glow {
+  aspect-ratio: 1696 / 2528;
 }
 
 /* Phones: the card's dark frame disappears against the dark stage, so at the
