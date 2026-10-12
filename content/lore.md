@@ -81,21 +81,22 @@ The tech stack, named as the parts of the world it actually is.
 
 | In the world | What it really is |
 | --- | --- |
-| The Furnace | ComfyUI, on port 8188, on the Omen. Where every picture is made. |
+| The Furnace | ComfyUI. Where every picture is made. |
 | The Queue | The Comfy generation queue. Jobs waiting their turn. The thing you flood. |
 | The Painter | Qwen-Image-Edit-2511. Paints faces, bodies, and every cut. |
-| The Scribe | Haiku. Writes words. Never touches a pixel. |
+| The Scribe | Haiku. Writes words. |
 | The Home Brains | Ollama. Models running on local iron. No cloud, no permission, no bill. |
 | The Rig | ControlNet, InstantX, Multiple-Angles, LoRAs. The harness that keeps a Character looking like the same Character. |
 | The Cut | Sharp. Crops, pads, and plates. |
 | The Chair | Cline. The place where talking becomes building. |
-| The Ledger | Supabase. What the house remembers. |
+| The Skin | Tailwind. One palette: neon space. Dark mode, always. |
+| The Ledger | Supabase. |
 | The Toll | Stripe. |
 | The Messenger | Resend. |
 | The Wire | Next.js and React, front to back. |
-| The Gate | Vercel. The only thing standing between the desk and the public. |
-| The Omen | The GPU machine. |
-| The EliteDesk | The desk box. Everything but the drawing happens here. |
+| The Gate | Vercel. |
+| The Omen | The GPU machine. Everything runs on it now. |
+| The EliteDesk | The second box. Two projects at once, when it's on. One computer right now. |
 
 ---
 

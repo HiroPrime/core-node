@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import ArcadeSpaceBackdrop from "@/components/ArcadeSpaceBackdrop";
 import { CircuitGrid } from "@/components/CircuitGrid";
-import { CREED, MACHINERY, OPERATOR, STACK_STORY } from "@/lib/lore-data";
+import { MACHINERY, OPERATOR, STACK_STORY } from "@/lib/lore-data";
 import "./stack-rack.css";
 
 /**
@@ -44,8 +44,7 @@ export function StackPage() {
           <p className="arcade-kicker roomy-top">The Machinery</p>
           <h1 className="brief-title">The Rack</h1>
           <p className="brief-what" style={{ color: "var(--mute)", fontSize: 19 }}>
-            {OPERATOR.intro} This is the rack that runs my house — every machine
-            that turns one person into a studio.
+            {OPERATOR.intro} This is the rack that runs my house.
           </p>
         </header>
 
@@ -83,19 +82,6 @@ export function StackPage() {
             </section>
           );
         })}
-
-        <section className="stack-group" style={{ borderBottom: "none" }}>
-          <h2>The Creed</h2>
-          <p className="stack-note">Five rules. They do not bend.</p>
-          <ul className="creed">
-            {CREED.map((rule) => (
-              <li key={rule.line}>
-                <span className="creed-line">{rule.line}</span>
-                <p className="creed-note">{rule.note}</p>
-              </li>
-            ))}
-          </ul>
-        </section>
 
         <div className="brief-actions">
           <Link className="btn primary" href="/select">

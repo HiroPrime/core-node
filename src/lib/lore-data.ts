@@ -38,10 +38,10 @@ export const MACHINERY: MachineGroup[] = [
     machines: [
       {
         name: "The Furnace",
-        reality: "ComfyUI, port 8188, on the Omen. Nothing else is allowed to start it.",
+        reality: "ComfyUI.",
       },
       { name: "The Painter", reality: "Qwen-Image-Edit-2511. Faces, bodies, every cut." },
-      { name: "The Scribe", reality: "Haiku. Writes words. Never touches a pixel." },
+      { name: "The Scribe", reality: "Haiku. Writes words." },
       {
         name: "The Home Brains",
         reality: "Ollama. Models on my own iron. No cloud, no permission, no bill.",
@@ -60,25 +60,31 @@ export const MACHINERY: MachineGroup[] = [
     machines: [
       { name: "The Chair", reality: "Cline. Speech in, products out." },
       { name: "The Wire", reality: "Next.js and React, front to back." },
-      { name: "The Skin", reality: "Tailwind. The house wears one palette: void and gold." },
+      {
+        name: "The Skin",
+        reality: "Tailwind. The house wears one palette: neon space. Dark mode, always.",
+      },
     ],
   },
   {
     group: "The House",
     note: "What remembers and what charges.",
     machines: [
-      { name: "The Ledger", reality: "Supabase. What the house remembers." },
+      { name: "The Ledger", reality: "Supabase." },
       { name: "The Toll", reality: "Stripe." },
       { name: "The Messenger", reality: "Resend." },
-      { name: "The Gate", reality: "Vercel. The only thing between the desk and the public." },
+      { name: "The Gate", reality: "Vercel." },
     ],
   },
   {
     group: "The Machines",
     note: "Two boxes, two jobs.",
     machines: [
-      { name: "The Omen", reality: "The GPU machine." },
-      { name: "The EliteDesk", reality: "The desk box. Everything but the drawing happens here." },
+      { name: "The Omen", reality: "The GPU machine. Everything runs on it now." },
+      {
+        name: "The EliteDesk",
+        reality: "The second box. Two projects at once, when it is on. One computer right now.",
+      },
     ],
   },
 ];
@@ -108,9 +114,10 @@ export const COPY_BANK = [
  * them and why. Written from the Operator's own words.
  */
 export const STACK_STORY = [
-  "This is not a data center. It's a desk, two boxes, and one person.",
+  "This isn't a big tech company. It's one person, one computer, and a passion to survive.",
   "I'm not a trained coder. I'm a product owner and a designer first — my hours go into the product, the UI, the UX. The part a customer actually touches and decides to love.",
   "And it's just me. So AI isn't a gimmick in this house; it's how one person covers the ground of a team. Every machine in this rack exists to make my hands stronger.",
-  "All of it runs on my own computer, on my own power, until it starts paying its way. No cloud bills, no gatekeepers, no permission.",
-  "And I'm not finished. The rack keeps growing because I keep learning — finding more leverage, building more of the things people need and want.",
+  "It runs on my own computer, on my own power, until it starts paying its way. Free until it Works — no cloud bills, no gatekeepers, no permission.",
+  "The taste is mine. The machines make the work; I decide what is good enough to go out. Pictures are Comfy only, and nothing goes out until I hit the button.",
+  "One page at a time — small first, then grow. Not an empire on day one. And I'm not finished: the rack keeps growing because I keep learning, finding more leverage, building more of the things people need and want.",
 ];
