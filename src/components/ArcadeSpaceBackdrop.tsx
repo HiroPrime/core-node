@@ -369,6 +369,9 @@ export default function ArcadeSpaceBackdrop({ className = "" }: { className?: st
           WebkitMaskImage: "radial-gradient(ellipse at center, black 30%, transparent 80%)",
         }}
       />
+      {/* The reading veil: last in the backdrop, so it dims the universe and
+          nothing else. Content lives in a layer above this. */}
+      <div className="universe-scrim" aria-hidden />
     </div>
   );
 }

@@ -782,6 +782,15 @@
   opacity: 0.07;
 }
 
+/* The reading veil. Sits above the canvas and below the content, so the
+   universe stays alive behind the page while white/gold words stay readable.
+   One number to taste: raise the .4 for calmer text, lower it for wilder space. */
+.universe-scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(3, 3, 8, 0.4);
+}
+
 /* The circuit plane sits over the universe, under the content. */
 .circuit-grid {
   position: fixed;
