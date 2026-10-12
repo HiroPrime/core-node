@@ -355,8 +355,6 @@
 
 .ns-art-tilt {
   position: relative;
-  display: grid;
-  place-items: center;
   width: 100%;
   height: 100%;
   transform-style: preserve-3d;
@@ -382,11 +380,15 @@
   transform: rotateY(-30deg) rotateX(12deg) scale(1.02);
 }
 
-/* Every layer shares one grid cell; the transforms sort the depth. */
+/* Every layer sits dead centre: absolute + auto margins, so the percentage
+   sizes resolve against the tilt box itself and never against an auto-sized
+   grid track. (That is how the card ended up hanging off the bottom.) */
 .ns-art-img,
 .ns-art-edge,
 .ns-art-sheen {
-  grid-area: 1 / 1;
+  position: absolute;
+  inset: 0;
+  margin: auto;
 }
 
 .ns-art-img,
