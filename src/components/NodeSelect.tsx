@@ -24,6 +24,9 @@ const STATUS_COLOR: Record<string, string> = {
   BENCHED: "#ef4444",
 };
 
+/** How far each thickness copy sits behind the one in front, in px. */
+const ART_DEPTH: Record<"card" | "memory", number> = { card: 0.9, memory: 1.8 };
+
 /** Resolve the select spots against the Node table, skipping anything missing. */
 const SPOTS = SELECT_SPOTS.map((spot) => getNode(spot.id)).filter(
   (node): node is NonNullable<typeof node> => Boolean(node)
@@ -183,19 +186,44 @@ export function NodeSelect() {
         <div className="ns-orb-wrap">
           <button
             type="button"
-            className="ns-orb"
+            className={`ns-orb${active.artifact ? " is-artifact" : ""}`}
             onClick={confirm}
             aria-label={`Open the ${active.name} briefing`}
             key={active.id}
           >
             <span className="ns-orb-glow" style={{ background: active.glow }} aria-hidden />
-            <span className="ns-orb-shell">
-              <img className="ns-orb-img" src={active.planet} alt="" draggable={false} />
-              {/* Specular streak across the glass */}
-              <span className="ns-orb-shine" aria-hidden />
-              {/* Rim light, so the glass reads as glass and not a disc */}
-              <span className="ns-orb-rim" style={{ borderColor: `${active.color}66` }} aria-hidden />
-            </span>
+            {active.artifact ? (
+              /* A real object on the stage — the Dex promo card or the Save
+                 Point memory card. Cutout PNG, tilted in 3D. The thickness is
+                 stacked darkened copies of the same cutout sitting behind the
+                 face, so the silhouette always matches the artwork. */
+              <span className={`ns-art ns-art--${active.artifact}`}>
+                <span className="ns-art-float">
+                  <span className="ns-art-tilt">
+                    {Array.from({ length: 9 }, (_, i) => (
+                      <img
+                        key={i}
+                        className="ns-art-edge"
+                        src={active.planet}
+                        alt=""
+                        draggable={false}
+                        style={{ transform: `translateZ(${-(9 - i) * ART_DEPTH[active.artifact!]}px)` }}
+                      />
+                    ))}
+                    <img className="ns-art-img" src={active.planet} alt="" draggable={false} />
+                    <span className="ns-art-sheen" aria-hidden />
+                  </span>
+                </span>
+              </span>
+            ) : (
+              <span className="ns-orb-shell">
+                <img className="ns-orb-img" src={active.planet} alt="" draggable={false} />
+                {/* Specular streak across the glass */}
+                <span className="ns-orb-shine" aria-hidden />
+                {/* Rim light, so the glass reads as glass and not a disc */}
+                <span className="ns-orb-rim" style={{ borderColor: `${active.color}66` }} aria-hidden />
+              </span>
+            )}
           </button>
         </div>
 

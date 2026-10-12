@@ -32,6 +32,12 @@ export interface UniverseNode {
   /** Mass on the select screen. */
   mass: number;
   planet: string;
+  /**
+   * How the select screen stages the planet image. "card" and "memory" are
+   * physical objects — a promo card and a memory card — shown as floating 3D
+   * cutouts on the stage. Anything without this stays in the round glass orb.
+   */
+  artifact?: "card" | "memory";
   /** null for the Core — it has no product, it has a person. */
   exploreUrl: string | null;
   /** Position on the constellation plane. */
@@ -74,7 +80,8 @@ export const NODES: UniverseNode[] = [
     color: "#FF00FF",
     glow: "rgba(255,0,255,0.5)",
     mass: 4,
-    planet: "/planets/savepoint-planet.png",
+    planet: "/planets/savepoint-memcard.png",
+    artifact: "memory",
     exploreUrl: "https://savepoint.nexus",
     x: 1600,
     y: 1400,
@@ -110,7 +117,8 @@ export const NODES: UniverseNode[] = [
     color: "#2ee6d6",
     glow: "rgba(46,230,214,0.5)",
     mass: 34,
-    planet: "/planets/prime-planet.png",
+    planet: "/planets/prime-portal-card.png",
+    artifact: "card",
     exploreUrl: "https://primeportal.nexus",
     x: -1600,
     y: -1200,

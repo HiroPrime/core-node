@@ -291,6 +291,7 @@
 @media (prefers-reduced-motion: reduce) {
   .ns-orb,
   .ns-orb-img,
+  .ns-art-float,
   .ns-node-kicker,
   .select-name,
   .ns-title {
@@ -307,4 +308,130 @@
   border-radius: 50%;
   box-shadow: inset 0 0 22px rgba(0, 0, 0, 0.6);
   pointer-events: none;
+}
+
+/* ---------- Artifact stage ---------- */
+
+/* When an artifact is on the stage the orb holds a real object instead of a
+   round shell: the Dex promo card for Prime Portal, a memory card for Save
+   Point. Perspective lives on the button, the tilt on a wrapper, and the
+   object's thickness is stacked darkened copies of the same cutout — so the
+   silhouette always matches the artwork and nothing has to fake an edge. */
+
+.ns-orb.is-artifact {
+  perspective: 1200px;
+}
+
+.ns-art {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+/* Float is 2D and separate from the tilt, so the two transforms never fight. */
+.ns-art-float {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  animation: ns-float 8s ease-in-out infinite;
+}
+
+/* Ground shadow, soft and wide, so the object reads as floating, not pasted. */
+.ns-art-float::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 3%;
+  width: 56%;
+  height: 9%;
+  transform: translateX(-50%);
+  background: radial-gradient(50% 50% at 50% 50%, rgba(0, 0, 0, 0.5), transparent 72%);
+  pointer-events: none;
+}
+
+.ns-art-tilt {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* The card hangs near-upright, the memory card is looked down on. */
+.ns-art--card .ns-art-tilt {
+  transform: rotateY(-17deg) rotateX(7deg);
+}
+
+.ns-art--memory .ns-art-tilt {
+  transform: rotateY(-22deg) rotateX(16deg);
+}
+
+.ns-orb.is-artifact:hover .ns-art--card .ns-art-tilt,
+.ns-orb.is-artifact:focus-visible .ns-art--card .ns-art-tilt {
+  transform: rotateY(-25deg) rotateX(5deg) scale(1.02);
+}
+
+.ns-orb.is-artifact:hover .ns-art--memory .ns-art-tilt,
+.ns-orb.is-artifact:focus-visible .ns-art--memory .ns-art-tilt {
+  transform: rotateY(-30deg) rotateX(12deg) scale(1.02);
+}
+
+/* Every layer shares one grid cell; the transforms sort the depth. */
+.ns-art-img,
+.ns-art-edge,
+.ns-art-sheen {
+  grid-area: 1 / 1;
+}
+
+.ns-art-img,
+.ns-art-edge {
+  display: block;
+}
+
+.ns-art--card .ns-art-img,
+.ns-art--card .ns-art-edge {
+  height: min(94%, 470px);
+  width: auto;
+}
+
+.ns-art--memory .ns-art-img,
+.ns-art--memory .ns-art-edge {
+  width: min(92%, 500px);
+  height: auto;
+}
+
+/* The extrusion itself. */
+.ns-art-edge {
+  filter: brightness(0.28) saturate(0.55);
+  pointer-events: none;
+}
+
+/* Glass sheen across the face. */
+.ns-art-sheen {
+  pointer-events: none;
+  border-radius: 5%;
+  background: linear-gradient(
+    148deg,
+    rgba(255, 255, 255, 0.22) 0%,
+    rgba(255, 255, 255, 0.05) 34%,
+    transparent 54%
+  );
+  mix-blend-mode: screen;
+  transform: translateZ(1px);
+}
+
+.ns-art--card .ns-art-sheen {
+  height: min(94%, 470px);
+  aspect-ratio: 1000 / 1400;
+}
+
+.ns-art--memory .ns-art-sheen {
+  width: min(92%, 500px);
+  aspect-ratio: 4 / 3;
 }
