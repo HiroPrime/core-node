@@ -81,7 +81,7 @@
     0 0 60px rgba(227, 148, 26, 0.18);
 }
 
-/* "Code Node" is a subtitle, not part of the name — much smaller, own line. */
+/* "Core Node" is a subtitle, not part of the name — much smaller, own line. */
 .press-title-sub {
   margin: clamp(10px, 1.8vh, 18px) 0 0;
   font-family: var(--font-pixel), "Courier New", monospace;

@@ -162,7 +162,7 @@ export function PressStart() {
       <div className="arcade-inner">
         <div className="press-hero">
           <h1 className="press-title">BasicHiro</h1>
-          <p className="press-title-sub">Code Node</p>
+          <p className="press-title-sub">Core Node</p>
 
           {/* Boot lines run over the top of the menu, which is always in the DOM.
               That keeps the first paint complete for crawlers and no-JS, and the
