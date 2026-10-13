@@ -14,8 +14,10 @@ export interface NodeBrief {
   what: string;
   /** The stack, in world-language first, real name in parens. */
   stack: string[];
-  /** The pieces that actually do the work. */
-  pieces: string[];
+  /** The pieces that actually do the work. Optional — a Node can show what it is learning instead. */
+  pieces?: string[];
+  /** What the Node is teaching me right now. */
+  learning?: string[];
   /** Who it is for. */
   audience: string;
 }
@@ -87,7 +89,7 @@ export const NODES: UniverseNode[] = [
     x: 1600,
     y: 1400,
     brief: {
-      what: "Where a Character gets made. You get a First Look — cinematic on top, T-pose underneath — and from that one body every later page is cut.",
+      what: "Where a Character gets made. You talk it through with a bot — who they are, what they look like — and the conversation turns into the first A-pose. Character consistency first, to open up any number of worlds that need a character.",
       stack: [
         "Next 15.5",
         "React 18",
@@ -103,6 +105,12 @@ export const NODES: UniverseNode[] = [
         "Haiku — The Scribe. Writes words. Never touches a pixel.",
         "The Rig — ControlNet, InstantX, Multiple-Angles, LoRAs. Keeps a Character looking like the same Character.",
         "One page at a time. My grade before anything moves.",
+      ],
+      learning: [
+        "Local UI — the whole pipeline runs on my own machine.",
+        "Image generation — getting past prompting.",
+        "Which AI is best for what task.",
+        "Building new tools almost every day.",
       ],
       audience:
         "Anyone who wants a character that is actually theirs. Gamers, TTRPG players, and creators who need one body that stays consistent.",
@@ -124,7 +132,7 @@ export const NODES: UniverseNode[] = [
     x: -1600,
     y: -1200,
     brief: {
-      what: "TCG search and data club. Pokemon, search, and the analytics beast. A deck that reads itself. The other half of the desk, and live as a product — which is not the same as done.",
+      what: "TCG and data club. Gundam right now — Pokemon and One Piece are coming. A light search engine for fans and arbitragers first; the heavy analytics are the endgame. The point is simple: pull a card up fast, without going to Google.",
       stack: [
         "Next 16.1",
         "React 19.2",
@@ -137,14 +145,19 @@ export const NODES: UniverseNode[] = [
         "Recharts views — the scrying glass. Trend, compare, read a deck back to you.",
         "Supabase holding everything the house remembers.",
       ],
+      learning: [
+        "Search consistency — the same card, the same answer, every time.",
+        "How people actually pull a card up — watching real searches.",
+        "Supabase and APIs — the data layer under it all.",
+      ],
       audience:
-        "Collectors and competitive players who would rather look at the numbers than guess.",
+        "Collectors, competitive players, and arbitragers — anyone who would rather look at the numbers than guess.",
     },
   },
   {
     id: "grimm",
     name: "Grimm Fracture",
-    title: "the dark world",
+    title: "",
     status: "BENCHED",
     statusText: "AI GENERATIVE WEB COMIC",
     color: "#ef4444",
@@ -156,14 +169,15 @@ export const NODES: UniverseNode[] = [
     x: 2000,
     y: -600,
     brief: {
-      what: "AI generative web comic. The art is Gemini's, not the Furnace's. The files stay on the shelf. The Node is cold and it is not on the desk. It is not gone, it is resting.",
-      stack: ["Gemini (the art)", "BasicHiro (the story)"],
-      pieces: [
-        "Pages made with Gemini, not Comfy. Borrowed light, same one-page-at-a-time rule.",
-        "Parked, on purpose. The files are on the shelf.",
-        "If it wakes up it comes back through the Furnace — consistent characters are solved now.",
+      what: "A creative endeavor to uncover the consistency needed to build an entire 60-issue comic book series — AI assisting on story writing, development, and art.",
+      stack: ["AI", "BasicHiro (the brain)"],
+      learning: [
+        "Character consistency — the thing everything else hangs on.",
+        "Image generation — turnarounds and character development.",
+        "AI writing — story and development.",
+        "Layout automation. Not working yet, but it is on the list.",
       ],
-      audience: "Nobody yet. That is the point of benched.",
+      audience: "My dark fantasy comic book fans.",
     },
   },
   {

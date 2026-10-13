@@ -260,6 +260,49 @@
   padding: clamp(48px, 10vh, 104px) 0 0;
 }
 
+/* Top row: the door back to Select on the left, the status badge on the far
+   right. Space between, a real gap, self-contained styles — never one
+   squished cluster. */
+.brief-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-bottom: 32px;
+}
+
+.brief-back {
+  display: inline-flex;
+  align-items: center;
+  color: var(--gold);
+  transition: opacity 140ms ease;
+}
+
+.brief-back:hover {
+  opacity: 0.75;
+}
+
+.brief-back-text {
+  font-family: var(--font-pixel), "Courier New", monospace;
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
+.brief-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 13px;
+  border: 1px solid;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  font-family: var(--font-pixel), "Courier New", monospace;
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
 .brief-head {
   display: flex;
   flex-direction: column;

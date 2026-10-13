@@ -9,10 +9,11 @@ import { getNode, STATUS_LABEL } from "@/lib/universe";
 /**
  * NodeBriefing — what this Node is, what it is built out of, who it is for.
  *
- * Four blocks in order: what it is, the stack, the pieces, the audience. Then two
- * exits: Launch (to the live thing, when there is a live thing) and Back (to the
- * Press Start screen). A Node with no URL and no public face gets a disabled
- * Launch with the reason stated, not a dead link.
+ * Blocks in order: what it is, the stack, the key pieces, what I am learning,
+ * the audience. Pieces and learning are optional — a Node shows the one it has.
+ * Then two exits: Launch (to the live thing, when there is a live thing) and
+ * Back (to the Press Start screen). A Node with no URL and no public face gets
+ * a disabled Launch with the reason stated, not a dead link.
  */
 
 const STATUS_COLOR: Record<string, string> = {
@@ -60,11 +61,11 @@ export function NodeBriefing({ id }: { id: string }) {
 
       <div className="arcade-inner is-scrolling">
         <div className="brief">
-          <div className="ns-head" style={{ position: "static", padding: 0 }}>
-            <Link href="/select" className="ns-brand" aria-label="Back to Select">
-              <span className="ns-brand-text">&#8592; Select</span>
+          <div className="brief-top">
+            <Link href="/select" className="brief-back" aria-label="Back to Select">
+              <span className="brief-back-text">&#8592; Select</span>
             </Link>
-            <span className="pad-badge" style={{ borderColor: node.color, color: node.color }}>
+            <span className="brief-badge" style={{ borderColor: node.color, color: node.color }}>
               {STATUS_LABEL[node.status]}
             </span>
           </div>
@@ -100,14 +101,27 @@ export function NodeBriefing({ id }: { id: string }) {
             </ul>
           </section>
 
-          <section className="brief-block">
-            <h2>Key pieces</h2>
-            <ul className="pieces">
-              {node.brief.pieces.map((piece) => (
-                <li key={piece}>{piece}</li>
-              ))}
-            </ul>
-          </section>
+          {node.brief.pieces?.length ? (
+            <section className="brief-block">
+              <h2>Key pieces</h2>
+              <ul className="pieces">
+                {node.brief.pieces.map((piece) => (
+                  <li key={piece}>{piece}</li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
+
+          {node.brief.learning?.length ? (
+            <section className="brief-block">
+              <h2>What I&rsquo;m learning</h2>
+              <ul className="pieces">
+                {node.brief.learning.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
 
           <section className="brief-block">
             <h2>Who it is for</h2>
