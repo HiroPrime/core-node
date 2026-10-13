@@ -43,6 +43,33 @@ machine started as a voice.
 
 ---
 
+## Why I do what I do
+
+Every Node starts as something I needed — a build that happens because I want it to
+exist. Then the realization, every time: it is a tool, and it is not just for me.
+
+I have ADHD. Long projects slip through my hands; builds hold. Other creators do not
+have that problem — they finish what they start. So the tool becomes the product:
+I build the tool, you build the project.
+
+Save Point is the one I am most excited about, because it is driven by the work I
+actually love: Character creation and Character consistency. If character art was never
+your strong point, it stops being the wall — talk the Character through once, and she
+stays the same person across poses, pages, and projects. Creators get the ability to
+create, even where it was never their strength — and it comes out high quality anyway.
+
+The honesty rule: if it is not working, or not where it is supposed to be, I am not
+charging for it. You do not sell a broken car and stay quiet about the broken part.
+The tools go out free while they grow, and the users direct where development goes
+next. More users in, better tools out.
+
+The miles: Comfy and Ollama on my own iron, VS Code and Cline in every session,
+Cursor, Gemini, and every online image platform worth the try. I know where the holes
+are because I have fallen into most of them — and a hole in a workflow is a product
+waiting to happen.
+
+---
+
 ## The Nodes
 
 ### Core Node — the Core
@@ -51,24 +78,39 @@ press-start screen, the Node select, and the Stack. This world has no product. I
 a person.
 
 ### Save Point — Character Consistency
-Where a Character gets made. You get a First Look — cinematic on top, T-pose underneath
-— and from that one body every later page is cut. Sheets, Rerolls, one page at a time,
-the Operator's grade before anything moves. Qwen paints it. Haiku writes the words. Both jobs are
-different and neither one does the other's work.
+Where a Character gets made. You talk it through with a bot — who they are, what they
+look like — and the conversation turns into the first A-pose. Character consistency
+first, to open up any number of worlds that need a character.
+
+Sheets, Rerolls, one page at a time, the Operator's grade before anything moves. Qwen
+paints it. Haiku writes the words. Both jobs are different and neither one does the
+other's work.
 
 It runs on the Omen, the GPU box, with the watcher awake and Comfy on **8188** only.
 Nothing else is allowed to start that forge.
 
 **Free until it Works.** Then: Break the Server. Flood the Queue. Put her to work.
 
-### Prime Portal — TCG Search and Data Club
-TCG search and data club. Pokemon, search, and the analytics beast. A deck that reads itself.
-Recharts is the scrying glass. This is the other half of the desk, and it is live as a
-product, which is not the same as done.
+What it is teaching: Local UI, image generation, which AI is best for what task, and
+building new tools almost every day.
 
-### Grimm Fracture — the dark world
-AI generative web comic. **Benched.** The files stay on the shelf. The Node is cold and
-it is not on the desk. It is not gone, it is resting.
+### Prime Portal — TCG Search and Data Club
+TCG and data club. Gundam right now — Pokemon and One Piece are coming. A light search
+engine for fans and arbitragers first; the heavy analytics are the endgame. The point is
+simple: pull a card up fast, without going to Google. Recharts is the scrying glass.
+Live as a product, which is not the same as done.
+
+What it is teaching: Search consistency, how people actually pull a card up, and the
+data layer — Supabase and APIs.
+
+### Grimm Fracture
+A creative endeavor to uncover the consistency needed to build an entire 60-issue comic
+book series — AI assisting on story writing, development, and art.
+
+**Benched**, with the door left open on the Level Select. The stack is AI and me —
+BasicHiro is the brain. What it is teaching: Character consistency, image generation,
+AI writing, and Layout automation (not working yet). For my dark fantasy comic book
+fans.
 
 ### Nexus Prime — the holding bay
 Quiet. Left standing. Not the desk.

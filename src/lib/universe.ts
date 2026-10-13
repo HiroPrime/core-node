@@ -251,14 +251,44 @@ export const MANIFESTO: ManifestoSection[] = [
     heading: "The method",
     lines: [
       "Speech in, products out. I talk more than I type. Every word I have ever sent this machine started as my voice.",
+      "The expensive part of building was never the code. It was getting the thing in my head into the world without losing it on the way through.",
       "I am a product designer first and a developer second, and I am proud that I code by talking.",
     ],
   },
   {
-    heading: "Why I do what I do",
+    heading: "The pattern",
     lines: [
-      "Because the expensive part of building was never the code. It was getting the thing in my head into the world without losing it on the way through.",
-      "Local iron, my own models, my own taste. No cloud permission slip, no bill that changes the decision. Free until it Works, then Break the Server, Flood the Queue, and put her to work.",
+      "Every Node starts the same way: something I needed, something I thought would be cool, a build that happens because I want it to exist.",
+      "Then the realization, every time: the thing I built is not just for me. It is a tool. I have ADHD — long projects slip through my hands, builds hold. Other creators don't have that problem. They finish what they start.",
+      "So the tool becomes the product. I build the tool. You build the project.",
+    ],
+  },
+  {
+    heading: "Save Point",
+    lines: [
+      "Save Point is the one I am most excited about, because it is driven by the work I actually love: Character creation and Character consistency.",
+      "If character art was never your strong point, it stops being the wall. You talk the Character through — one conversation — and she stays the same person across poses, pages, and projects.",
+      "That is the trade I want with the world: creators get the ability to create, even where it was never their strength — and it comes out high quality anyway.",
+    ],
+  },
+  {
+    heading: "The honesty rule",
+    lines: [
+      "If it is not working — or not where it is supposed to be — I should not be charging for it. You don't sell a broken car and stay quiet about the broken part.",
+      "So the tools go out free while they grow, and the people using them direct where development goes next. More users in, better tools out. Fair all the way around.",
+    ],
+  },
+  {
+    heading: "The miles",
+    lines: [
+      "None of this runs on luck. The tools are the ones I have lived in: Comfy and Ollama on my own iron — no cloud permission slip — VS Code and Cline in every session, Cursor, Gemini, and every online image platform worth the try.",
+      "That mileage is the job. I know where the holes are because I have fallen into most of them — and a hole in a workflow is a product waiting to happen.",
+      "What is exciting about my work: I build the tool I wish existed, and then other creators take it places I will never go.",
+    ],
+  },
+  {
+    heading: "The Nodes",
+    lines: [
       "Every Node is something I built. Some are live. Some are benched. All of them are mine.",
     ],
   },

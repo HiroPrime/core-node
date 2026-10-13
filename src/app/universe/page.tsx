@@ -9,7 +9,7 @@ import { MANIFESTO } from "@/lib/universe";
 export const metadata: Metadata = {
   title: "My Universe — BasicHiro",
   description:
-    "The manifesto. Why I do what I do — product designer first, developer second, an AI vibe coder who talks more than types.",
+    "The manifesto. Why I do what I do — the tools I build, the creators they are for, and the miles behind both.",
 };
 
 /**
@@ -33,9 +33,9 @@ export default function UniversePage() {
           <p className="arcade-kicker">My Universe</p>
           <h1 className="page-title">Why I do what I do</h1>
           <p className="page-lede">
-            {OPERATOR.intro} The Nexus is not a portfolio — it is a machine that
-            builds itself, one Node at a time, with a person at the center who
-            mostly talks.
+            {OPERATOR.intro} Product designer first, developer second — one
+            person and one rack of local machines. Here is the why: the tools I
+            build, the creators they are for, and the miles behind both.
           </p>
         </header>
 
