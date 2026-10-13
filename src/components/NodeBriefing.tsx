@@ -12,7 +12,7 @@ import { getNode, STATUS_LABEL } from "@/lib/universe";
  * Blocks in order: what it is, the stack, the key pieces, what I am learning,
  * the audience. Pieces and learning are optional — a Node shows the one it has.
  * Then two exits: Launch (to the live thing, when there is a live thing) and
- * Back (to the Press Start screen). A Node with no URL and no public face gets
+ * Back to Select (to the Level Select). A Node with no URL and no public face gets
  * a disabled Launch with the reason stated, not a dead link.
  */
 
@@ -140,8 +140,8 @@ export function NodeBriefing({ id }: { id: string }) {
                 <Lock size={13} /> No public Node
               </span>
             )}
-            <Link className="btn ghost" href="/">
-              <ArrowLeft size={14} /> Back
+            <Link className="btn ghost" href="/select">
+              <ArrowLeft size={14} /> Back to Select
             </Link>
           </div>
 

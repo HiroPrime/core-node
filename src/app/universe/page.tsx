@@ -3,7 +3,7 @@ import Link from "next/link";
 import ArcadeSpaceBackdrop from "@/components/ArcadeSpaceBackdrop";
 import { CircuitGrid } from "@/components/CircuitGrid";
 import { ControllerBadge } from "@/components/ControllerBadge";
-import { CREED, OPERATOR } from "@/lib/lore-data";
+import { OPERATOR } from "@/lib/lore-data";
 import { MANIFESTO } from "@/lib/universe";
 
 export const metadata: Metadata = {
@@ -49,19 +49,6 @@ export default function UniversePage() {
             ))}
           </section>
         ))}
-
-        <section className="stack-group">
-          <h2>The Creed</h2>
-          <p className="stack-note">Five rules the house runs on.</p>
-          <ul className="creed">
-            {CREED.map((item) => (
-              <li key={item.line}>
-                <span className="creed-line">{item.line}</span>
-                <p className="creed-note">{item.note}</p>
-              </li>
-            ))}
-          </ul>
-        </section>
 
         <div className="brief-actions">
           <Link href="/select" className="btn primary">
