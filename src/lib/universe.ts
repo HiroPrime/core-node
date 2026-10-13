@@ -259,7 +259,7 @@ export const MANIFESTO: ManifestoSection[] = [
     heading: "The pattern",
     lines: [
       "Every Node starts the same way: something I needed, something I thought would be cool, a build that happens because I want it to exist.",
-      "Then the realization, every time: the thing I built is not just for me. It is a tool. I have ADHD — long projects slip through my hands, builds hold. Other creators don't have that problem. They finish what they start.",
+      "Then the realization, every time: I build a tool — and other creators can take their creativity and finish what I started.",
       "So the tool becomes the product. I build the tool. You build the project.",
     ],
   },

@@ -46,11 +46,10 @@ machine started as a voice.
 ## Why I do what I do
 
 Every Node starts as something I needed — a build that happens because I want it to
-exist. Then the realization, every time: it is a tool, and it is not just for me.
+exist. Then the realization, every time: I build a tool — and other creators can take
+their creativity and finish what I started.
 
-I have ADHD. Long projects slip through my hands; builds hold. Other creators do not
-have that problem — they finish what they start. So the tool becomes the product:
-I build the tool, you build the project.
+So the tool becomes the product: I build the tool, you build the project.
 
 Save Point is the one I am most excited about, because it is driven by the work I
 actually love: Character creation and Character consistency. If character art was never
