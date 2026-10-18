@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "name": "charlie-brawler-v2",
+  "displayName": "Charlie — Plant-Step Side Walk",
+  "directions": ["right", "left", "down", "up"],
+  "walkFramesPerDirection": { "right": 4, "left": 4, "down": 4, "up": 4 },
+  "idleFramesPerDirection": 1,
+  "frame": { "height": 64, "width": 35 },
+  "frameMs": 150,
+  "scaleInGame": 3,
+  "loop": ["plant", "step", "plant", "step"],
+  "sourceFrames": [1, 2, 1, 6]
+}
