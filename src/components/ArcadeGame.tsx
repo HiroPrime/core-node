@@ -145,28 +145,52 @@ export function ArcadeGame() {
   const [cabinet, setCabinet] = useState<GameId>("neon-chase");
   const openRef = useRef<(id: string) => void>(() => {});
   const bootRef = useRef<(id: GameId) => void>(() => {});
+  const depthRef = useRef(0);
+  const backRef = useRef<() => void>(() => {});
+  /** One extra history entry so the phone's back button stays on the arcade floor. */
+  const rememberFloor = () => {
+    if (depthRef.current > 0) return;
+    history.pushState({ arcade: "floor" }, "");
+    depthRef.current = 1;
+  };
   openRef.current = (id: string) => {
     if (id !== "neon-chase" && id !== "void-beast") return;
     setCabinet(id);
     setPlaying(true);
+    rememberFloor();
   };
   bootRef.current = (id: GameId) => {
     setCabinet(id);
     setPlaying(false);
     setRacing(true);
+    rememberFloor();
   };
   const startRace = () => {
     setPlaying(false);
     setRacing(true);
+    rememberFloor();
   };
   const backOut = () => {
     if (racingRef.current) {
       setRacing(false);
       setPlaying(true);
     } else if (playingRef.current) {
-      setPlaying(false);
+      if (depthRef.current > 0) history.back();
+      else setPlaying(false);
     }
   };
+  backRef.current = backOut;
+
+  useEffect(() => {
+    const onPop = () => {
+      if (depthRef.current <= 0) return;
+      depthRef.current -= 1;
+      setRacing(false);
+      setPlaying(false);
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
 
   useEffect(() => {
     if (playing) playRef.current?.focus();
@@ -336,7 +360,7 @@ export function ArcadeGame() {
           e.preventDefault();
           startRace();
         } else if (e.code === "Escape" || e.code === "KeyE") {
-          setPlaying(false);
+          backRef.current();
         }
         held.clear();
         return;
