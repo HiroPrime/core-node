@@ -4,6 +4,7 @@ import { CoreNodeLogo } from "@/components/CoreNodeLogo";
 const LINKS = [
   { href: "/", label: "Press Start" },
   { href: "/select", label: "Nodes" },
+  { href: "/arcade", label: "Arcade" },
   { href: "/stack", label: "Stack" },
 ];
 

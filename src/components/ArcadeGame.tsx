@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { AquaticRush } from "@/components/AquaticRush";
 import { NeonChase } from "@/components/NeonChase";
 import { VoidBeast } from "@/components/VoidBeast";
 
@@ -8,8 +9,8 @@ import { VoidBeast } from "@/components/VoidBeast";
  * ArcadeGame — the house arcade floor.
  *
  * Charlie walks a carpeted floor past every cabinet from the sprite sheet.
- * NEON CHASE and VOID BEAST are switched on: step up, press E, and that
- * cabinet's start screen comes up with 1 CREDIT and PLAY blinking.
+ * NEON CHASE, VOID BEAST, and AQUATIC RUSH are switched on: step up,
+ * press E, and that cabinet's start screen comes up with 1 CREDIT and PLAY.
  *
  * Her brawler-v2 pack is the 4-frame 64px walk, drawn at 3x. The floor is
  * bigger than the screen. The camera follows her, and zooms out as the
@@ -77,11 +78,12 @@ const ZOOM_SPAN = 840;
 const ZOOM_MIN = 0.32;
 const START = "/arcade-bk/Gemini_Generated_Image_3818h13818h13818.jpg";
 
-type GameId = "neon-chase" | "void-beast";
+type GameId = "neon-chase" | "void-beast" | "aquatic-rush";
 
 const ATTRACT: Record<GameId, { src: string; title: string }> = {
   "neon-chase": { src: START, title: "NEON CHASE" },
   "void-beast": { src: "/arcade-bk/Void%20Beast/start.jpg", title: "VOID BEAST" },
+  "aquatic-rush": { src: "/arcade-bk/Aquatic%20Rush/start.jpg", title: "AQUATIC RUSH" },
 };
 
 function EdgeBack({ onBack }: { onBack: () => void }) {
@@ -116,12 +118,12 @@ function EdgeBack({ onBack }: { onBack: () => void }) {
 const CABINETS: CabinetSpec[] = [
   { id: "neon-chase", name: "NEON CHASE", playable: true, glow: "#ff4ad2" },
   { id: "void-beast", name: "VOID BEAST", playable: true, glow: "#9b5cff" },
+  { id: "aquatic-rush", name: "AQUATIC RUSH", playable: true, glow: "#3d8bff" },
   { id: "kakariko-chronicles", name: "KAKARIKO CHRONICLES", glow: "#ff4ad2" },
   { id: "dungeon-delve", name: "DUNGEON DELVE", glow: "#3dff8a" },
   { id: "spin-ball", name: "SPIN-BALL", glow: "#ffe14a" },
   { id: "mecha-force", name: "MECHA FORCE", glow: "#3df0ff" },
   { id: "tomb-crusade", name: "TOMB CRUSADE", glow: "#ff5a3d" },
-  { id: "aquatic-rush", name: "AQUATIC RUSH", glow: "#3d8bff" },
   { id: "fast-food-fight", name: "FAST FOOD FIGHT", glow: "#ff8a3d" },
   { id: "steel-samurai", name: "STEEL SAMURAI", glow: "#d7e2ee" },
 ];
@@ -154,7 +156,7 @@ export function ArcadeGame() {
     depthRef.current = 1;
   };
   openRef.current = (id: string) => {
-    if (id !== "neon-chase" && id !== "void-beast") return;
+    if (id !== "neon-chase" && id !== "void-beast" && id !== "aquatic-rush") return;
     setCabinet(id);
     setPlaying(true);
     rememberFloor();
@@ -277,8 +279,10 @@ export function ArcadeGame() {
       laidOut = true;
       if (qa === "race") bootRef.current("neon-chase");
       else if (qa === "beast") bootRef.current("void-beast");
+      else if (qa === "rush") bootRef.current("aquatic-rush");
       else if (qa === "play") openRef.current("neon-chase");
       else if (qa === "vplay") openRef.current("void-beast");
+      else if (qa === "aplay") openRef.current("aquatic-rush");
     };
 
     const assetReady = () => {
@@ -611,6 +615,9 @@ export function ArcadeGame() {
       )}
       {racing && cabinet === "void-beast" && (
         <VoidBeast onExit={() => { setRacing(false); setPlaying(true); }} />
+      )}
+      {racing && cabinet === "aquatic-rush" && (
+        <AquaticRush onExit={() => { setRacing(false); setPlaying(true); }} />
       )}
       {(playing || racing) && <EdgeBack onBack={backOut} />}
       {playing && !racing && (
