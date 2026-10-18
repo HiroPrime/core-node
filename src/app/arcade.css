@@ -1014,15 +1014,15 @@ body:has(.game-shell) {
 .neon-pedal {
   pointer-events: auto;
   touch-action: none;
-  min-width: 108px;
-  min-height: 72px;
+  min-width: 76px;
+  min-height: 46px;
   border: 3px solid #ffe14a;
   background: rgba(8, 0, 24, 0.78);
   color: #fff6c2;
   font-family: var(--font-pixel), "Courier New", monospace;
-  font-size: 20px;
-  letter-spacing: 0.08em;
-  padding: 16px 14px;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  padding: 8px 10px;
   user-select: none;
 }
 

@@ -430,7 +430,7 @@ export function NeonChase({ onExit }: { onExit: () => void }) {
           const y = horizon + Math.pow(1 - depth, 1.35) * (viewBottom - horizon - 8);
           if (y > viewBottom - 4) return;
           const road = roadAt(Math.min(y, viewBottom - 1));
-          const height = 16 + (1 - Math.min(1, Math.max(0, car.z))) * 78;
+          const height = (16 + (1 - Math.min(1, Math.max(0, car.z))) * 78) * (mobile ? 0.5 : 1);
           const cx = laneX(car.lane, road);
           const rival = roster[car.sprite];
           if (rival) {
@@ -456,11 +456,11 @@ export function NeonChase({ onExit }: { onExit: () => void }) {
           }
         }
 
-        const playerFoot = viewBottom - 6;
+        const fullH = Math.min(168, (viewBottom - horizon) * 0.34);
+        const carH = fullH * (mobile ? 0.42 : 0.7);
+        const playerFoot = viewBottom - 6 - carH;
         const playerRoad = roadAt(playerFoot - 36);
         const pcx = laneX(x, playerRoad);
-        const fullH = Math.min(168, (viewBottom - horizon) * 0.34);
-        const carH = mobile ? fullH * 0.62 : fullH;
         const body = roster[picked];
         if (phase !== "pick" && dead <= 0) drawCar(body, pcx, playerFoot, carH);
 

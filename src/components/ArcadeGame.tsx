@@ -336,6 +336,8 @@ export function ArcadeGame() {
           }
         }
 
+        const prevX = player.x;
+        const prevY = player.y;
         if (laidOut) {
           const nx = Math.max(0, Math.min(worldW - BOX_W, player.x + dx * SPEED * dt));
           const ny = Math.max(0, Math.min(worldH - BOX_H, player.y + dy * SPEED * DEPTH_SPEED * dt));
@@ -343,10 +345,11 @@ export function ArcadeGame() {
           if (!blocked(player.x, ny)) player.y = ny;
         }
 
-        if (dy < 0) facing = "up";
-        else if (dy > 0) facing = "down";
-        else if (dx > 0) facing = "right";
-        else if (dx < 0) facing = "left";
+        const movedX = player.x - prevX;
+        const movedY = player.y - prevY;
+        if (Math.abs(movedX) > Math.abs(movedY)) facing = movedX > 0 ? "right" : "left";
+        else if (movedY < 0) facing = "up";
+        else if (movedY > 0) facing = "down";
 
         const span = Math.min(w, h * 1.35);
         zoom = Math.min(1, Math.max(ZOOM_MIN, span / ZOOM_SPAN));
