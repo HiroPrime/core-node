@@ -84,6 +84,35 @@ const ATTRACT: Record<GameId, { src: string; title: string }> = {
   "void-beast": { src: "/arcade-bk/Void%20Beast/start.jpg", title: "VOID BEAST" },
 };
 
+function EdgeBack({ onBack }: { onBack: () => void }) {
+  const origin = useRef<{ x: number; y: number } | null>(null);
+  return (
+    <div
+      className="arcade-back-edge"
+      aria-hidden
+      onPointerDown={(e) => {
+        if (e.pointerType === "mouse" && e.button !== 0) return;
+        origin.current = { x: e.clientX, y: e.clientY };
+        try {
+          e.currentTarget.setPointerCapture(e.pointerId);
+        } catch {
+          /* a real finger still ends on pointerup */
+        }
+      }}
+      onPointerUp={(e) => {
+        if (!origin.current) return;
+        const dx = e.clientX - origin.current.x;
+        const dy = e.clientY - origin.current.y;
+        origin.current = null;
+        if (dx >= 64 && Math.abs(dx) > Math.abs(dy)) onBack();
+      }}
+      onPointerCancel={() => {
+        origin.current = null;
+      }}
+    />
+  );
+}
+
 const CABINETS: CabinetSpec[] = [
   { id: "neon-chase", name: "NEON CHASE", playable: true, glow: "#ff4ad2" },
   { id: "void-beast", name: "VOID BEAST", playable: true, glow: "#9b5cff" },
@@ -129,6 +158,14 @@ export function ArcadeGame() {
   const startRace = () => {
     setPlaying(false);
     setRacing(true);
+  };
+  const backOut = () => {
+    if (racingRef.current) {
+      setRacing(false);
+      setPlaying(true);
+    } else if (playingRef.current) {
+      setPlaying(false);
+    }
   };
 
   useEffect(() => {
@@ -551,6 +588,7 @@ export function ArcadeGame() {
       {racing && cabinet === "void-beast" && (
         <VoidBeast onExit={() => { setRacing(false); setPlaying(true); }} />
       )}
+      {(playing || racing) && <EdgeBack onBack={backOut} />}
       {playing && !racing && (
         <div className="game-overlay" role="dialog" aria-label={ATTRACT[cabinet].title}>
           <div className="neon-frame">
@@ -563,7 +601,7 @@ export function ArcadeGame() {
               </button>
             </div>
           </div>
-          <p className="game-hint arcade-kicker">ENTER — play · ESC — back</p>
+          <p className="game-hint arcade-kicker">ENTER — PLAY · ESC OR SWIPE THE LEFT EDGE — BACK</p>
         </div>
       )}
     </div>

@@ -23,12 +23,13 @@ const BOOT_LINES: { key: string; value: string }[] = [
   { key: "Grid", value: "3 Live · 2 Resting" },
 ];
 
-type MenuId = "universe" | "start" | "stack";
+type MenuId = "universe" | "start" | "arcade" | "stack";
 
 /** Plain labels only — the old "#" and description lines are gone. */
 const MENU: { id: MenuId; label: string; href: string }[] = [
   { id: "universe", label: "My Universe", href: "/universe" },
   { id: "start", label: "Press Start", href: "/select" },
+  { id: "arcade", label: "Arcade", href: "/arcade" },
   { id: "stack", label: "Tech Stack", href: "/stack" },
 ];
 

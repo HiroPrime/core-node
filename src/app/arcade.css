@@ -872,6 +872,23 @@ body:has(.game-shell) {
   touch-action: none;
 }
 
+.arcade-back-edge {
+  display: none;
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 36px;
+  z-index: 80;
+  touch-action: none;
+}
+
+@media (max-width: 900px), (pointer: coarse) {
+  .arcade-back-edge {
+    display: block;
+  }
+}
+
 .game-canvas {
   position: absolute;
   inset: 0;
