@@ -2,13 +2,14 @@
 
 import { useEffect, useRef, useState } from "react";
 import { NeonChase } from "@/components/NeonChase";
+import { VoidBeast } from "@/components/VoidBeast";
 
 /**
  * ArcadeGame — the house arcade floor.
  *
  * Charlie walks a carpeted floor past every cabinet from the sprite sheet.
- * NEON CHASE is the one that's switched on: step up to it, press E, and its
- * start screen comes up with 1 CREDIT and PLAY blinking, ready.
+ * NEON CHASE and VOID BEAST are switched on: step up, press E, and that
+ * cabinet's start screen comes up with 1 CREDIT and PLAY blinking.
  *
  * Her brawler-v2 pack is the 4-frame 64px walk, drawn at 3x. The floor is
  * bigger than the screen. The camera follows her, and zooms out as the
@@ -76,9 +77,16 @@ const ZOOM_SPAN = 840;
 const ZOOM_MIN = 0.32;
 const START = "/arcade-bk/Gemini_Generated_Image_3818h13818h13818.jpg";
 
+type GameId = "neon-chase" | "void-beast";
+
+const ATTRACT: Record<GameId, { src: string; title: string }> = {
+  "neon-chase": { src: START, title: "NEON CHASE" },
+  "void-beast": { src: "/arcade-bk/Void%20Beast/start.jpg", title: "VOID BEAST" },
+};
+
 const CABINETS: CabinetSpec[] = [
   { id: "neon-chase", name: "NEON CHASE", playable: true, glow: "#ff4ad2" },
-  { id: "void-beast", name: "VOID BEAST", glow: "#9b5cff" },
+  { id: "void-beast", name: "VOID BEAST", playable: true, glow: "#9b5cff" },
   { id: "kakariko-chronicles", name: "KAKARIKO CHRONICLES", glow: "#ff4ad2" },
   { id: "dungeon-delve", name: "DUNGEON DELVE", glow: "#3dff8a" },
   { id: "spin-ball", name: "SPIN-BALL", glow: "#ffe14a" },
@@ -105,6 +113,19 @@ export function ArcadeGame() {
     racingRef.current = on;
     setRacingState(on);
   };
+  const [cabinet, setCabinet] = useState<GameId>("neon-chase");
+  const openRef = useRef<(id: string) => void>(() => {});
+  const bootRef = useRef<(id: GameId) => void>(() => {});
+  openRef.current = (id: string) => {
+    if (id !== "neon-chase" && id !== "void-beast") return;
+    setCabinet(id);
+    setPlaying(true);
+  };
+  bootRef.current = (id: GameId) => {
+    setCabinet(id);
+    setPlaying(false);
+    setRacing(true);
+  };
   const startRace = () => {
     setPlaying(false);
     setRacing(true);
@@ -123,7 +144,7 @@ export function ArcadeGame() {
 
     const held = new Set<string>();
     const qa = new URLSearchParams(window.location.search).get("qa");
-    let nearPlayable = false;
+    let nearId: string | null = null;
 
     const player = { x: BOX_W, y: BOX_H };
     let facing: Facing = "down";
@@ -193,8 +214,10 @@ export function ArcadeGame() {
       player.x = neon.x + neon.w / 2 - BOX_W / 2;
       player.y = neon.y + neon.h + (qa === "near" ? 10 : 90);
       laidOut = true;
-      if (qa === "race") setRacing(true);
-      else if (qa === "play") setPlaying(true);
+      if (qa === "race") bootRef.current("neon-chase");
+      else if (qa === "beast") bootRef.current("void-beast");
+      else if (qa === "play") openRef.current("neon-chase");
+      else if (qa === "vplay") openRef.current("void-beast");
     };
 
     const assetReady = () => {
@@ -282,10 +305,10 @@ export function ArcadeGame() {
         return;
       }
       if (e.code === "KeyE" || e.code === "Enter") {
-        if (nearPlayable) {
+        if (nearId) {
           held.clear();
           goal = null;
-          setPlaying(true);
+          openRef.current(nearId);
         }
         return;
       }
@@ -329,7 +352,8 @@ export function ArcadeGame() {
             if (!blocked(player.x, goal.y)) player.y = goal.y;
             const play = goal.play;
             goal = null;
-            if (play && cabinets.some((c) => c.playable && approached(c))) setPlaying(true);
+            const here = cabinets.find((c) => c.playable && approached(c));
+            if (play && here) openRef.current(here.id);
           } else {
             dx = tx / dist;
             dy = ty / dist;
@@ -404,7 +428,7 @@ export function ArcadeGame() {
         }
 
         const close = laidOut ? cabinets.find(approached) ?? null : null;
-        nearPlayable = Boolean(close?.playable);
+        nearId = close?.playable ? close.id : null;
 
         const drawPlayer = () => {
           if (!spriteFrame) {
@@ -478,7 +502,7 @@ export function ArcadeGame() {
         if (hit.playable && approached(hit)) {
           goal = null;
           held.clear();
-          setPlaying(true);
+          openRef.current(hit.id);
           return;
         }
         goal = {
@@ -521,12 +545,17 @@ export function ArcadeGame() {
         aria-label="Arcade. Tap the floor to walk Charlie. Tap a machine to play. WASD and E still work."
       />
       {!racing && <p className="game-hint arcade-kicker">TAP OR WASD — WALK · TAP A MACHINE — PLAY</p>}
-      {racing && <NeonChase onExit={() => { setRacing(false); setPlaying(true); }} />}
+      {racing && cabinet === "neon-chase" && (
+        <NeonChase onExit={() => { setRacing(false); setPlaying(true); }} />
+      )}
+      {racing && cabinet === "void-beast" && (
+        <VoidBeast onExit={() => { setRacing(false); setPlaying(true); }} />
+      )}
       {playing && !racing && (
-        <div className="game-overlay" role="dialog" aria-label="NEON CHASE">
+        <div className="game-overlay" role="dialog" aria-label={ATTRACT[cabinet].title}>
           <div className="neon-frame">
             {/* eslint-disable-next-line @next/next/no-img-element -- a static local attract screen on a full-bleed dialog */}
-            <img src={START} alt="NEON CHASE" />
+            <img src={ATTRACT[cabinet].src} alt={ATTRACT[cabinet].title} />
             <div className="neon-ready">
               <p className="neon-credit">1 CREDIT</p>
               <button ref={playRef} type="button" className="neon-play" onClick={startRace}>
