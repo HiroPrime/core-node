@@ -76,14 +76,24 @@ const CARPET_SCALE = 0.42;
 /** Window span (px) where the camera is still 1:1. Smaller than this zooms out. */
 const ZOOM_SPAN = 840;
 const ZOOM_MIN = 0.32;
-const START = "/arcade-bk/Gemini_Generated_Image_3818h13818h13818.jpg";
-
 type GameId = "neon-chase" | "void-beast" | "aquatic-rush";
 
-const ATTRACT: Record<GameId, { src: string; title: string }> = {
-  "neon-chase": { src: START, title: "NEON CHASE" },
-  "void-beast": { src: "/arcade-bk/Void%20Beast/start.jpg", title: "VOID BEAST" },
-  "aquatic-rush": { src: "/arcade-bk/Aquatic%20Rush/start.jpg", title: "AQUATIC RUSH" },
+const ATTRACT: Record<GameId, { src: string; mobile: string; title: string }> = {
+  "neon-chase": {
+    src: "/arcade-bk/start.jpg",
+    mobile: "/arcade-bk/startmobile.jpg",
+    title: "NEON CHASE",
+  },
+  "void-beast": {
+    src: "/arcade-bk/Void%20Beast/start.jpg",
+    mobile: "/arcade-bk/Void%20Beast/startmobile.jpg",
+    title: "VOID BEAST",
+  },
+  "aquatic-rush": {
+    src: "/arcade-bk/Aquatic%20Rush/start.jpg",
+    mobile: "/arcade-bk/Aquatic%20Rush/startmobile.jpg",
+    title: "AQUATIC RUSH",
+  },
 };
 
 function EdgeBack({ onBack }: { onBack: () => void }) {
@@ -145,6 +155,7 @@ export function ArcadeGame() {
     setRacingState(on);
   };
   const [cabinet, setCabinet] = useState<GameId>("neon-chase");
+  const [portrait, setPortrait] = useState(false);
   const openRef = useRef<(id: string) => void>(() => {});
   const bootRef = useRef<(id: GameId) => void>(() => {});
   const depthRef = useRef(0);
@@ -197,6 +208,13 @@ export function ArcadeGame() {
   useEffect(() => {
     if (playing) playRef.current?.focus();
   }, [playing]);
+
+  useEffect(() => {
+    const read = () => setPortrait(window.innerWidth < 900 && window.innerHeight > window.innerWidth);
+    read();
+    window.addEventListener("resize", read);
+    return () => window.removeEventListener("resize", read);
+  }, []);
 
   useEffect(() => {
     const shell = shellRef.current;
@@ -624,7 +642,10 @@ export function ArcadeGame() {
         <div className="game-overlay" role="dialog" aria-label={ATTRACT[cabinet].title}>
           <div className="neon-frame">
             {/* eslint-disable-next-line @next/next/no-img-element -- a static local attract screen on a full-bleed dialog */}
-            <img src={ATTRACT[cabinet].src} alt={ATTRACT[cabinet].title} />
+            <img
+              src={portrait ? ATTRACT[cabinet].mobile : ATTRACT[cabinet].src}
+              alt={ATTRACT[cabinet].title}
+            />
             <div className="neon-ready">
               <p className="neon-credit">1 CREDIT</p>
               <button ref={playRef} type="button" className="neon-play" onClick={startRace}>
