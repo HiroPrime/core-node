@@ -5,8 +5,9 @@ import { useEffect, useRef, useState } from "react";
 /**
  * AQUATIC RUSH — climb the ocean on one button.
  *
- * The sub starts on the floor. Hold the button and it rises. Let go and it
- * sinks. Left and right steer. Fish patrol sideways. Treasure is the score.
+ * The sub starts on the floor. Hold the bottom half of the screen and it rises.
+ * Drag that same press to steer. Let go and it sinks straight down. Fish patrol
+ * sideways. Treasure is the score.
  * Five hits and the sub blows up. The surface is the win.
  * The clock eats points, and it eats faster the longer the dive runs.
  * Fish travel in pairs on the same line.
@@ -16,6 +17,8 @@ const ROOT = "/arcade/aquatic-rush/";
 const BG = "/arcade/aquatic-rush/background.jpg";
 const LIVES = 5;
 const CLIMB = 9;
+const ART_W = 1184;
+const ART_H = 3584;
 
 type Phase = "controls" | "count" | "play" | "boom" | "over" | "win";
 type Fish =
@@ -113,6 +116,7 @@ export function AquaticRush({ onExit }: { onExit: () => void }) {
 
     let w = 0;
     let h = 0;
+    let worldW = 0;
     let worldH = 0;
     let phase: Phase = "controls";
     let booted = false;
@@ -154,6 +158,12 @@ export function AquaticRush({ onExit }: { onExit: () => void }) {
     const mobile = () => w < 900 || h < 560;
     const u = () => Math.max(0.72, Math.min(1.7, Math.min(w, h) / 820));
     const gutter = () => w * (mobile() ? 0.1 : 0.16);
+    const stageSize = () => {
+      const climbH = h * CLIMB;
+      if (!mobile()) return { width: w, height: climbH };
+      const scale = Math.max(w / ART_W, climbH / ART_H);
+      return { width: ART_W * scale, height: ART_H * scale };
+    };
     const showHands = () => mobile() || window.matchMedia("(pointer: coarse)").matches;
 
     const drainRate = () => 20 + Math.floor(playTime / 4) * 20;
@@ -161,7 +171,7 @@ export function AquaticRush({ onExit }: { onExit: () => void }) {
     const layout = () => {
       const rng = rand(18);
       const left = gutter();
-      const right = w - gutter();
+      const right = worldW - gutter();
       const span = Math.max(80, right - left);
       const bands: Fish[][] = [
         ["jelly", "lion", "urchin", "eel", "ray"],
@@ -227,7 +237,7 @@ export function AquaticRush({ onExit }: { onExit: () => void }) {
       turnT = 0;
       boomT = 0;
       pops.length = 0;
-      sub.x = w / 2;
+      sub.x = worldW / 2;
       sub.y = worldH - h * 0.34;
       sub.vx = 0;
       sub.vy = 0;
@@ -269,14 +279,19 @@ export function AquaticRush({ onExit }: { onExit: () => void }) {
       canvas.height = Math.floor(h * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.imageSmoothingEnabled = false;
-      const next = h * CLIMB;
-      if (worldH > 0 && Math.abs(next - worldH) > 8) {
-        const scale = next / worldH;
-        sub.y *= scale;
-        foes.forEach((f) => { f.y *= scale; });
-        gems.forEach((g) => { g.y *= scale; });
+      const next = stageSize();
+      if (worldW > 0 && worldH > 0) {
+        const sx = next.width / worldW;
+        const sy = next.height / worldH;
+        if (Math.abs(sx - 1) > 0.01 || Math.abs(sy - 1) > 0.01) {
+          sub.x *= sx;
+          sub.y *= sy;
+          foes.forEach((f) => { f.x *= sx; f.y *= sy; });
+          gems.forEach((g) => { g.x *= sx; g.y *= sy; });
+        }
       }
-      worldH = next;
+      worldW = next.width;
+      worldH = next.height;
       if (!booted) boot();
       else if (foes.length === 0) layout();
     };
@@ -356,7 +371,7 @@ export function AquaticRush({ onExit }: { onExit: () => void }) {
       return `sink-${Math.floor(clock * 18) % 4}`;
     };
 
-    const drawHud = (cam: number) => {
+    const drawHud = (camX: number, camY: number) => {
       const s = u();
       ctx.save();
       ctx.textAlign = "left";
@@ -406,8 +421,8 @@ export function AquaticRush({ onExit }: { onExit: () => void }) {
         ctx.globalAlpha = Math.max(0, 1 - p.t / life);
         ctx.textAlign = "center";
         ctx.font = `${Math.round(18 * s)}px ${pixelFont}`;
-        const px = p.x;
-        const py = p.y - cam - p.t * 42;
+        const px = p.x - camX;
+        const py = p.y - camY - p.t * 42;
         const tw = ctx.measureText(p.text).width;
         ctx.fillStyle = "rgba(4,16,32,0.72)";
         ctx.fillRect(px - tw / 2 - 8, py - 16 * s, tw + 16, 22 * s);
@@ -421,9 +436,9 @@ export function AquaticRush({ onExit }: { onExit: () => void }) {
       ctx.fillStyle = "#041018";
       ctx.fillRect(0, 0, w, h);
       const rows: [string, string][] = [
-        ["ARROWS OR STICK", "STEER"],
-        ["HOLD THE BUTTON", "RISE"],
-        ["LET GO", "SINK"],
+        ["ARROWS", "STEER"],
+        ["HOLD AND DRAG", "RISE AND STEER"],
+        ["LET GO", "SINK STRAIGHT"],
         ["TREASURE", "POINTS"],
         ["THE CLOCK", "EATS THEM"],
         ["SLOWER DIVE", "BIGGER BITE"],
@@ -479,9 +494,10 @@ export function AquaticRush({ onExit }: { onExit: () => void }) {
         const targetVy = input.rise ? riseV : sinkV;
         sub.vy += (targetVy - sub.vy) * Math.min(1, dt * 3.4);
         const targetVx = input.steer * w * 0.26;
-        sub.vx += (targetVx - sub.vx) * Math.min(1, dt * 3.2);
+        if (Math.abs(input.steer) < 0.04) sub.vx = 0;
+        else sub.vx += (targetVx - sub.vx) * Math.min(1, dt * 3.2);
         const left = gutter() + 20;
-        const right = w - gutter() - 20;
+        const right = worldW - gutter() - 20;
         sub.x = Math.max(left, Math.min(right, sub.x + sub.vx * dt));
         sub.y = Math.max(h * 0.12, Math.min(worldH - h * 0.22, sub.y + sub.vy * dt));
 
@@ -490,7 +506,7 @@ export function AquaticRush({ onExit }: { onExit: () => void }) {
           f.frame += dt;
           f.x += f.dir * f.speed * dt;
           const edge = gutter() + FISH_H[f.kind] * 0.2;
-          if (f.x < edge || f.x > w - edge) f.dir *= -1;
+          if (f.x < edge || f.x > worldW - edge) f.dir *= -1;
           const hh = FISH_H[f.kind] * u();
           const dx = Math.abs(f.x - sub.x);
           const dy = Math.abs(f.y - sub.y);
@@ -526,7 +542,8 @@ export function AquaticRush({ onExit }: { onExit: () => void }) {
         if (pops[i].t > 1.15) pops.splice(i, 1);
       }
 
-      const cam = Math.max(0, Math.min(worldH - h, sub.y - h * 0.62));
+      const camY = Math.max(0, Math.min(worldH - h, sub.y - h * 0.62));
+      const camX = Math.max(0, Math.min(Math.max(0, worldW - w), sub.x - w / 2));
       const jx = shake > 0 ? Math.sin(clock * 60) * 5 : 0;
       ctx.save();
       ctx.translate(jx, 0);
@@ -535,10 +552,10 @@ export function AquaticRush({ onExit }: { onExit: () => void }) {
 
       if (phase !== "controls") {
         ctx.save();
-        ctx.translate(0, -cam);
+        ctx.translate(-camX, -camY);
         if (bg && bg.complete && bg.naturalWidth) {
           ctx.imageSmoothingEnabled = false;
-          ctx.drawImage(bg, 0, 0, w, worldH);
+          ctx.drawImage(bg, 0, 0, worldW, worldH);
         }
         gems.forEach((g) => {
           const gy = g.y + Math.sin(clock * 2.2 + g.bob) * 8;
@@ -560,7 +577,7 @@ export function AquaticRush({ onExit }: { onExit: () => void }) {
         }
         ctx.restore();
 
-        drawHud(cam);
+        drawHud(camX, camY);
 
         if (phase === "count") {
           const label = countT < 3 ? String(3 - Math.floor(countT)) : "GO!!!";
@@ -573,7 +590,7 @@ export function AquaticRush({ onExit }: { onExit: () => void }) {
           ctx.textAlign = "center";
           ctx.fillStyle = "rgba(255,246,194,0.8)";
           ctx.font = `${Math.round(12 * u())}px ${pixelFont}`;
-          ctx.fillText("HOLD TO RISE  ·  CLOCK EATS POINTS", w / 2, h - (showHands() ? 132 : 28));
+          ctx.fillText("HOLD AND DRAG  ·  LET GO SINKS", w / 2, h * 0.46);
         }
         if (phase === "over" || phase === "win") {
           ctx.fillStyle = "rgba(3,10,20,0.62)";
@@ -639,6 +656,30 @@ export function AquaticRush({ onExit }: { onExit: () => void }) {
   }, []);
 
   const stickOrigin = useRef<{ x: number; y: number; id: number } | null>(null);
+  const stickRef = useRef<HTMLDivElement | null>(null);
+  const glowRef = useRef<HTMLDivElement | null>(null);
+  const THROW = 64;
+
+  const placeTouch = (x: number, y: number, dx: number, dy: number, on: boolean) => {
+    const shell = shellRef.current;
+    if (!shell || !stickRef.current || !glowRef.current) return;
+    const rect = shell.getBoundingClientRect();
+    const lx = x - rect.left;
+    const ly = y - rect.top;
+    stickRef.current.style.opacity = on ? "1" : "0";
+    stickRef.current.style.transform = `translate(${lx}px, ${ly}px) translate(-50%, -50%)`;
+    glowRef.current.style.opacity = on ? "1" : "0";
+    glowRef.current.style.transform = `translate(${lx + dx}px, ${ly + dy}px) translate(-50%, -50%)`;
+    if (knobRef.current) knobRef.current.style.transform = `translate(${dx}px, ${dy}px)`;
+  };
+
+  const endTouch = (id?: number) => {
+    if (id != null && stickOrigin.current && stickOrigin.current.id !== id) return;
+    stickOrigin.current = null;
+    riseRef.current = false;
+    steerRef.current = 0;
+    placeTouch(0, 0, 0, 0, false);
+  };
 
   return (
     <div ref={shellRef} className="game-overlay neon-ride" role="dialog" aria-label="AQUATIC RUSH">
@@ -646,58 +687,31 @@ export function AquaticRush({ onExit }: { onExit: () => void }) {
       {hands && (
         <div className="aqua-hands">
           <div
-            className="aqua-stick"
+            className="aqua-pad"
             onPointerDown={(e) => {
+              if (e.pointerType === "mouse" && e.button !== 0) return;
               e.preventDefault();
-              e.currentTarget.setPointerCapture(e.pointerId);
+              try { e.currentTarget.setPointerCapture(e.pointerId); } catch { /* pointer already gone */ }
               stickOrigin.current = { x: e.clientX, y: e.clientY, id: e.pointerId };
+              riseRef.current = true;
+              steerRef.current = 0;
+              placeTouch(e.clientX, e.clientY, 0, 0, true);
             }}
             onPointerMove={(e) => {
               const origin = stickOrigin.current;
               if (!origin || origin.id !== e.pointerId) return;
-              const dx = Math.max(-42, Math.min(42, e.clientX - origin.x));
-              const dy = Math.max(-42, Math.min(42, e.clientY - origin.y));
-              steerRef.current = dx / 42;
-              if (knobRef.current) knobRef.current.style.transform = `translate(${dx}px, ${dy}px)`;
+              const dx = Math.max(-THROW, Math.min(THROW, e.clientX - origin.x));
+              const dy = Math.max(-THROW, Math.min(THROW, e.clientY - origin.y));
+              steerRef.current = dx / THROW;
+              placeTouch(origin.x, origin.y, dx, dy, true);
             }}
-            onPointerUp={(e) => {
-              if (stickOrigin.current?.id !== e.pointerId) return;
-              stickOrigin.current = null;
-              steerRef.current = 0;
-              if (knobRef.current) knobRef.current.style.transform = "translate(0px, 0px)";
-            }}
-            onPointerCancel={() => {
-              stickOrigin.current = null;
-              steerRef.current = 0;
-              if (knobRef.current) knobRef.current.style.transform = "translate(0px, 0px)";
-            }}
-          >
+            onPointerUp={(e) => endTouch(e.pointerId)}
+            onPointerCancel={(e) => endTouch(e.pointerId)}
+          />
+          <div ref={stickRef} className="aqua-stick">
             <div ref={knobRef} className="aqua-knob" />
           </div>
-          <button
-            type="button"
-            className="aqua-rise"
-            onPointerDown={(e) => {
-              e.preventDefault();
-              riseRef.current = true;
-              e.currentTarget.classList.add("is-down");
-            }}
-            onPointerUp={(e) => {
-              riseRef.current = false;
-              e.currentTarget.classList.remove("is-down");
-            }}
-            onPointerCancel={(e) => {
-              riseRef.current = false;
-              e.currentTarget.classList.remove("is-down");
-            }}
-            onPointerLeave={(e) => {
-              if (!riseRef.current) return;
-              riseRef.current = false;
-              e.currentTarget.classList.remove("is-down");
-            }}
-          >
-            RISE
-          </button>
+          <div ref={glowRef} className="aqua-glow" />
         </div>
       )}
     </div>
