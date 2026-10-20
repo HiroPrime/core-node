@@ -89,7 +89,7 @@ function rand(seed: number) {
   };
 }
 
-export function AquaticRush({ onExit }: { onExit: () => void }) {
+export function AquaticRush({ onExit, onGameOver }: { onExit: () => void; onGameOver?: (score: number) => void }) {
   const shellRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const onExitRef = useRef(onExit);
@@ -98,6 +98,8 @@ export function AquaticRush({ onExit }: { onExit: () => void }) {
   const diveRef = useRef(false);
   const [hands, setHands] = useState(false);
   onExitRef.current = onExit;
+  const onGameOverRef = useRef(onGameOver);
+  onGameOverRef.current = onGameOver;
 
   useEffect(() => {
     const shell = shellRef.current;
@@ -372,6 +374,7 @@ export function AquaticRush({ onExit }: { onExit: () => void }) {
         phase = "boom";
         boomT = 0;
         saveHigh();
+        onGameOverRef.current?.(score);
       }
     };
 

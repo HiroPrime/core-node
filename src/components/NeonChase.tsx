@@ -46,13 +46,15 @@ function load(src: string, into: (img: HTMLImageElement) => void) {
   img.src = src;
 }
 
-export function NeonChase({ onExit }: { onExit: () => void }) {
+export function NeonChase({ onExit, onGameOver }: { onExit: () => void; onGameOver?: (score: number) => void }) {
   const shellRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const onExitRef = useRef(onExit);
   const heldRef = useRef(new Set<string>());
   const [pedals, setPedals] = useState(false);
   onExitRef.current = onExit;
+  const onGameOverRef = useRef(onGameOver);
+  onGameOverRef.current = onGameOver;
 
   useEffect(() => {
     const shell = shellRef.current;
@@ -364,6 +366,7 @@ export function NeonChase({ onExit }: { onExit: () => void }) {
               high = passed;
               saveHigh();
             }
+            onGameOverRef.current?.(passed);
             passed = 0;
             dead = 1.2;
           }
