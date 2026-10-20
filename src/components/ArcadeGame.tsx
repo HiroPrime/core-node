@@ -73,9 +73,10 @@ const CABINET_GAP = 52;
 const FLOOR_FRONT = 780;
 const CARPET = "/arcade-bk/Gemini_Generated_Image_kdli4mkdli4mkdli.jpg";
 const CARPET_SCALE = 0.42;
-/** Window span (px) where the camera is still 1:1. Smaller than this zooms out. */
+/** Window span (px) where the camera is at its closest. Smaller than this zooms out. */
 const ZOOM_SPAN = 840;
 const ZOOM_MIN = 0.32;
+const ZOOM_CLOSE = 1.25;
 type GameId = "neon-chase" | "void-beast" | "aquatic-rush";
 
 const ATTRACT: Record<GameId, { src: string; mobile: string; title: string }> = {
@@ -265,11 +266,11 @@ export function ArcadeGame() {
     let laidOut = false;
     let assetsLeft = CABINETS.length + 1;
 
-    const pixelFamily = (() => {
+    const displayFamily = (() => {
       const v = getComputedStyle(document.documentElement)
-        .getPropertyValue("--font-pixel")
+        .getPropertyValue("--font-display")
         .trim();
-      return v || '"Courier New", monospace';
+      return v || "Outfit, sans-serif";
     })();
 
     const layout = () => {
@@ -459,7 +460,7 @@ export function ArcadeGame() {
         else if (movedY > 0) facing = "down";
 
         const span = Math.min(w, h * 1.35);
-        zoom = Math.min(1, Math.max(ZOOM_MIN, span / ZOOM_SPAN));
+        zoom = Math.max(ZOOM_MIN, Math.min(1, span / ZOOM_SPAN)) * ZOOM_CLOSE;
         const viewW = w / zoom;
         const viewH = h / zoom;
         camX =
@@ -546,22 +547,32 @@ export function ArcadeGame() {
         if (close && !playingRef.current) {
           ctx.save();
           const label = close.playable ? "PLAY" : close.name;
-          const screenPx = w < 900 ? 22 : 30;
+          const screenPx = w < 900 ? 20 : 26;
           let namePx = screenPx;
           const applyName = (px: number) => {
-            ctx.font = `${px / zoom}px ${pixelFamily}`;
+            ctx.font = `700 ${px / zoom}px ${displayFamily}`;
           };
           applyName(namePx);
-          while (namePx > 14 && ctx.measureText(label).width * zoom > w - 28) {
+          while (namePx > 16 && ctx.measureText(label).width * zoom > w - 36) {
             namePx -= 1;
             applyName(namePx);
           }
-          ctx.textAlign = "center";
-          ctx.fillStyle = "#ffe14a";
-          ctx.shadowColor = "#ffe14a";
-          ctx.shadowBlur = 14 / zoom;
+          const textW = ctx.measureText(label).width;
+          const padX = 12 / zoom;
+          const padY = 7 / zoom;
+          const boxW = textW + padX * 2;
+          const boxH = namePx / zoom + padY * 2;
+          const cx = Math.round(player.x + BOX_W / 2 - camX);
           const head = spriteFrame ? player.y + BOX_H - spriteFrame.height * SCALE : player.y;
-          ctx.fillText(label, Math.round(player.x + BOX_W / 2 - camX), Math.round(head - camY - (namePx + 14) / zoom));
+          const top = Math.round(head - camY - boxH - 8 / zoom);
+          ctx.fillStyle = "rgba(6, 4, 16, 0.9)";
+          ctx.beginPath();
+          ctx.roundRect(cx - boxW / 2, top, boxW, boxH, 8 / zoom);
+          ctx.fill();
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillStyle = "#fff6c2";
+          ctx.fillText(label, cx, top + boxH / 2);
           ctx.restore();
         }
       }
@@ -627,7 +638,6 @@ export function ArcadeGame() {
         className="game-canvas"
         aria-label="Arcade. Tap the floor to walk Charlie. Tap a machine to play. WASD and E still work."
       />
-      {!racing && <p className="game-hint arcade-kicker">TAP OR WASD — WALK · TAP A MACHINE — PLAY</p>}
       {racing && cabinet === "neon-chase" && (
         <NeonChase onExit={() => { setRacing(false); setPlaying(true); }} />
       )}
@@ -640,6 +650,9 @@ export function ArcadeGame() {
       {(playing || racing) && <EdgeBack onBack={backOut} />}
       {playing && !racing && (
         <div className="game-overlay" role="dialog" aria-label={ATTRACT[cabinet].title}>
+          <button type="button" className="neon-close" onClick={backOut} aria-label="Close">
+            X
+          </button>
           <div className="neon-frame">
             {/* eslint-disable-next-line @next/next/no-img-element -- a static local attract screen on a full-bleed dialog */}
             <img
@@ -653,7 +666,6 @@ export function ArcadeGame() {
               </button>
             </div>
           </div>
-          <p className="game-hint arcade-kicker">ENTER — PLAY · ESC OR SWIPE THE LEFT EDGE — BACK</p>
         </div>
       )}
     </div>

@@ -6,11 +6,10 @@ import { useEffect, useRef, useState } from "react";
  * AQUATIC RUSH — climb the ocean on one button.
  *
  * The sub starts on the floor. Push the stick up to rise, down to dive, and
- * sideways to steer. Sideways is faster than the climb. Let go and it sinks.
- * The first stretch is empty. Fish and treasure show up after that, thicker
- * near the surface. Fish swim across, up and down, and on a diagonal.
- * Five hits and the sub blows up. The surface is the win.
- * The clock eats points, and it eats faster the longer the dive runs.
+ * sideways to steer. Sideways is a little faster than the climb. Let go and
+ * it sinks. There is no surface. The middle of the trench repeats, and the
+ * fish get thicker the higher you go. Five hits and the haul is gone.
+ * The high score is the treasure you were holding when you died.
  */
 
 const ROOT = "/arcade/aquatic-rush/";
@@ -21,7 +20,7 @@ const ART_H = 3584;
 const VIEW_W = 1280;
 const VIEW_H = 800;
 
-type Phase = "controls" | "count" | "play" | "boom" | "over" | "win";
+type Phase = "controls" | "count" | "play" | "boom" | "over";
 type Fish =
   | "jelly" | "lion" | "urchin" | "eel" | "ray"
   | "star" | "stone" | "octo" | "box" | "cone"
@@ -47,23 +46,26 @@ const FISH_H: Record<Fish, number> = {
   white: 72, hammer: 68, moray: 58, cuda: 44, tiger: 74,
 };
 
-const LOOT: { id: string; value: number }[] = [
-  { id: "coin", value: 100 },
-  { id: "pile", value: 300 },
-  { id: "heap", value: 500 },
-  { id: "stack", value: 800 },
-  { id: "chest", value: 1000 },
-  { id: "chest-open", value: 1500 },
-  { id: "chest-royal", value: 2000 },
-  { id: "chest-gem", value: 2500 },
-  { id: "ruby", value: 400 },
-  { id: "diamond", value: 900 },
-  { id: "goblet", value: 700 },
-  { id: "pearls", value: 600 },
-  { id: "necklace", value: 1200 },
-  { id: "watch", value: 1800 },
-  { id: "crown", value: 3000 },
+const LOOT: { id: string; name: string; value: number }[] = [
+  { id: "coin", name: "COIN", value: 100 },
+  { id: "pile", name: "PILE", value: 300 },
+  { id: "ruby", name: "RUBY", value: 400 },
+  { id: "heap", name: "HEAP", value: 500 },
+  { id: "pearls", name: "PEARLS", value: 600 },
+  { id: "goblet", name: "GOBLET", value: 700 },
+  { id: "stack", name: "STACK", value: 800 },
+  { id: "diamond", name: "DIAMOND", value: 900 },
+  { id: "chest", name: "CHEST", value: 1000 },
+  { id: "necklace", name: "NECKLACE", value: 1200 },
+  { id: "chest-open", name: "OPEN CHEST", value: 1500 },
+  { id: "watch", name: "WATCH", value: 1800 },
+  { id: "chest-royal", name: "ROYAL CHEST", value: 2000 },
+  { id: "chest-gem", name: "GEM CHEST", value: 2500 },
+  { id: "crown", name: "CROWN", value: 3000 },
 ];
+
+const TILE_SRC_H = 800;
+const FLOOR_SRC_Y = 2920;
 
 const PACK: [string, number][] = [
   ["idle", 6], ["fwd", 4], ["back", 4], ["turn", 8], ["sink", 4], ["rise", 4], ["boom", 8],
@@ -116,18 +118,63 @@ export function AquaticRush({ onExit }: { onExit: () => void }) {
         load(`${ROOT}${key}.png`, (img) => { frames[key] = img; });
       }
     });
-    let bg: HTMLImageElement | null = null;
-    load(BG, (img) => { bg = img; });
+    let water: HTMLCanvasElement | null = null;
+    let floor: HTMLCanvasElement | null = null;
+    load(BG, (img) => {
+      const sw = img.naturalWidth;
+      const sh = img.naturalHeight;
+      const cut = (sy: number, sheight: number) => {
+        const board = document.createElement("canvas");
+        board.width = sw;
+        board.height = sheight;
+        const g = board.getContext("2d");
+        if (!g) return board;
+        g.drawImage(img, 0, sy, sw, sheight, 0, 0, sw, sheight);
+        return board;
+      };
+      const tile = document.createElement("canvas");
+      tile.width = sw;
+      tile.height = TILE_SRC_H;
+      const g = tile.getContext("2d");
+      if (g) {
+        g.imageSmoothingEnabled = true;
+        const sx = Math.round(sw * 0.44);
+        const srcW = Math.round(sw * 0.12);
+        g.drawImage(img, sx, 2360, srcW, 480, 0, 0, sw, TILE_SRC_H);
+        const shade = g.createLinearGradient(0, 0, sw, 0);
+        shade.addColorStop(0, "rgba(2,10,24,0.62)");
+        shade.addColorStop(0.2, "rgba(2,10,24,0)");
+        shade.addColorStop(0.8, "rgba(2,10,24,0)");
+        shade.addColorStop(1, "rgba(2,10,24,0.62)");
+        g.fillStyle = shade;
+        g.fillRect(0, 0, sw, TILE_SRC_H);
+      }
+      water = tile;
+      const floorBoard = cut(FLOOR_SRC_Y, sh - FLOOR_SRC_Y);
+      const fg = floorBoard.getContext("2d");
+      if (fg) {
+        const fadeH = Math.round(floorBoard.height * 0.34);
+        fg.globalCompositeOperation = "destination-out";
+        const fade = fg.createLinearGradient(0, 0, 0, fadeH);
+        fade.addColorStop(0, "rgba(0,0,0,1)");
+        fade.addColorStop(0.55, "rgba(0,0,0,0.35)");
+        fade.addColorStop(1, "rgba(0,0,0,0)");
+        fg.fillStyle = fade;
+        fg.fillRect(0, 0, floorBoard.width, fadeH);
+      }
+      floor = floorBoard;
+    });
 
     let w = 0;
     let h = 0;
-    let worldW = 0;
-    let worldH = 0;
+    const worldW = VIEW_W;
+    const tileH = VIEW_W * TILE_SRC_H / ART_W;
+    const floorH = VIEW_W * (ART_H - FLOOR_SRC_Y) / ART_W;
+    const bedBottom = 0;
+    const bedTop = -floorH;
     let phase: Phase = "controls";
     let booted = false;
     let clock = 0;
-    let playTime = 0;
-    let drainBank = 0;
     let countT = 0;
     let boomT = 0;
     let score = 0;
@@ -147,6 +194,11 @@ export function AquaticRush({ onExit }: { onExit: () => void }) {
     const sub = { x: 0, y: 0, vx: 0, vy: 0 };
     let foes: Foe[] = [];
     let gems: Gem[] = [];
+    let found: string[] = [];
+    let nextY = 0;
+    let startY = 0;
+    let laneN = 0;
+    let rng = rand(1);
     const pops: Pop[] = [];
     const keys = new Set<string>();
 
@@ -161,92 +213,94 @@ export function AquaticRush({ onExit }: { onExit: () => void }) {
     };
 
     const mobile = () => w < 900 || h < 560;
+    // Phones crop the desktop ocean. Pull the camera back so a small screen
+    // shows more world. Desktop stays 1 CSS pixel = 1 world pixel.
+    const pull = () => {
+      const phone = w < 700 || (w < 900 && h > w);
+      if (!phone) return 1;
+      return Math.max(1.7, Math.min(2, 760 / Math.max(w, 1)));
+    };
     const u = () => Math.max(0.72, Math.min(1.7, Math.min(VIEW_W, VIEW_H) / 820));
     const gutter = () => VIEW_W * 0.12;
-    const stageSize = () => ({
-      width: VIEW_W,
-      height: VIEW_W * ART_H / ART_W,
-    });
     const showHands = () => mobile() || window.matchMedia("(pointer: coarse)").matches;
 
-    const drainRate = () => 20 + Math.floor(playTime / 4) * 20;
+    const bands: Fish[][] = [
+      ["jelly", "lion", "urchin", "eel", "ray"],
+      ["star", "stone", "octo", "box", "cone"],
+      ["white", "hammer", "moray", "cuda", "tiger"],
+    ];
 
-    const layout = () => {
-      const rng = rand(18);
+    const climbAt = (y: number) => Math.max(0, startY - y);
+
+    const spawnLane = (y: number) => {
       const left = gutter();
       const right = worldW - gutter();
-      const span = Math.max(80, right - left);
-      const bands: Fish[][] = [
-        ["jelly", "lion", "urchin", "eel", "ray"],
-        ["star", "stone", "octo", "box", "cone"],
-        ["white", "hammer", "moray", "cuda", "tiger"],
-      ];
-      const pick = (band: number) => bands[band][Math.floor(rng() * bands[band].length)];
-      const yMax = worldH - VIEW_H * 0.18 - 6 * 150;
-      const yMin = VIEW_H * 0.28;
-      const plan = ["side1", "side1", "side1", "side2", "side2", "diag", "mix", "mix", "mix"] as const;
-      const sideMove = (sign: number) => ({ vx: sign, vy: 0 });
-      const upMove = (sign: number) => ({ vx: 0, vy: sign });
-      const diagMove = (sx: number, sy: number) => {
-        const len = Math.hypot(sx, sy);
+      const climb = climbAt(y);
+      const step = Math.floor(Math.max(0, climb - 1100) / 1500);
+      const shape = step <= 0 ? "side1" : step === 1 ? "side2" : step === 2 ? "diag" : "mix";
+      const count = step <= 0 ? 1 : step < 4 ? 2 : Math.min(4, 2 + Math.floor((step - 4) / 2));
+      const band = Math.min(2, Math.floor(step / 2));
+      const pace = (140 + Math.min(200, step * 22)) * u();
+      const mid = (left + right) / 2 + (laneN % 2 === 0 ? -90 : 90);
+      const side = (sign: number) => ({ vx: sign, vy: 0 });
+      const vert = (sign: number) => ({ vx: 0, vy: sign });
+      const diag = (sx: number, sy: number) => {
+        const len = Math.hypot(sx, sy) || 1;
         return { vx: sx / len, vy: sy / len };
       };
-      foes = [];
-      plan.forEach((shape, i) => {
-        const y = yMax - (i / Math.max(1, plan.length - 1)) * (yMax - yMin);
-        const depth = y / worldH;
-        const band = depth > 0.64 ? 0 : depth > 0.36 ? 1 : 2;
-        const hotter = Math.min(2, band + 1);
-        const pace = (band === 2 ? 260 : band === 1 ? 200 : 150) * u();
-        const count = shape === "side1" ? 1 : 2;
-        const mid = (left + right) / 2 + (i % 2 === 0 ? -70 : 70);
-        for (let k = 0; k < count; k += 1) {
-          const kind = pick(rng() < 0.22 ? hotter : band);
-          let move = sideMove(rng() < 0.5 ? -1 : 1);
-          if (shape === "side2") move = sideMove(k === 0 ? -1 : 1);
-          else if (shape === "diag") move = diagMove(k === 0 ? -1 : 1, k === 0 ? -0.7 : 0.7);
-          else if (shape === "mix") {
-            move = k === 0
-              ? upMove(rng() < 0.5 ? -1 : 1)
-              : diagMove(rng() < 0.5 ? -1 : 1, rng() < 0.5 ? -0.65 : 0.65);
-          }
-          const x = count === 1 ? mid : mid + (k === 0 ? -170 : 170);
-          const fy = Math.max(yMin + 24, Math.min(yMax - 24, y));
-          foes.push({
-            kind,
-            x: Math.max(left + 30, Math.min(right - 30, x)),
-            y: fy,
-            dir: move.vx < 0 ? -1 : 1,
-            vx: move.vx,
-            vy: move.vy,
-            speed: pace * (0.85 + rng() * 0.25),
-            frame: rng() * 8,
-            yLo: Math.max(yMin, fy - 70),
-            yHi: Math.min(yMax, fy + 70),
-          });
+      for (let k = 0; k < count; k += 1) {
+        const kind = bands[rng() < 0.2 ? Math.min(2, band + 1) : band][Math.floor(rng() * 5)];
+        let move = side(rng() < 0.5 ? -1 : 1);
+        if (shape === "side2") move = side(k % 2 === 0 ? -1 : 1);
+        else if (shape === "diag") move = diag(k % 2 === 0 ? -1 : 1, k % 2 === 0 ? -0.65 : 0.65);
+        else if (shape === "mix") {
+          move = k % 3 === 0
+            ? vert(rng() < 0.5 ? -1 : 1)
+            : k % 3 === 1
+              ? diag(rng() < 0.5 ? -1 : 1, rng() < 0.5 ? -0.6 : 0.6)
+              : side(rng() < 0.5 ? -1 : 1);
         }
-      });
-      const bag = [
-        "coin", "coin", "coin", "coin", "pile", "pile", "heap", "stack",
-        "ruby", "ruby", "pearls", "goblet", "chest", "diamond",
-        "necklace", "chest-open", "watch", "chest-royal", "chest-gem", "crown",
-      ];
-      gems = bag.map((id, i) => {
-        const spec = LOOT.find((item) => item.id === id)!;
-        return {
-          id,
+        const spread = count === 1 ? 0 : (k - (count - 1) / 2) * 210;
+        const x = Math.max(left + 36, Math.min(right - 36, mid + spread));
+        foes.push({
+          kind,
+          x,
+          y,
+          dir: move.vx < 0 ? -1 : 1,
+          vx: move.vx,
+          vy: move.vy,
+          speed: pace * (0.85 + rng() * 0.3),
+          frame: rng() * 8,
+          yLo: y - 80,
+          yHi: y + 80,
+        });
+      }
+      if (rng() < 0.72) {
+        const tier = Math.min(LOOT.length, 2 + step);
+        const pick = Math.floor(Math.pow(rng(), 1.35) * tier);
+        const spec = LOOT[pick];
+        gems.push({
+          id: spec.id,
           value: spec.value,
-          x: left + 24 + rng() * (span - 48),
-          y: yMax - 40 - ((i + 0.5) / bag.length) * (yMax - yMin - 80),
+          x: left + 48 + rng() * (right - left - 96),
+          y: y + 130,
           bob: rng() * Math.PI * 2,
-        };
-      });
+        });
+      }
+      laneN += 1;
+    };
+
+    const fillAhead = () => {
+      const reach = sub.y - Math.max(h, VIEW_H) * 1.15;
+      while (nextY > reach) {
+        const gap = Math.max(250, 430 - Math.max(0, climbAt(nextY) - 1100) / 70);
+        spawnLane(nextY);
+        nextY -= gap;
+      }
     };
 
     const fresh = () => {
       score = 0;
-      playTime = 0;
-      drainBank = 0;
       lives = LIVES;
       hurt = 0;
       shake = 0;
@@ -254,11 +308,18 @@ export function AquaticRush({ onExit }: { onExit: () => void }) {
       turnT = 0;
       boomT = 0;
       pops.length = 0;
+      foes = [];
+      gems = [];
+      found = [];
+      laneN = 0;
+      rng = rand((Date.now() ^ 0x9e3779b9) >>> 0);
       sub.x = worldW / 2;
-      sub.y = worldH - VIEW_H * 0.34;
+      sub.y = -VIEW_H * 0.34;
       sub.vx = 0;
       sub.vy = 0;
-      layout();
+      startY = sub.y;
+      nextY = startY - 1100;
+      fillAhead();
     };
 
     const boot = () => {
@@ -297,21 +358,7 @@ export function AquaticRush({ onExit }: { onExit: () => void }) {
       canvas.height = Math.floor(h * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.imageSmoothingEnabled = false;
-      const next = stageSize();
-      if (worldW > 0 && worldH > 0) {
-        const sx = next.width / worldW;
-        const sy = next.height / worldH;
-        if (Math.abs(sx - 1) > 0.01 || Math.abs(sy - 1) > 0.01) {
-          sub.x *= sx;
-          sub.y *= sy;
-          foes.forEach((f) => { f.x *= sx; f.y *= sy; });
-          gems.forEach((g) => { g.x *= sx; g.y *= sy; });
-        }
-      }
-      worldW = next.width;
-      worldH = next.height;
       if (!booted) boot();
-      else if (foes.length === 0) layout();
     };
 
     const pad = (n: number) => String(Math.max(0, Math.floor(n))).padStart(6, "0");
@@ -386,7 +433,7 @@ export function AquaticRush({ onExit }: { onExit: () => void }) {
         return `turn-${face > 0 ? 7 - i : i}`;
       }
       const driving = Math.abs(steer) > 0.55;
-      const onFloor = sub.y > worldH - VIEW_H * 0.36 && Math.abs(sub.vy) < 20;
+      const onFloor = sub.y > -VIEW_H * 0.4 && Math.abs(sub.vy) < 20;
       if (onFloor && Math.abs(steer) < 0.2 && !rise) return `idle-${Math.floor(clock * 14) % 6}`;
       if (driving && rise) {
         const set = face > 0 ? "fwd" : "back";
@@ -396,7 +443,7 @@ export function AquaticRush({ onExit }: { onExit: () => void }) {
       return `sink-${Math.floor(clock * 18) % 4}`;
     };
 
-    const drawHud = (camX: number, camY: number) => {
+    const drawHud = (camX: number, camY: number, camPull: number) => {
       const s = u();
       ctx.save();
       ctx.textAlign = "left";
@@ -419,35 +466,20 @@ export function AquaticRush({ onExit }: { onExit: () => void }) {
       ctx.font = `${Math.round(11 * s)}px ${pixelFont}`;
       ctx.fillText(`HI ${pad(high)}`, w / 2, 68 * s);
       if (phase === "play" || phase === "boom") {
-        ctx.fillStyle = "#ff4d6a";
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#7ef6ff";
         ctx.font = `${Math.round(11 * s)}px ${pixelFont}`;
-        ctx.fillText(`-${drainRate()}/S`, w / 2, 86 * s);
+        const risen = Math.max(0, Math.floor(climbAt(sub.y) / 10));
+        ctx.fillText(`UP ${String(risen).padStart(4, "0")}`, w / 2, 86 * s);
       }
-
-      const meterX = w - 28 * s;
-      const meterTop = 24 * s;
-      const meterH = Math.min(h * 0.42, 220 * s);
-      ctx.fillStyle = "rgba(4,16,32,0.55)";
-      ctx.fillRect(meterX, meterTop, 10 * s, meterH);
-      const ascent = 1 - sub.y / worldH;
-      ctx.fillStyle = "#3df0ff";
-      const fill = meterH * Math.max(0, Math.min(1, ascent));
-      ctx.fillRect(meterX, meterTop + meterH - fill, 10 * s, fill);
-      ctx.fillStyle = "#ffe14a";
-      ctx.fillRect(meterX - 3 * s, meterTop + meterH - fill - 2, 16 * s, 4);
-      ctx.textAlign = "right";
-      ctx.font = `${Math.round(10 * s)}px ${pixelFont}`;
-      ctx.fillStyle = "#fff6c2";
-      ctx.fillText("TOP", meterX - 8, meterTop + 10);
-      ctx.fillText("FLOOR", meterX - 8, meterTop + meterH);
 
       pops.forEach((p) => {
         const life = 1.15;
         ctx.globalAlpha = Math.max(0, 1 - p.t / life);
         ctx.textAlign = "center";
         ctx.font = `${Math.round(18 * s)}px ${pixelFont}`;
-        const px = p.x - camX;
-        const py = p.y - camY - p.t * 42;
+        const px = (p.x - camX) / camPull;
+        const py = (p.y - camY) / camPull - p.t * 42;
         const tw = ctx.measureText(p.text).width;
         ctx.fillStyle = "rgba(4,16,32,0.72)";
         ctx.fillRect(px - tw / 2 - 8, py - 16 * s, tw + 16, 22 * s);
@@ -465,11 +497,9 @@ export function AquaticRush({ onExit }: { onExit: () => void }) {
         ["STICK UP", "RISE"],
         ["STICK DOWN", "DIVE"],
         ["LET GO", "SINK"],
-        ["TREASURE", "POINTS"],
-        ["THE CLOCK", "EATS THEM"],
-        ["SLOWER DIVE", "BIGGER BITE"],
-        ["FIVE HITS", "YOU BLOW UP"],
-        ["THE SURFACE", "YOU WIN"],
+        ["TREASURE", "YOUR SCORE"],
+        ["FIVE HITS", "YOU LOSE IT"],
+        ["NO SURFACE", "KEEP CLIMBING"],
       ];
       const s = Math.min(u(), h / 640);
       let y = h / 2 - (rows.length * 40 + 90) * s / 2;
@@ -507,14 +537,6 @@ export function AquaticRush({ onExit }: { onExit: () => void }) {
         if (face !== prevFace) turnT = 0.28;
         if (turnT > 0) turnT = Math.max(0, turnT - dt);
 
-        playTime += dt;
-        drainBank += dt;
-        if (drainBank >= 1) {
-          const ticks = Math.floor(drainBank);
-          drainBank -= ticks;
-          score = Math.max(0, score - ticks * drainRate());
-        }
-
         const riseSpeed = VIEW_H * 0.2;
         const riseV = -riseSpeed;
         const diveV = VIEW_H * 0.32;
@@ -527,7 +549,11 @@ export function AquaticRush({ onExit }: { onExit: () => void }) {
         const left = gutter() + 20;
         const right = worldW - gutter() - 20;
         sub.x = Math.max(left, Math.min(right, sub.x + sub.vx * dt));
-        sub.y = Math.max(VIEW_H * 0.12, Math.min(worldH - VIEW_H * 0.22, sub.y + sub.vy * dt));
+        sub.y = Math.min(-VIEW_H * 0.2, sub.y + sub.vy * dt);
+        fillAhead();
+        const behind = sub.y + Math.max(1100, h * 1.4);
+        foes = foes.filter((f) => f.y < behind);
+        gems = gems.filter((g) => g.y < behind);
 
         const subH = 64 * u();
         foes.forEach((f) => {
@@ -555,14 +581,10 @@ export function AquaticRush({ onExit }: { onExit: () => void }) {
           const gy = g.y + Math.sin(clock * 2.2 + g.bob) * 8;
           if (Math.hypot(g.x - sub.x, gy - sub.y) < 36 * u() + 18) {
             score += g.value;
+            found.push(g.id);
             pops.push({ text: `+${g.value}`, x: g.x, y: gy, t: 0 });
             gems.splice(i, 1);
           }
-        }
-
-        if (sub.y <= VIEW_H * 0.16) {
-          phase = "win";
-          saveHigh();
         }
       } else if (phase === "count") {
         countT += dt;
@@ -579,8 +601,12 @@ export function AquaticRush({ onExit }: { onExit: () => void }) {
         if (pops[i].t > 1.15) pops.splice(i, 1);
       }
 
-      const camY = h >= worldH ? (worldH - h) / 2 : Math.max(0, Math.min(worldH - h, sub.y - h * 0.62));
-      const camX = w >= worldW ? (worldW - w) / 2 : Math.max(0, Math.min(worldW - w, sub.x - w / 2));
+      const camPull = pull();
+      const viewW = w * camPull;
+      const viewH = h * camPull;
+      let camY = sub.y - viewH * 0.62;
+      if (camY + viewH > bedBottom) camY = bedBottom - viewH;
+      const camX = viewW >= worldW ? (worldW - viewW) / 2 : Math.max(0, Math.min(worldW - viewW, sub.x - viewW / 2));
       const jx = shake > 0 ? Math.sin(clock * 60) * 5 : 0;
       ctx.save();
       ctx.translate(jx, 0);
@@ -589,10 +615,22 @@ export function AquaticRush({ onExit }: { onExit: () => void }) {
 
       if (phase !== "controls") {
         ctx.save();
+        ctx.scale(1 / camPull, 1 / camPull);
         ctx.translate(-camX, -camY);
-        if (bg && bg.complete && bg.naturalWidth) {
+        ctx.fillStyle = "#042033";
+        ctx.fillRect(camX - 40, camY - 40, viewW + 80, viewH + 80);
+        if (water) {
           ctx.imageSmoothingEnabled = true;
-          ctx.drawImage(bg, 0, 0, worldW, worldH);
+          const first = Math.max(-1, Math.floor((bedTop - (camY + viewH)) / tileH) - 1);
+          const last = Math.ceil((bedTop - camY) / tileH) + 1;
+          for (let i = first; i <= last; i += 1) {
+            ctx.drawImage(water, 0, bedTop - (i + 1) * tileH, worldW, tileH);
+          }
+          ctx.imageSmoothingEnabled = false;
+        }
+        if (floor) {
+          ctx.imageSmoothingEnabled = true;
+          ctx.drawImage(floor, 0, bedTop, worldW, floorH);
           ctx.imageSmoothingEnabled = false;
         }
         gems.forEach((g) => {
@@ -604,7 +642,7 @@ export function AquaticRush({ onExit }: { onExit: () => void }) {
           const i = Math.floor(f.frame * 8) % n;
           blit(`${f.kind}-${i}`, f.x, f.y, FISH_H[f.kind] * u(), f.dir < 0);
         });
-        if (phase !== "over" && phase !== "win") {
+        if (phase !== "over") {
           ctx.save();
           if (hurt > 0 && Math.floor(hurt * 16) % 2 === 0) ctx.globalAlpha = 0.35;
           const pose = subPose(input.steer, input.rise);
@@ -615,7 +653,7 @@ export function AquaticRush({ onExit }: { onExit: () => void }) {
         }
         ctx.restore();
 
-        drawHud(camX, camY);
+        drawHud(camX, camY, camPull);
 
         if (phase === "count") {
           const label = countT < 3 ? String(3 - Math.floor(countT)) : "GO!!!";
@@ -630,20 +668,50 @@ export function AquaticRush({ onExit }: { onExit: () => void }) {
           ctx.font = `${Math.round(12 * u())}px ${pixelFont}`;
           ctx.fillText("STICK TO STEER  ·  LET GO SINKS", w / 2, h * 0.46);
         }
-        if (phase === "over" || phase === "win") {
-          ctx.fillStyle = "rgba(3,10,20,0.62)";
+        if (phase === "over") {
+          const order: string[] = [];
+          const tally = new Map<string, number>();
+          found.forEach((id) => {
+            if (!tally.has(id)) order.push(id);
+            tally.set(id, (tally.get(id) || 0) + 1);
+          });
+          const lines = order.map((id) => {
+            const spec = LOOT.find((item) => item.id === id);
+            const count = tally.get(id) || 0;
+            const name = spec?.name ?? id.toUpperCase();
+            return count > 1 ? `${name}  x${count}` : name;
+          });
+          const rows = Math.max(1, lines.length);
+          const s = Math.min(u() * 0.9, h / (240 + rows * 26));
+          ctx.fillStyle = "rgba(3,10,20,0.86)";
           ctx.fillRect(0, 0, w, h);
           ctx.textAlign = "center";
-          ctx.fillStyle = phase === "win" ? "#ffe14a" : "#ff4ad2";
-          ctx.font = `${Math.round(28 * u())}px ${pixelFont}`;
-          ctx.fillText(phase === "win" ? "SURFACED" : "BLOWN UP", w / 2, h / 2 - 28 * u());
+          let y = Math.max(36 * s, h / 2 - (rows * 22 + 130) * s / 2);
+          ctx.fillStyle = "#ff4ad2";
+          ctx.font = `${Math.round(20 * s)}px ${pixelFont}`;
+          ctx.fillText("TREASURE'S LOST", w / 2, y);
+          y += 34 * s;
           ctx.fillStyle = "#fff6c2";
-          ctx.font = `${Math.round(16 * u())}px ${pixelFont}`;
-          ctx.fillText(`TREASURE ${pad(score)}`, w / 2, h / 2 + 12 * u());
+          ctx.font = `${Math.round(13 * s)}px ${pixelFont}`;
+          if (lines.length === 0) {
+            ctx.fillText("NOTHING FOUND", w / 2, y);
+            y += 26 * s;
+          } else {
+            lines.forEach((line) => {
+              ctx.fillText(line, w / 2, y);
+              y += 22 * s;
+            });
+          }
+          y += 10 * s;
+          ctx.fillStyle = "#ffe14a";
+          ctx.font = `${Math.round(16 * s)}px ${pixelFont}`;
+          ctx.fillText(pad(score), w / 2, y);
+          y += 28 * s;
           ctx.fillStyle = "#7ef6ff";
-          ctx.font = `${Math.round(13 * u())}px ${pixelFont}`;
-          ctx.fillText(`HI ${pad(high)}`, w / 2, h / 2 + 40 * u());
-          ctx.fillText("ENTER OR CLICK", w / 2, h / 2 + 72 * u());
+          ctx.font = `${Math.round(12 * s)}px ${pixelFont}`;
+          ctx.fillText(`HI ${pad(high)}`, w / 2, y);
+          y += 26 * s;
+          ctx.fillText("ENTER OR CLICK", w / 2, y);
         }
       } else {
         drawControls();
@@ -658,7 +726,7 @@ export function AquaticRush({ onExit }: { onExit: () => void }) {
         onExitRef.current();
         return;
       }
-      if ((phase === "controls" || phase === "over" || phase === "win") && (e.code === "Enter" || e.code === "Space")) {
+      if ((phase === "controls" || phase === "over") && (e.code === "Enter" || e.code === "Space")) {
         if (phase === "controls") begin();
         else again();
         return;
@@ -671,7 +739,7 @@ export function AquaticRush({ onExit }: { onExit: () => void }) {
     const onPointerDown = (e: PointerEvent) => {
       if (e.pointerType === "mouse" && e.button !== 0) return;
       if (phase === "controls") begin();
-      else if (phase === "over" || phase === "win") again();
+      else if (phase === "over") again();
     };
 
     let last = performance.now();
