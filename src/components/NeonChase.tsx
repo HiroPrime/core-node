@@ -751,15 +751,17 @@ export function NeonChase({ onExit }: { onExit: () => void }) {
       <canvas ref={canvasRef} className="neon-ride-canvas" />
       <button
         type="button"
-        className="neon-exit"
-        aria-label="Exit to arcade (Esc)"
+        className="arcade-close"
+        aria-label="Close game"
         onPointerDown={(e) => e.stopPropagation()}
         onClick={(e) => {
           e.stopPropagation();
           onExitRef.current();
         }}
       >
-        EXIT · ESC
+        <svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true">
+          <path d="M3 3 L13 13 M13 3 L3 13" stroke="currentColor" strokeWidth="3" strokeLinecap="square" />
+        </svg>
       </button>
       {pedals && (
         <div className="neon-pedals">

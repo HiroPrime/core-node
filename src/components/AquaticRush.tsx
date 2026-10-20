@@ -801,6 +801,20 @@ export function AquaticRush({ onExit }: { onExit: () => void }) {
       <canvas ref={canvasRef} className="neon-ride-canvas" />
       <button
         type="button"
+        className="arcade-close"
+        aria-label="Close game"
+        onPointerDown={(e) => e.stopPropagation()}
+        onClick={(e) => {
+          e.stopPropagation();
+          onExitRef.current();
+        }}
+      >
+        <svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true">
+          <path d="M3 3 L13 13 M13 3 L3 13" stroke="currentColor" strokeWidth="3" strokeLinecap="square" />
+        </svg>
+      </button>
+      <button
+        type="button"
         className="neon-exit neon-exit-bl"
         aria-label="Exit to arcade (Esc)"
         onPointerDown={(e) => e.stopPropagation()}

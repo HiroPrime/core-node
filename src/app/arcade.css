@@ -1202,3 +1202,28 @@ body:has(.game-shell) {
   }
 }
 
+.arcade-close {
+  position: absolute;
+  top: calc(10px + env(safe-area-inset-top, 0px));
+  right: calc(10px + env(safe-area-inset-right, 0px));
+  z-index: 7;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 3px solid #ff4ad2;
+  border-radius: 6px;
+  background: rgba(8, 0, 24, 0.82);
+  color: #ffb3d4;
+  box-shadow: 0 0 14px rgba(255, 74, 210, 0.45);
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.arcade-close:active {
+  background: #ffe14a;
+  color: #140018;
+}

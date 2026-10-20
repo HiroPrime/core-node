@@ -374,10 +374,10 @@ export function VoidBeast({ onExit }: { onExit: () => void }) {
       ctx.textAlign = "right";
       ctx.fillStyle = weapon === "gold" ? "#ffe14a" : weapon === "basic" ? "#d7e2ee" : "#3df0ff";
       ctx.font = `${Math.round(13 * s)}px ${pixelFont}`;
-      ctx.fillText(label, w - 16 * s, 28 * s);
+      ctx.fillText(label, w - 16 * s - 60, 28 * s);
       if (weapon !== "basic") {
         const bw = 64 * s;
-        const bx = w - 16 * s - bw;
+        const bx = w - 16 * s - 60 - bw;
         const by = 36 * s;
         ctx.fillStyle = "rgba(255,255,255,0.2)";
         ctx.fillRect(bx, by, bw, 6 * s);
@@ -788,6 +788,20 @@ export function VoidBeast({ onExit }: { onExit: () => void }) {
   return (
     <div ref={shellRef} className="game-overlay neon-ride" role="dialog" aria-label="VOID BEAST">
       <canvas ref={canvasRef} className="neon-ride-canvas" />
+      <button
+        type="button"
+        className="arcade-close"
+        aria-label="Close game"
+        onPointerDown={(e) => e.stopPropagation()}
+        onClick={(e) => {
+          e.stopPropagation();
+          onExitRef.current();
+        }}
+      >
+        <svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true">
+          <path d="M3 3 L13 13 M13 3 L3 13" stroke="currentColor" strokeWidth="3" strokeLinecap="square" />
+        </svg>
+      </button>
       <button
         type="button"
         className="neon-exit neon-exit-bl"
