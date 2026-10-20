@@ -1203,6 +1203,22 @@ body:has(.game-shell) {
   overflow: hidden;
 }
 
+.arcade-start {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+}
+
+/* Letterboxed art box: the whole image always fits, black bars around it.
+   UI is positioned relative to this box, not the viewport. */
+.arcade-start-box {
+  position: relative;
+  aspect-ratio: 2816 / 1536;
+  width: min(100%, calc((100dvh - var(--chrome-h)) * 2816 / 1536));
+  max-height: 100%;
+}
+
 .arcade-start-art,
 .arcade-start-art img {
   position: absolute;
@@ -1212,28 +1228,33 @@ body:has(.game-shell) {
 }
 
 .arcade-start-art img {
-  object-fit: cover;
-  object-position: center;
+  object-fit: contain;
   image-rendering: pixelated;
 }
 
-/* Sits on the floor below the arch, clear of the title and characters. */
+/* On the floor below the arch, clear of the title, arch and characters. */
 .arcade-start-ui {
   position: absolute;
   left: 50%;
-  bottom: calc(5% + env(safe-area-inset-bottom, 0px));
+  bottom: 4%;
   transform: translateX(-50%);
   z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
-  width: min(92vw, 380px);
+  gap: 8px;
+  width: min(92%, 380px);
 }
 
-@media (max-aspect-ratio: 4/5), (max-width: 640px) {
+/* Phone / tablet only: mobile art, same letterboxing. */
+@media (max-width: 899px), (orientation: portrait) and (pointer: coarse) {
+  .arcade-start-box {
+    aspect-ratio: 1536 / 2752;
+    width: min(100%, calc((100dvh - var(--chrome-h)) * 1536 / 2752));
+  }
+
   .arcade-start-ui {
-    bottom: calc(11% + env(safe-area-inset-bottom, 0px));
+    bottom: 11%;
   }
 }
 

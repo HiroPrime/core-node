@@ -11,8 +11,9 @@
  *   - onSignIn():  open the existing Google/Discord sign-in modal
  *   - onGuest():   play offline as a guest (scores stay on this device)
  *
- * Background art: /arcade/start/arcadestart.webp (desktop) and
- * /arcade/start/arcadestartmobile.webp (portrait / narrow). The art already
+ * Background art: /arcade/start/arcadestart.webp (desktop, letterboxed to fit)
+ * and /arcade/start/arcadestartmobile.webp (width < 900px, or portrait touch).
+ * The art box keeps the image aspect; the UI is positioned inside that box. The art already
  * paints "PRESS START", so the buttons sit low, on the floor below the arch,
  * clear of the title, the arch, and the characters.
  * ============================================================================
@@ -38,8 +39,9 @@ export function ArcadeStartScreen({ signedIn, playerName, authReady, onStart, on
 
   return (
     <div className="arcade-start" role="dialog" aria-label="Arcade Nexus start screen">
+      <div className="arcade-start-box">
       <picture className="arcade-start-art">
-        <source media="(max-aspect-ratio: 4/5), (max-width: 640px)" srcSet="/arcade/start/arcadestartmobile.webp" />
+        <source media="(max-width: 899px), (orientation: portrait) and (pointer: coarse)" srcSet="/arcade/start/arcadestartmobile.webp" />
         <img src="/arcade/start/arcadestart.webp" alt="Arcade Nexus. Press start." />
       </picture>
       <div className="arcade-start-ui">
@@ -60,6 +62,7 @@ export function ArcadeStartScreen({ signedIn, playerName, authReady, onStart, on
             </button>
           </>
         )}
+      </div>
       </div>
     </div>
   );
