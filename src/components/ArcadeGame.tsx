@@ -490,7 +490,7 @@ export function ArcadeGame() {
             }
           }
           ctx.imageSmoothingEnabled = false;
-          ctx.fillStyle = "rgba(18, 0, 32, 0.28)";
+          ctx.fillStyle = "rgba(18, 0, 32, 0.42)";
           ctx.fillRect(0, 0, viewW, viewH);
         }
 
