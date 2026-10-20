@@ -12,7 +12,7 @@ import { VoidBeast } from "@/components/VoidBeast";
  * NEON CHASE, VOID BEAST, and AQUATIC RUSH are switched on: step up,
  * press E, and that cabinet's start screen comes up with 1 CREDIT and PLAY.
  *
- * Her brawler-v2 pack is the 4-frame 64px walk, drawn at 3x. The floor is
+ * Her walk6 pack is the 6-frame 35x64 walk (brawler-v2 idle), drawn at 3x. The floor is
  * bigger than the screen. The camera follows her, and zooms out as the
  * window shrinks so a phone still shows a wide slice of the arcade.
  * Tap the carpet to walk. Tap a machine to walk up to it.
@@ -42,13 +42,15 @@ const SCALE = 3;
 const BOX_W = 48;
 const BOX_H = 64;
 const CHARLIE = "/charlie/brawler-v2/";
-const SPRITE_REV = "p8";
+const CHARLIE_WALK = "/charlie/walk6/";
+const SPRITE_REV = "p9";
 const sprite = (name: string) => `${CHARLIE}${name}?v=${SPRITE_REV}`;
+const walkSprite = (name: string) => `${CHARLIE_WALK}${name}?v=${SPRITE_REV}`;
 const SPRITES: Record<Facing, string> = {
-  left: sprite("left-1.png"),
-  right: sprite("right-1.png"),
-  up: sprite("up-1.png"),
-  down: sprite("down-1.png"),
+  left: walkSprite("left-1.png"),
+  right: walkSprite("right-1.png"),
+  up: walkSprite("up-1.png"),
+  down: walkSprite("down-1.png"),
 };
 const IDLE: Record<Facing, string[]> = {
   left: [sprite("left-idle-1.png")],
@@ -59,14 +61,14 @@ const IDLE: Record<Facing, string[]> = {
 const IDLE_MS = 200;
 
 const walkFrames = (direction: Facing, count: number) =>
-  Array.from({ length: count }, (_, index) => sprite(`${direction}-${index + 1}.png`));
+  Array.from({ length: count }, (_, index) => walkSprite(`${direction}-${index + 1}.png`));
 const WALK: Record<Facing, string[]> = {
-  left: walkFrames("left", 4),
-  right: walkFrames("right", 4),
-  up: walkFrames("up", 4),
-  down: walkFrames("down", 4),
+  left: walkFrames("left", 6),
+  right: walkFrames("right", 6),
+  up: walkFrames("up", 6),
+  down: walkFrames("down", 6),
 };
-const WALK_MS = 150;
+const WALK_MS = 130;
 
 const CABINET_H = 300;
 const CABINET_GAP = 52;
