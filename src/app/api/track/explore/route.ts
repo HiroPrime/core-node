@@ -1,19 +1,31 @@
 import { NextResponse } from "next/server";
+import { parsePlanetId } from "@/lib/planet-id";
+import { clientAddress, limitExplore } from "@/lib/rate-limit";
 import { createClient } from "@/lib/supabase/server";
 
 export async function POST(request: Request) {
+  const limit = limitExplore(clientAddress(request));
+  if (!limit.ok) {
+    return NextResponse.json(
+      { error: "Too many requests" },
+      {
+        status: 429,
+        headers: { "Retry-After": String(limit.retryAfterSeconds) },
+      },
+    );
+  }
+
   try {
     const body = await request.json();
-    const planetId =
-      typeof body?.planetId === "string" ? body.planetId.trim() : "";
-
-    if (!planetId) {
-      return NextResponse.json({ error: "planetId required" }, { status: 400 });
+    const parsed = parsePlanetId(body?.planetId);
+    if (!parsed.ok) {
+      const message = parsed.error === "required" ? "planetId required" : "Invalid planetId";
+      return NextResponse.json({ error: message }, { status: 400 });
     }
 
     const supabase = await createClient();
     const { error } = await supabase.rpc("track_core_node_explore", {
-      p_planet_id: planetId,
+      p_planet_id: parsed.planetId,
     });
 
     if (error) {
