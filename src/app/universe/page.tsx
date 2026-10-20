@@ -7,7 +7,7 @@ import { OPERATOR } from "@/lib/lore-data";
 import { MANIFESTO } from "@/lib/universe";
 
 export const metadata: Metadata = {
-  title: "My Universe — BasicHiro",
+  title: "My Universe",
   description:
     "The manifesto. Why I do what I do — the tools I build, the creators they are for, and the miles behind both.",
 };

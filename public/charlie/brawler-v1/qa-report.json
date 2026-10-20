@@ -1,0 +1,1075 @@
+{
+  "schemaVersion": 1,
+  "name": "charlie-brawler-v1",
+  "createdAt": "2026-10-15T23:29:57.979808+00:00",
+  "passed": true,
+  "errors": [],
+  "warnings": [],
+  "counts": {
+    "templates": 12,
+    "renders": 12,
+    "right": 12,
+    "left": 12,
+    "down": 12,
+    "up": 12,
+    "idleRight": 1,
+    "idleLeft": 1,
+    "idleDown": 1,
+    "idleUp": 1
+  },
+  "cutMetrics": {
+    "right": [
+      {
+        "path": "C:\\Users\\jacob\\OneDrive\\Desktop\\NEXUS NODES\\core-node\\logs\\characters\\charlie-brawler-v1\\walk-right96\\1.png",
+        "size": [
+          43,
+          96
+        ],
+        "bbox": [
+          0,
+          0,
+          42,
+          95
+        ],
+        "width": 43,
+        "height": 96,
+        "centerX": 21.0,
+        "bottom": 95,
+        "headCenterX": 21.424740484429066
+      },
+      {
+        "path": "C:\\Users\\jacob\\OneDrive\\Desktop\\NEXUS NODES\\core-node\\logs\\characters\\charlie-brawler-v1\\walk-right96\\2.png",
+        "size": [
+          43,
+          96
+        ],
+        "bbox": [
+          0,
+          0,
+          42,
+          95
+        ],
+        "width": 43,
+        "height": 96,
+        "centerX": 21.0,
+        "bottom": 95,
+        "headCenterX": 21.37856525496975
+      },
+      {
+        "path": "C:\\Users\\jacob\\OneDrive\\Desktop\\NEXUS NODES\\core-node\\logs\\characters\\charlie-brawler-v1\\walk-right96\\3.png",
+        "size": [
+          43,
+          96
+        ],
+        "bbox": [
+          0,
+          1,
+          42,
+          95
+        ],
+        "width": 43,
+        "height": 95,
+        "centerX": 21.0,
+        "bottom": 95,
+        "headCenterX": 21.40865800865801
+      },
+      {
+        "path": "C:\\Users\\jacob\\OneDrive\\Desktop\\NEXUS NODES\\core-node\\logs\\characters\\charlie-brawler-v1\\walk-right96\\4.png",
+        "size": [
+          43,
+          96
+        ],
+        "bbox": [
+          0,
+          2,
+          42,
+          95
+        ],
+        "width": 43,
+        "height": 94,
+        "centerX": 21.0,
+        "bottom": 95,
+        "headCenterX": 21.435047951176983
+      },
+      {
+        "path": "C:\\Users\\jacob\\OneDrive\\Desktop\\NEXUS NODES\\core-node\\logs\\characters\\charlie-brawler-v1\\walk-right96\\5.png",
+        "size": [
+          43,
+          96
+        ],
+        "bbox": [
+          0,
+          2,
+          42,
+          95
+        ],
+        "width": 43,
+        "height": 94,
+        "centerX": 21.0,
+        "bottom": 95,
+        "headCenterX": 21.435047951176983
+      },
+      {
+        "path": "C:\\Users\\jacob\\OneDrive\\Desktop\\NEXUS NODES\\core-node\\logs\\characters\\charlie-brawler-v1\\walk-right96\\6.png",
+        "size": [
+          43,
+          96
+        ],
+        "bbox": [
+          0,
+          1,
+          42,
+          95
+        ],
+        "width": 43,
+        "height": 95,
+        "centerX": 21.0,
+        "bottom": 95,
+        "headCenterX": 21.40865800865801
+      },
+      {
+        "path": "C:\\Users\\jacob\\OneDrive\\Desktop\\NEXUS NODES\\core-node\\logs\\characters\\charlie-brawler-v1\\walk-right96\\7.png",
+        "size": [
+          43,
+          96
+        ],
+        "bbox": [
+          0,
+          0,
+          42,
+          95
+        ],
+        "width": 43,
+        "height": 96,
+        "centerX": 21.0,
+        "bottom": 95,
+        "headCenterX": 21.424740484429066
+      },
+      {
+        "path": "C:\\Users\\jacob\\OneDrive\\Desktop\\NEXUS NODES\\core-node\\logs\\characters\\charlie-brawler-v1\\walk-right96\\8.png",
+        "size": [
+          43,
+          96
+        ],
+        "bbox": [
+          0,
+          1,
+          42,
+          95
+        ],
+        "width": 43,
+        "height": 95,
+        "centerX": 21.0,
+        "bottom": 95,
+        "headCenterX": 21.40865800865801
+      },
+      {
+        "path": "C:\\Users\\jacob\\OneDrive\\Desktop\\NEXUS NODES\\core-node\\logs\\characters\\charlie-brawler-v1\\walk-right96\\9.png",
+        "size": [
+          43,
+          96
+        ],
+        "bbox": [
+          0,
+          1,
+          42,
+          95
+        ],
+        "width": 43,
+        "height": 95,
+        "centerX": 21.0,
+        "bottom": 95,
+        "headCenterX": 21.40865800865801
+      },
+      {
+        "path": "C:\\Users\\jacob\\OneDrive\\Desktop\\NEXUS NODES\\core-node\\logs\\characters\\charlie-brawler-v1\\walk-right96\\10.png",
+        "size": [
+          43,
+          96
+        ],
+        "bbox": [
+          0,
+          1,
+          42,
+          95
+        ],
+        "width": 43,
+        "height": 95,
+        "centerX": 21.0,
+        "bottom": 95,
+        "headCenterX": 21.359792924935288
+      },
+      {
+        "path": "C:\\Users\\jacob\\OneDrive\\Desktop\\NEXUS NODES\\core-node\\logs\\characters\\charlie-brawler-v1\\walk-right96\\11.png",
+        "size": [
+          43,
+          96
+        ],
+        "bbox": [
+          0,
+          2,
+          42,
+          95
+        ],
+        "width": 43,
+        "height": 94,
+        "centerX": 21.0,
+        "bottom": 95,
+        "headCenterX": 21.435047951176983
+      },
+      {
+        "path": "C:\\Users\\jacob\\OneDrive\\Desktop\\NEXUS NODES\\core-node\\logs\\characters\\charlie-brawler-v1\\walk-right96\\12.png",
+        "size": [
+          43,
+          96
+        ],
+        "bbox": [
+          0,
+          1,
+          42,
+          95
+        ],
+        "width": 43,
+        "height": 95,
+        "centerX": 21.0,
+        "bottom": 95,
+        "headCenterX": 21.40865800865801
+      }
+    ],
+    "left": [
+      {
+        "path": "C:\\Users\\jacob\\OneDrive\\Desktop\\NEXUS NODES\\core-node\\logs\\characters\\charlie-brawler-v1\\walk-left96\\1.png",
+        "size": [
+          43,
+          96
+        ],
+        "bbox": [
+          0,
+          0,
+          42,
+          95
+        ],
+        "width": 43,
+        "height": 96,
+        "centerX": 21.0,
+        "bottom": 95,
+        "headCenterX": 20.575259515570934
+      },
+      {
+        "path": "C:\\Users\\jacob\\OneDrive\\Desktop\\NEXUS NODES\\core-node\\logs\\characters\\charlie-brawler-v1\\walk-left96\\2.png",
+        "size": [
+          43,
+          96
+        ],
+        "bbox": [
+          0,
+          0,
+          42,
+          95
+        ],
+        "width": 43,
+        "height": 96,
+        "centerX": 21.0,
+        "bottom": 95,
+        "headCenterX": 20.62143474503025
+      },
+      {
+        "path": "C:\\Users\\jacob\\OneDrive\\Desktop\\NEXUS NODES\\core-node\\logs\\characters\\charlie-brawler-v1\\walk-left96\\3.png",
+        "size": [
+          43,
+          96
+        ],
+        "bbox": [
+          0,
+          1,
+          42,
+          95
+        ],
+        "width": 43,
+        "height": 95,
+        "centerX": 21.0,
+        "bottom": 95,
+        "headCenterX": 20.59134199134199
+      },
+      {
+        "path": "C:\\Users\\jacob\\OneDrive\\Desktop\\NEXUS NODES\\core-node\\logs\\characters\\charlie-brawler-v1\\walk-left96\\4.png",
+        "size": [
+          43,
+          96
+        ],
+        "bbox": [
+          0,
+          2,
+          42,
+          95
+        ],
+        "width": 43,
+        "height": 94,
+        "centerX": 21.0,
+        "bottom": 95,
+        "headCenterX": 20.564952048823017
+      },
+      {
+        "path": "C:\\Users\\jacob\\OneDrive\\Desktop\\NEXUS NODES\\core-node\\logs\\characters\\charlie-brawler-v1\\walk-left96\\5.png",
+        "size": [
+          43,
+          96
+        ],
+        "bbox": [
+          0,
+          2,
+          42,
+          95
+        ],
+        "width": 43,
+        "height": 94,
+        "centerX": 21.0,
+        "bottom": 95,
+        "headCenterX": 20.564952048823017
+      },
+      {
+        "path": "C:\\Users\\jacob\\OneDrive\\Desktop\\NEXUS NODES\\core-node\\logs\\characters\\charlie-brawler-v1\\walk-left96\\6.png",
+        "size": [
+          43,
+          96
+        ],
+        "bbox": [
+          0,
+          1,
+          42,
+          95
+        ],
+        "width": 43,
+        "height": 95,
+        "centerX": 21.0,
+        "bottom": 95,
+        "headCenterX": 20.59134199134199
+      },
+      {
+        "path": "C:\\Users\\jacob\\OneDrive\\Desktop\\NEXUS NODES\\core-node\\logs\\characters\\charlie-brawler-v1\\walk-left96\\7.png",
+        "size": [
+          43,
+          96
+        ],
+        "bbox": [
+          0,
+          0,
+          42,
+          95
+        ],
+        "width": 43,
+        "height": 96,
+        "centerX": 21.0,
+        "bottom": 95,
+        "headCenterX": 20.575259515570934
+      },
+      {
+        "path": "C:\\Users\\jacob\\OneDrive\\Desktop\\NEXUS NODES\\core-node\\logs\\characters\\charlie-brawler-v1\\walk-left96\\8.png",
+        "size": [
+          43,
+          96
+        ],
+        "bbox": [
+          0,
+          1,
+          42,
+          95
+        ],
+        "width": 43,
+        "height": 95,
+        "centerX": 21.0,
+        "bottom": 95,
+        "headCenterX": 20.59134199134199
+      },
+      {
+        "path": "C:\\Users\\jacob\\OneDrive\\Desktop\\NEXUS NODES\\core-node\\logs\\characters\\charlie-brawler-v1\\walk-left96\\9.png",
+        "size": [
+          43,
+          96
+        ],
+        "bbox": [
+          0,
+          1,
+          42,
+          95
+        ],
+        "width": 43,
+        "height": 95,
+        "centerX": 21.0,
+        "bottom": 95,
+        "headCenterX": 20.59134199134199
+      },
+      {
+        "path": "C:\\Users\\jacob\\OneDrive\\Desktop\\NEXUS NODES\\core-node\\logs\\characters\\charlie-brawler-v1\\walk-left96\\10.png",
+        "size": [
+          43,
+          96
+        ],
+        "bbox": [
+          0,
+          1,
+          42,
+          95
+        ],
+        "width": 43,
+        "height": 95,
+        "centerX": 21.0,
+        "bottom": 95,
+        "headCenterX": 20.640207075064712
+      },
+      {
+        "path": "C:\\Users\\jacob\\OneDrive\\Desktop\\NEXUS NODES\\core-node\\logs\\characters\\charlie-brawler-v1\\walk-left96\\11.png",
+        "size": [
+          43,
+          96
+        ],
+        "bbox": [
+          0,
+          2,
+          42,
+          95
+        ],
+        "width": 43,
+        "height": 94,
+        "centerX": 21.0,
+        "bottom": 95,
+        "headCenterX": 20.564952048823017
+      },
+      {
+        "path": "C:\\Users\\jacob\\OneDrive\\Desktop\\NEXUS NODES\\core-node\\logs\\characters\\charlie-brawler-v1\\walk-left96\\12.png",
+        "size": [
+          43,
+          96
+        ],
+        "bbox": [
+          0,
+          1,
+          42,
+          95
+        ],
+        "width": 43,
+        "height": 95,
+        "centerX": 21.0,
+        "bottom": 95,
+        "headCenterX": 20.59134199134199
+      }
+    ],
+    "down": [
+      {
+        "path": "C:\\Users\\jacob\\OneDrive\\Desktop\\NEXUS NODES\\core-node\\logs\\characters\\charlie-brawler-v1\\walk-down96\\1.png",
+        "size": [
+          45,
+          96
+        ],
+        "bbox": [
+          0,
+          6,
+          44,
+          95
+        ],
+        "width": 45,
+        "height": 90,
+        "centerX": 22.0,
+        "bottom": 95,
+        "headCenterX": 22.352985638699923
+      },
+      {
+        "path": "C:\\Users\\jacob\\OneDrive\\Desktop\\NEXUS NODES\\core-node\\logs\\characters\\charlie-brawler-v1\\walk-down96\\2.png",
+        "size": [
+          45,
+          96
+        ],
+        "bbox": [
+          0,
+          5,
+          44,
+          95
+        ],
+        "width": 45,
+        "height": 91,
+        "centerX": 22.0,
+        "bottom": 95,
+        "headCenterX": 22.379909365558913
+      },
+      {
+        "path": "C:\\Users\\jacob\\OneDrive\\Desktop\\NEXUS NODES\\core-node\\logs\\characters\\charlie-brawler-v1\\walk-down96\\3.png",
+        "size": [
+          45,
+          96
+        ],
+        "bbox": [
+          0,
+          3,
+          44,
+          95
+        ],
+        "width": 45,
+        "height": 93,
+        "centerX": 22.0,
+        "bottom": 95,
+        "headCenterX": 22.299701046337816
+      },
+      {
+        "path": "C:\\Users\\jacob\\OneDrive\\Desktop\\NEXUS NODES\\core-node\\logs\\characters\\charlie-brawler-v1\\walk-down96\\4.png",
+        "size": [
+          45,
+          96
+        ],
+        "bbox": [
+          0,
+          1,
+          44,
+          95
+        ],
+        "width": 45,
+        "height": 95,
+        "centerX": 22.0,
+        "bottom": 95,
+        "headCenterX": 22.298595713229858
+      },
+      {
+        "path": "C:\\Users\\jacob\\OneDrive\\Desktop\\NEXUS NODES\\core-node\\logs\\characters\\charlie-brawler-v1\\walk-down96\\5.png",
+        "size": [
+          45,
+          96
+        ],
+        "bbox": [
+          0,
+          1,
+          44,
+          95
+        ],
+        "width": 45,
+        "height": 95,
+        "centerX": 22.0,
+        "bottom": 95,
+        "headCenterX": 22.298595713229858
+      },
+      {
+        "path": "C:\\Users\\jacob\\OneDrive\\Desktop\\NEXUS NODES\\core-node\\logs\\characters\\charlie-brawler-v1\\walk-down96\\6.png",
+        "size": [
+          45,
+          96
+        ],
+        "bbox": [
+          0,
+          0,
+          44,
+          95
+        ],
+        "width": 45,
+        "height": 96,
+        "centerX": 22.0,
+        "bottom": 95,
+        "headCenterX": 22.3036109064112
+      },
+      {
+        "path": "C:\\Users\\jacob\\OneDrive\\Desktop\\NEXUS NODES\\core-node\\logs\\characters\\charlie-brawler-v1\\walk-down96\\7.png",
+        "size": [
+          45,
+          96
+        ],
+        "bbox": [
+          0,
+          0,
+          44,
+          95
+        ],
+        "width": 45,
+        "height": 96,
+        "centerX": 22.0,
+        "bottom": 95,
+        "headCenterX": 22.259692757863935
+      },
+      {
+        "path": "C:\\Users\\jacob\\OneDrive\\Desktop\\NEXUS NODES\\core-node\\logs\\characters\\charlie-brawler-v1\\walk-down96\\8.png",
+        "size": [
+          45,
+          96
+        ],
+        "bbox": [
+          0,
+          0,
+          44,
+          95
+        ],
+        "width": 45,
+        "height": 96,
+        "centerX": 22.0,
+        "bottom": 95,
+        "headCenterX": 22.3036109064112
+      },
+      {
+        "path": "C:\\Users\\jacob\\OneDrive\\Desktop\\NEXUS NODES\\core-node\\logs\\characters\\charlie-brawler-v1\\walk-down96\\9.png",
+        "size": [
+          45,
+          96
+        ],
+        "bbox": [
+          0,
+          0,
+          44,
+          95
+        ],
+        "width": 45,
+        "height": 96,
+        "centerX": 22.0,
+        "bottom": 95,
+        "headCenterX": 22.3036109064112
+      },
+      {
+        "path": "C:\\Users\\jacob\\OneDrive\\Desktop\\NEXUS NODES\\core-node\\logs\\characters\\charlie-brawler-v1\\walk-down96\\10.png",
+        "size": [
+          45,
+          96
+        ],
+        "bbox": [
+          0,
+          0,
+          44,
+          95
+        ],
+        "width": 45,
+        "height": 96,
+        "centerX": 22.0,
+        "bottom": 95,
+        "headCenterX": 22.3036109064112
+      },
+      {
+        "path": "C:\\Users\\jacob\\OneDrive\\Desktop\\NEXUS NODES\\core-node\\logs\\characters\\charlie-brawler-v1\\walk-down96\\11.png",
+        "size": [
+          45,
+          96
+        ],
+        "bbox": [
+          0,
+          3,
+          44,
+          95
+        ],
+        "width": 45,
+        "height": 93,
+        "centerX": 22.0,
+        "bottom": 95,
+        "headCenterX": 22.299701046337816
+      },
+      {
+        "path": "C:\\Users\\jacob\\OneDrive\\Desktop\\NEXUS NODES\\core-node\\logs\\characters\\charlie-brawler-v1\\walk-down96\\12.png",
+        "size": [
+          45,
+          96
+        ],
+        "bbox": [
+          0,
+          5,
+          44,
+          95
+        ],
+        "width": 45,
+        "height": 91,
+        "centerX": 22.0,
+        "bottom": 95,
+        "headCenterX": 22.379909365558913
+      }
+    ],
+    "up": [
+      {
+        "path": "C:\\Users\\jacob\\OneDrive\\Desktop\\NEXUS NODES\\core-node\\logs\\characters\\charlie-brawler-v1\\walk-up96\\1.png",
+        "size": [
+          45,
+          96
+        ],
+        "bbox": [
+          0,
+          0,
+          44,
+          95
+        ],
+        "width": 45,
+        "height": 96,
+        "centerX": 22.0,
+        "bottom": 95,
+        "headCenterX": 21.679411764705883
+      },
+      {
+        "path": "C:\\Users\\jacob\\OneDrive\\Desktop\\NEXUS NODES\\core-node\\logs\\characters\\charlie-brawler-v1\\walk-up96\\2.png",
+        "size": [
+          45,
+          96
+        ],
+        "bbox": [
+          0,
+          0,
+          44,
+          95
+        ],
+        "width": 45,
+        "height": 96,
+        "centerX": 22.0,
+        "bottom": 95,
+        "headCenterX": 21.679411764705883
+      },
+      {
+        "path": "C:\\Users\\jacob\\OneDrive\\Desktop\\NEXUS NODES\\core-node\\logs\\characters\\charlie-brawler-v1\\walk-up96\\3.png",
+        "size": [
+          45,
+          96
+        ],
+        "bbox": [
+          0,
+          0,
+          44,
+          95
+        ],
+        "width": 45,
+        "height": 96,
+        "centerX": 22.0,
+        "bottom": 95,
+        "headCenterX": 21.678544914625093
+      },
+      {
+        "path": "C:\\Users\\jacob\\OneDrive\\Desktop\\NEXUS NODES\\core-node\\logs\\characters\\charlie-brawler-v1\\walk-up96\\4.png",
+        "size": [
+          45,
+          96
+        ],
+        "bbox": [
+          0,
+          1,
+          44,
+          95
+        ],
+        "width": 45,
+        "height": 95,
+        "centerX": 22.0,
+        "bottom": 95,
+        "headCenterX": 21.658736059479555
+      },
+      {
+        "path": "C:\\Users\\jacob\\OneDrive\\Desktop\\NEXUS NODES\\core-node\\logs\\characters\\charlie-brawler-v1\\walk-up96\\5.png",
+        "size": [
+          45,
+          96
+        ],
+        "bbox": [
+          0,
+          1,
+          44,
+          95
+        ],
+        "width": 45,
+        "height": 95,
+        "centerX": 22.0,
+        "bottom": 95,
+        "headCenterX": 21.658736059479555
+      },
+      {
+        "path": "C:\\Users\\jacob\\OneDrive\\Desktop\\NEXUS NODES\\core-node\\logs\\characters\\charlie-brawler-v1\\walk-up96\\6.png",
+        "size": [
+          45,
+          96
+        ],
+        "bbox": [
+          0,
+          0,
+          44,
+          95
+        ],
+        "width": 45,
+        "height": 96,
+        "centerX": 22.0,
+        "bottom": 95,
+        "headCenterX": 21.678544914625093
+      },
+      {
+        "path": "C:\\Users\\jacob\\OneDrive\\Desktop\\NEXUS NODES\\core-node\\logs\\characters\\charlie-brawler-v1\\walk-up96\\7.png",
+        "size": [
+          45,
+          96
+        ],
+        "bbox": [
+          0,
+          0,
+          44,
+          95
+        ],
+        "width": 45,
+        "height": 96,
+        "centerX": 22.0,
+        "bottom": 95,
+        "headCenterX": 21.679411764705883
+      },
+      {
+        "path": "C:\\Users\\jacob\\OneDrive\\Desktop\\NEXUS NODES\\core-node\\logs\\characters\\charlie-brawler-v1\\walk-up96\\8.png",
+        "size": [
+          45,
+          96
+        ],
+        "bbox": [
+          0,
+          0,
+          44,
+          95
+        ],
+        "width": 45,
+        "height": 96,
+        "centerX": 22.0,
+        "bottom": 95,
+        "headCenterX": 21.678544914625093
+      },
+      {
+        "path": "C:\\Users\\jacob\\OneDrive\\Desktop\\NEXUS NODES\\core-node\\logs\\characters\\charlie-brawler-v1\\walk-up96\\9.png",
+        "size": [
+          45,
+          96
+        ],
+        "bbox": [
+          0,
+          0,
+          44,
+          95
+        ],
+        "width": 45,
+        "height": 96,
+        "centerX": 22.0,
+        "bottom": 95,
+        "headCenterX": 21.678544914625093
+      },
+      {
+        "path": "C:\\Users\\jacob\\OneDrive\\Desktop\\NEXUS NODES\\core-node\\logs\\characters\\charlie-brawler-v1\\walk-up96\\10.png",
+        "size": [
+          45,
+          96
+        ],
+        "bbox": [
+          0,
+          0,
+          44,
+          95
+        ],
+        "width": 45,
+        "height": 96,
+        "centerX": 22.0,
+        "bottom": 95,
+        "headCenterX": 21.678544914625093
+      },
+      {
+        "path": "C:\\Users\\jacob\\OneDrive\\Desktop\\NEXUS NODES\\core-node\\logs\\characters\\charlie-brawler-v1\\walk-up96\\11.png",
+        "size": [
+          45,
+          96
+        ],
+        "bbox": [
+          0,
+          1,
+          44,
+          95
+        ],
+        "width": 45,
+        "height": 95,
+        "centerX": 22.0,
+        "bottom": 95,
+        "headCenterX": 21.658736059479555
+      },
+      {
+        "path": "C:\\Users\\jacob\\OneDrive\\Desktop\\NEXUS NODES\\core-node\\logs\\characters\\charlie-brawler-v1\\walk-up96\\12.png",
+        "size": [
+          45,
+          96
+        ],
+        "bbox": [
+          0,
+          0,
+          44,
+          95
+        ],
+        "width": 45,
+        "height": 96,
+        "centerX": 22.0,
+        "bottom": 95,
+        "headCenterX": 21.678544914625093
+      }
+    ]
+  },
+  "mirrorFailures": [],
+  "motion": {
+    "rightHeadSpread": 0.07525502624169533,
+    "rightHeightSpread": 2,
+    "leftHeadSpread": 0.07525502624169533,
+    "leftHeightSpread": 2,
+    "downHeadSpread": 0.120216607694978,
+    "downHeightSpread": 6,
+    "upHeadSpread": 0.02067570522632778,
+    "upHeightSpread": 1
+  },
+  "poseRetention": {
+    "skipped": true,
+    "reason": "deterministic rig uses GegX cadence, not template-scale geometry"
+  },
+  "directionalMotion": {
+    "right": {
+      "uniqueFrames": 11,
+      "consecutivePixelChange": [
+        0.24875124875124874,
+        0.5767292716445259,
+        0.5259391771019678,
+        0.13450023030861355,
+        0.5572727272727273,
+        0.6248210023866348,
+        0.6175318315377081,
+        0.2116650987770461,
+        0.21396192203082504,
+        0.5011185682326622,
+        0.5590909090909091,
+        0.6315035799522674
+      ],
+      "meanConsecutivePixelChange": 0.4502404639239279,
+      "loopSeamPixelChange": 0.6315035799522674,
+      "quarterCycleLowerMaskChange": [
+        0.4382513661202186,
+        0.2266514806378132,
+        0.14823529411764705,
+        0.4382513661202186,
+        0.23059096176129779,
+        0.14823529411764705,
+        0.4464864864864865,
+        0.23059096176129779,
+        0.14823529411764705,
+        0.4464864864864865,
+        0.2266514806378132,
+        0.14823529411764705
+      ],
+      "meanQuarterCycleLowerMaskChange": 0.2730751472068517
+    },
+    "down": {
+      "uniqueFrames": 12,
+      "consecutivePixelChange": [
+        0.4646302250803859,
+        0.6623076923076923,
+        0.6298701298701299,
+        0.016753091344236137,
+        0.5303205870992661,
+        0.558023745691306,
+        0.5563218390804597,
+        0.022538552787663108,
+        0.0189873417721519,
+        0.6765256458255335,
+        0.6613899613899614,
+        0.4657534246575342
+      ],
+      "meanConsecutivePixelChange": 0.4386185197421934,
+      "loopSeamPixelChange": 0.4657534246575342,
+      "quarterCycleLowerMaskChange": [
+        0.136986301369863,
+        0.12240868706811452,
+        0.08983218163869694,
+        0.11747285291214216,
+        0.08191808191808192,
+        0.054933875890132246,
+        0.08064516129032258,
+        0.08902077151335312,
+        0.13872832369942195,
+        0.14952380952380953,
+        0.09939148073022312,
+        0.10717896865520728
+      ],
+      "meanQuarterCycleLowerMaskChange": 0.10567004135078072
+    },
+    "up": {
+      "uniqueFrames": 12,
+      "consecutivePixelChange": [
+        0.0456968773800457,
+        0.4658246656760773,
+        0.44335716974030864,
+        0.11244668476153548,
+        0.4651424287856072,
+        0.45512104283054006,
+        0.4567075436640654,
+        0.09505557684936758,
+        0.10914681014604151,
+        0.4314318095957688,
+        0.4479010494752624,
+        0.4618249534450652
+      ],
+      "meanConsecutivePixelChange": 0.33247138436247375,
+      "loopSeamPixelChange": 0.4618249534450652,
+      "quarterCycleLowerMaskChange": [
+        0.12545787545787546,
+        0.09695290858725762,
+        0.062088428974600186,
+        0.12545787545787546,
+        0.07196261682242991,
+        0.062088428974600186,
+        0.09386617100371747,
+        0.07196261682242991,
+        0.062088428974600186,
+        0.09386617100371747,
+        0.09695290858725762,
+        0.062088428974600186
+      ],
+      "meanQuarterCycleLowerMaskChange": 0.08540273830341348
+    }
+  },
+  "identity": [
+    {
+      "direction": "right",
+      "source": "C:\\Users\\jacob\\OneDrive\\Desktop\\NEXUS NODES\\core-node\\logs\\characters\\charlie-brawler-v1\\generated-views\\right.png",
+      "paletteSimilarity": [
+        0.7386282338028798,
+        0.7205716731002577,
+        0.7124196973875755,
+        0.7142273054383363,
+        0.7161976905112564,
+        0.7148654846778306,
+        0.7386282338028798,
+        0.7258014788073099,
+        0.7067646549747575,
+        0.7052618677223288,
+        0.7152587233751062,
+        0.7173261145990903
+      ],
+      "mean": 0.7188292631833008,
+      "minimum": 0.7052618677223288
+    },
+    {
+      "direction": "down",
+      "source": "C:\\Users\\jacob\\OneDrive\\Desktop\\NEXUS NODES\\core-node\\logs\\characters\\charlie-brawler-v1\\generated-views\\down.png",
+      "paletteSimilarity": [
+        0.7518218314813084,
+        0.7563352803390535,
+        0.7587377105659938,
+        0.7613285724433695,
+        0.7610312844783486,
+        0.7544162066986684,
+        0.7574623191850163,
+        0.7643793080708066,
+        0.7638364828715218,
+        0.7644216736518787,
+        0.7618749503472138,
+        0.7575620922458697
+      ],
+      "mean": 0.7594339760315875,
+      "minimum": 0.7518218314813084
+    },
+    {
+      "direction": "up",
+      "source": "C:\\Users\\jacob\\OneDrive\\Desktop\\NEXUS NODES\\core-node\\logs\\characters\\charlie-brawler-v1\\generated-views\\up.png",
+      "paletteSimilarity": [
+        0.7378476456076819,
+        0.7376578324798779,
+        0.7428578628000638,
+        0.7420176741508394,
+        0.7369309621481077,
+        0.7397618875678657,
+        0.7397618875678657,
+        0.7449662052239951,
+        0.7482758194564105,
+        0.7462616935438067,
+        0.7423975767517782,
+        0.7420767023826805
+      ],
+      "mean": 0.7417344791400811,
+      "minimum": 0.7369309621481077
+    }
+  ]
+}

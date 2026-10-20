@@ -168,6 +168,7 @@ export function NodeSelect() {
 
   return (
     <main className="ns-screen" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+      <h1 className="sr-only">Level Select: every Node in the Grid</h1>
       <ArcadeSpaceBackdrop className="is-dim" />
 
       {/* Header — just the counter. The chrome header above already carries the
@@ -212,7 +213,7 @@ export function NodeSelect() {
                         style={{ transform: `translateZ(${-(9 - i) * ART_DEPTH[active.artifact!]}px)` }}
                       />
                     ))}
-                    <img className="ns-art-img" src={active.planet} alt="" draggable={false} />
+                    <img className="ns-art-img" src={active.planet} alt={`${active.name} artwork`} draggable={false} />
                   </span>
                 </span>
               </span>
@@ -220,7 +221,7 @@ export function NodeSelect() {
               <>
                 <span className="ns-orb-glow" style={{ background: active.glow }} aria-hidden />
                 <span className="ns-orb-shell">
-                  <img className="ns-orb-img" src={active.planet} alt="" draggable={false} />
+                  <img className="ns-orb-img" src={active.planet} alt={`${active.name} planet`} draggable={false} />
                   {/* Specular streak across the glass */}
                   <span className="ns-orb-shine" aria-hidden />
                   {/* Rim light, so the glass reads as glass and not a disc */}
@@ -241,9 +242,9 @@ export function NodeSelect() {
         <p className="ns-node-kicker" style={{ color: active.color }} key={`${active.id}-k`}>
           {active.statusText}
         </p>
-        <h1 className="select-name" key={active.id}>
+        <h2 className="select-name" key={active.id}>
           {active.name}
-        </h1>
+        </h2>
         {active.title ? <p className="ns-title">{active.title}</p> : null}
 
         <button

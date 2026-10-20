@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "name": "charlie-brawler-v2",
+  "displayName": "Charlie — GegX-Locked Beat-'Em-Up Walk v2",
+  "coreRoot": "C:\\Users\\jacob\\OneDrive\\Desktop\\NEXUS NODES\\core-node",
+  "comfyUrl": "http://127.0.0.1:8188",
+  "comfyPython": "C:\\Users\\jacob\\AppData\\Local\\Comfy-Desktop\\ComfyUI-Installs\\Save Point Generator\\ComfyUI\\.venv\\Scripts\\python.exe",
+  "toolRoot": "logs\\comfy\\sprite-tool",
+  "workRoot": "logs\\characters\\charlie-brawler-v2",
+  "publishRoot": "public\\charlie\\brawler-v2",
+  "identity": {
+    "sourceAPose": "logs\\characters\\charlie-chibi\\turnaround\\body-front.png",
+    "benchmark": "public\\arcade-bk\\Kakatriko Chronicles\\basic-movements.jpg",
+    "viewRoot": "logs\\characters\\charlie-brawler-v2\\generated-views",
+    "views": {
+      "right": "logs\\characters\\charlie-brawler-v2\\generated-views\\right.png",
+      "left": "logs\\characters\\charlie-brawler-v2\\generated-views\\left.png",
+      "down": "logs\\characters\\charlie-brawler-v2\\generated-views\\down.png",
+      "up": "logs\\characters\\charlie-brawler-v2\\generated-views\\up.png"
+    },
+    "pixelReference": "logs\\characters\\charlie-brawler-v2\\generated-views\\pixel-reference.png",
+    "tinyReference": "logs\\characters\\charlie-brawler-v2\\generated-views\\tiny-reference.png",
+    "pixelReferenceSize": [0, 125],
+    "pixelReferenceColors": 32,
+    "seed": 260101,
+    "denoise": 0.78,
+    "steps": 4,
+    "appearance": {
+      "summary": "The target is the exact chibi character in reference two: pink high ponytail with oversized black bow, very small rounded button nose with a flat short profile, large dark eye, gray off-shoulder cropped sweater over black camisole, fitted black shorts with white belt, black mid-calf lace-up combat boots. Preserve her head shape and proportions. Replace every yellow, green, hood, raincoat, and rain boot pixel.",
+      "hair": "saturated warm pink hair in a high ponytail tied with a black bow, blunt bangs and two face-framing pieces",
+      "face": "large dark brown eyes, thick dark brows, winged black eyeliner, warm medium skin and the same small rounded button nose and jawline",
+      "top": "gray off-shoulder cropped ribbed sweater over visible black camisole straps",
+      "bottom": "fitted high-waisted black shorts with a slim light-gray belt, clearly shorts and never a skirt",
+      "shoes": "black mid-calf lace-up combat boots with thick soles"
+    }
+  },
+  "motion": {
+    "engine": "gegx-template-controlnet",
+    "provider": "GegX Free Pack - Little Zombies v1.1",
+    "license": "Commercial and free project use allowed; source assets may not be resold or redistributed.",
+    "packCharacter": "logs\\characters\\gegx-free-little-zombies-v1.1\\raincoat_kid",
+    "packReadme": "logs\\characters\\gegx-free-little-zombies-v1.1\\README.txt",
+    "directions": {
+      "right": "east",
+      "down": "south",
+      "up": "north"
+    },
+    "frameCount": 12,
+    "groundRow": 164,
+    "centerX": 96,
+    "seed": 260201,
+    "denoise": 0.88,
+    "controlStrength": 1.4,
+    "steps": 4,
+    "avoid": "yellow raincoat, hood, green zombie skin, exposed teeth, yellow rain boots"
+  },
+  "output": {
+    "height": 96,
+    "colors": 64,
+    "saturation": 1.25,
+    "frameMs": 110,
+    "scaleInGame": 2
+  }
+}

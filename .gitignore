@@ -48,3 +48,6 @@ next-env.d.ts
 
 # social launch kit (local only)
 launch-kit/
+
+# images moved out of public/ by the 2026-10-20 cleanup (local only, large)
+/assets-unused/

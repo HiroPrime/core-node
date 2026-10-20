@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "name": "charlie-brawler-v1",
+  "displayName": "Charlie \u2014 Beat-'Em-Up Walk v1",
+  "publishedAt": "2026-10-15T23:30:24.315797+00:00",
+  "directions": [
+    "right",
+    "left",
+    "down",
+    "up"
+  ],
+  "walkFramesPerDirection": 12,
+  "idleFramesPerDirection": 1,
+  "frame": {
+    "maxWidth": 45,
+    "height": 96,
+    "widthByDirection": {
+      "right": 43,
+      "left": 43,
+      "down": 45,
+      "up": 45
+    }
+  },
+  "pivot": {
+    "x": 0.5,
+    "y": 1.0
+  },
+  "frameMs": 110,
+  "scaleInGame": 2,
+  "appearanceLock": {
+    "hair": "saturated warm pink hair in a high ponytail tied with a black bow, blunt bangs and two face-framing pieces",
+    "face": "large dark brown eyes, thick dark brows, winged black eyeliner, warm medium skin and the same small nose and jawline",
+    "top": "gray off-shoulder cropped ribbed sweater over visible black camisole straps",
+    "bottom": "fitted high-waisted black shorts with a slim light-gray belt, clearly shorts and never a skirt",
+    "shoes": "black mid-calf lace-up combat boots with thick soles"
+  },
+  "motionEngine": "source-sprite-rig",
+  "motionProvider": "GegX Free Pack - Little Zombies v1.1",
+  "motionLicense": "Commercial and free project use allowed; source assets may not be resold or redistributed.",
+  "sourceAssetsRedistributed": false,
+  "qa": {
+    "passed": true,
+    "warnings": []
+  }
+}

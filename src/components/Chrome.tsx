@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CoreNodeLogo } from "@/components/CoreNodeLogo";
+import { SiteFooter } from "@/components/SiteFooter";
 
 const LINKS = [
   { href: "/", label: "Press Start" },
@@ -24,6 +25,7 @@ export function Chrome({ children }: { children?: React.ReactNode }) {
         </nav>
       </header>
       {children}
+      <SiteFooter />
     </>
   );
 }

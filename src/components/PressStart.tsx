@@ -214,7 +214,10 @@ export function PressStart() {
 
           {/* Two lines, not one run-on sentence: who I am, then how to drive it. */}
           <p className="press-foot">{OPERATOR.role}</p>
-          <p className="press-foot press-foot-controls">Arrows to move. Enter to pick.</p>
+          <p className="press-foot press-foot-controls">
+            <span className="hint-keys">Arrows to move. Enter to pick.</span>
+            <span className="hint-touch">Tap a menu item to pick.</span>
+          </p>
         </div>
       </div>
 

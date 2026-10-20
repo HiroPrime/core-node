@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Outfit, Nunito, Press_Start_2P } from "next/font/google";
 import { Chrome } from "@/components/Chrome";
 import "./globals.css";
@@ -24,14 +24,46 @@ const pixel = Press_Start_2P({
   display: "swap",
 });
 
+const SITE_DESCRIPTION =
+  "BasicHiro — a non-binary solo developer and AI vibe coder. Product designer first, developer second.";
+
 export const metadata: Metadata = {
-  title: "BasicHiro — Core Node",
-  description:
-    "BasicHiro — a non-binary solo developer and AI vibe coder. Product designer first, developer second.",
+  metadataBase: new URL("https://corenode.nexus"),
+  title: {
+    default: "BasicHiro — Core Node",
+    template: "%s — BasicHiro",
+  },
+  description: SITE_DESCRIPTION,
+  applicationName: "Core Node",
+  authors: [{ name: "BasicHiro", url: "https://corenode.nexus" }],
+  creator: "BasicHiro",
+  alternates: { canonical: "./" },
+  openGraph: {
+    type: "website",
+    siteName: "Core Node",
+    url: "./",
+    locale: "en_US",
+    title: "BasicHiro — Core Node",
+    description: SITE_DESCRIPTION,
+  },
+  twitter: {
+    card: "summary_large_image",
+    site: "@basic_hiro",
+    creator: "@basic_hiro",
+    title: "BasicHiro — Core Node",
+    description: SITE_DESCRIPTION,
+  },
   icons: {
     icon: [{ url: "/icon", type: "image/png" }],
     apple: [{ url: "/apple-icon", type: "image/png" }],
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#07060f",
+  colorScheme: "dark",
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

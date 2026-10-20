@@ -19,7 +19,7 @@ export async function generateMetadata({
   const node = getNode(id);
 
   return {
-    title: node ? `${node.name} — Core Node` : "Node — Core Node",
+    title: node ? node.name : "Node",
     description: node?.brief.what ?? "A Node in the Grid.",
   };
 }

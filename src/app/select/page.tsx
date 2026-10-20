@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { NodeSelect } from "@/components/NodeSelect";
 
 export const metadata: Metadata = {
-  title: "Select — Core Node",
+  title: "Level Select",
   description: "The Grid. Every Node on one plane.",
 };
 
