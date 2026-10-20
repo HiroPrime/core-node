@@ -813,18 +813,6 @@ export function AquaticRush({ onExit }: { onExit: () => void }) {
           <path d="M3 3 L13 13 M13 3 L3 13" stroke="currentColor" strokeWidth="3" strokeLinecap="square" />
         </svg>
       </button>
-      <button
-        type="button"
-        className="neon-exit neon-exit-bl"
-        aria-label="Exit to arcade (Esc)"
-        onPointerDown={(e) => e.stopPropagation()}
-        onClick={(e) => {
-          e.stopPropagation();
-          onExitRef.current();
-        }}
-      >
-        EXIT · ESC
-      </button>
       {hands && (
         <div className="aqua-hands">
           <div

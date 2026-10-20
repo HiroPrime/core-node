@@ -1087,44 +1087,6 @@ body:has(.game-shell) {
   text-shadow: none;
 }
 
-.neon-exit {
-  position: absolute;
-  top: calc(10px + env(safe-area-inset-top, 0px));
-  right: calc(12px + env(safe-area-inset-right, 0px));
-  z-index: 6;
-  min-width: 64px;
-  min-height: 44px;
-  border: 3px solid #ff4ad2;
-  background: rgba(8, 0, 24, 0.82);
-  color: #ffb3d4;
-  box-shadow: 0 0 14px rgba(255, 74, 210, 0.4);
-  font-family: var(--font-pixel), "Courier New", monospace;
-  font-size: 12px;
-  letter-spacing: 0.06em;
-  padding: 8px 10px;
-  cursor: pointer;
-  touch-action: manipulation;
-  user-select: none;
-}
-
-.neon-exit:active {
-  background: #ffe14a;
-  color: #140018;
-}
-
-.neon-exit-bl {
-  top: auto;
-  right: auto;
-  bottom: calc(12px + env(safe-area-inset-bottom, 0px));
-  left: calc(12px + env(safe-area-inset-left, 0px));
-}
-
-@media (hover: none) and (pointer: coarse) {
-  .neon-exit-bl {
-    display: none;
-  }
-}
-
 .aqua-hands {
   position: absolute;
   inset: 0;
