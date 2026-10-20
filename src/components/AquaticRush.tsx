@@ -799,6 +799,18 @@ export function AquaticRush({ onExit }: { onExit: () => void }) {
   return (
     <div ref={shellRef} className="game-overlay neon-ride" role="dialog" aria-label="AQUATIC RUSH">
       <canvas ref={canvasRef} className="neon-ride-canvas" />
+      <button
+        type="button"
+        className="neon-exit neon-exit-bl"
+        aria-label="Exit to arcade (Esc)"
+        onPointerDown={(e) => e.stopPropagation()}
+        onClick={(e) => {
+          e.stopPropagation();
+          onExitRef.current();
+        }}
+      >
+        EXIT · ESC
+      </button>
       {hands && (
         <div className="aqua-hands">
           <div

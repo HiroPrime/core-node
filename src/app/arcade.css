@@ -1112,6 +1112,19 @@ body:has(.game-shell) {
   color: #140018;
 }
 
+.neon-exit-bl {
+  top: auto;
+  right: auto;
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  left: calc(12px + env(safe-area-inset-left, 0px));
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .neon-exit-bl {
+    display: none;
+  }
+}
+
 .aqua-hands {
   position: absolute;
   inset: 0;
