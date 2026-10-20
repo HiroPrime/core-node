@@ -88,7 +88,7 @@ other's work.
 It runs on the Omen, the GPU box, with the watcher awake and Comfy on **8188** only.
 Nothing else is allowed to start that forge.
 
-**Free until it Works.** Then: Break the Server. Flood the Queue. Put her to work.
+**Free until it Works.** Then: Break the Server. Flood the Queue.
 
 What it is teaching: Local UI, image generation, which AI is best for what task, and
 building new tools almost every day.
@@ -143,7 +143,7 @@ The tech stack, named as the parts of the world it actually is.
 
 ## The Creed
 
-**Free. Break the Server. Flood the Queue. Put her to work.**
+**Free. Break the Server. Flood the Queue.**
 
 - Free until it Works.
 - The Taste Is Mine. The machines make the work; I decide what is good enough to go out.
@@ -165,7 +165,7 @@ Short lines, in her spoken voice, ready to drop into the site.
 - "Welcome to the Nexus. Choose your Node."
 - "View the Universe."
 - "Every Node is something I built. Some are live. Some are benched. All of them are mine."
-- "Free. Break the Server. Flood the Queue. Put her to work."
+- "Free. Break the Server. Flood the Queue."
 
 ---
 
@@ -177,4 +177,4 @@ Short lines, in her spoken voice, ready to drop into the site.
 - First person. The site speaks as the Operator: I, my, me. Never third person, never a
   biographer, never a brand intern.
 - Short. This is spoken, not read like a novel.
-- "Her" is for the machines (put her to work). The Operator is "me".
+- "Her" is for the machines. The Operator is "me".

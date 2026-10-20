@@ -1,6 +1,6 @@
 # Core Node
 
-Personal Core for **Charlie / Jacob / BasicHiro**. Non-binary solo developer.
+Personal Core for **BasicHiro** (they/them). Non-binary solo developer.
 
 Live: [corenode.nexus](https://corenode.nexus)
 

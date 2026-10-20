@@ -14,7 +14,7 @@ export const OPERATOR = {
   role: "Non-binary solo developer. Product designer first, developer second.",
   /** One line of who this is. Goes at the top of the Rack and the manifesto. */
   intro: "I'm BasicHiro — a non-binary solo developer and AI vibe coder.",
-  creed: "Free. Break the Server. Flood the Queue. Put her to work.",
+  creed: "Free. Break the Server. Flood the Queue.",
   email: "basichiro@corenode.nexus",
   linkedin: "https://www.linkedin.com/in/jacobclovell",
   x: "https://x.com/basic_hiro",
