@@ -6,7 +6,7 @@ import { NeonChase } from "@/components/NeonChase";
 import { VoidBeast } from "@/components/VoidBeast";
 
 /**
- * ArcadeGame — the house arcade floor.
+ * ArcadeGame â€” the house arcade floor.
  *
  * Charlie walks a carpeted floor past every cabinet from the sprite sheet.
  * NEON CHASE, VOID BEAST, and AQUATIC RUSH are switched on: step up,
@@ -490,7 +490,7 @@ export function ArcadeGame() {
             }
           }
           ctx.imageSmoothingEnabled = false;
-          ctx.fillStyle = "rgba(18, 0, 32, 0.42)";
+          ctx.fillStyle = "rgba(18, 0, 32, 0.63)";
           ctx.fillRect(0, 0, viewW, viewH);
         }
 
