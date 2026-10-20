@@ -4,6 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import { AquaticRush } from "@/components/AquaticRush";
 import { NeonChase } from "@/components/NeonChase";
 import { VoidBeast } from "@/components/VoidBeast";
+import { characterSprites, getCharacter } from "@/lib/arcade/roster";
+import { fetchTopScores, localBest, submitScore, type ArcadeGameId, type BoardRow } from "@/lib/arcade/scores";
+import { FloorPresence, type RemoteView } from "@/lib/arcade/presence";
 
 /**
  * ArcadeGame â€” the house arcade floor.
@@ -41,34 +44,9 @@ const DEPTH_SPEED = 0.72;
 const SCALE = 3;
 const BOX_W = 48;
 const BOX_H = 64;
-const CHARLIE = "/charlie/brawler-v2/";
-const CHARLIE_WALK = "/charlie/walk6/";
-const SPRITE_REV = "p9";
-const sprite = (name: string) => `${CHARLIE}${name}?v=${SPRITE_REV}`;
-const walkSprite = (name: string) => `${CHARLIE_WALK}${name}?v=${SPRITE_REV}`;
-const SPRITES: Record<Facing, string> = {
-  left: walkSprite("left-1.png"),
-  right: walkSprite("right-1.png"),
-  up: walkSprite("up-1.png"),
-  down: walkSprite("down-1.png"),
-};
-const IDLE: Record<Facing, string[]> = {
-  left: [sprite("left-idle-1.png")],
-  right: [sprite("right-idle-1.png")],
-  up: [sprite("up-idle-1.png")],
-  down: [sprite("down-idle-1.png")],
-};
-const IDLE_MS = 200;
-
-const walkFrames = (direction: Facing, count: number) =>
-  Array.from({ length: count }, (_, index) => walkSprite(`${direction}-${index + 1}.png`));
-const WALK: Record<Facing, string[]> = {
-  left: walkFrames("left", 6),
-  right: walkFrames("right", 6),
-  up: walkFrames("up", 6),
-  down: walkFrames("down", 6),
-};
-const WALK_MS = 130;
+/** Sprites come from the roster (src/lib/arcade/roster.ts). */
+const BOARD_ROWS = 5;
+const BOARD_REFRESH_MS = 30000;
 
 const CABINET_H = 300;
 const CABINET_GAP = 52;
@@ -141,7 +119,37 @@ const CABINETS: CabinetSpec[] = [
   { id: "steel-samurai", name: "STEEL SAMURAI", glow: "#d7e2ee" },
 ];
 
-export function ArcadeGame() {
+type ArcadeGameProps = {
+  /** Roster id of the local player's character. */
+  characterId?: string;
+  /** Shown over other players' heads; null = guest. */
+  playerName?: string | null;
+  /** Supabase user id when signed in. Guests don't broadcast presence. */
+  userId?: string | null;
+};
+
+type SpectateTarget = { id: string; name: string; game: string; best: number };
+
+export function ArcadeGame({ characterId = "charlie", playerName = null, userId = null }: ArcadeGameProps = {}) {
+  const characterRef = useRef(characterId);
+  characterRef.current = characterId;
+  const nameRef = useRef(playerName);
+  nameRef.current = playerName;
+  const userRef = useRef(userId);
+  userRef.current = userId;
+  const boardsRef = useRef(new Map<string, BoardRow[]>());
+  const [watchable, setWatchable] = useState<SpectateTarget | null>(null);
+  const [spectating, setSpectating] = useState<SpectateTarget | null>(null);
+  const watchKeyRef = useRef("");
+  const refreshBoards = useRef<() => void>(() => {});
+  refreshBoards.current = () => {
+    (["neon-chase", "void-beast", "aquatic-rush"] as ArcadeGameId[]).forEach((id) => {
+      void fetchTopScores(id, BOARD_ROWS, userRef.current).then((rows) => boardsRef.current.set(id, rows));
+    });
+  };
+  const gameOver = (id: GameId, score: number) => {
+    void submitScore(id, score).then(() => refreshBoards.current());
+  };
   const shellRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const playRef = useRef<HTMLButtonElement | null>(null);
@@ -157,7 +165,12 @@ export function ArcadeGame() {
     racingRef.current = on;
     setRacingState(on);
   };
-  const [cabinet, setCabinet] = useState<GameId>("neon-chase");
+  const [cabinet, setCabinetState] = useState<GameId>("neon-chase");
+  const cabinetRef = useRef<GameId>("neon-chase");
+  const setCabinet = (id: GameId) => {
+    cabinetRef.current = id;
+    setCabinetState(id);
+  };
   const [portrait, setPortrait] = useState(false);
   const openRef = useRef<(id: string) => void>(() => {});
   const bootRef = useRef<(id: GameId) => void>(() => {});
@@ -213,6 +226,12 @@ export function ArcadeGame() {
   }, [playing]);
 
   useEffect(() => {
+    refreshBoards.current();
+    const t = window.setInterval(() => refreshBoards.current(), BOARD_REFRESH_MS);
+    return () => window.clearInterval(t);
+  }, []);
+
+  useEffect(() => {
     const read = () => setPortrait(window.innerWidth < 900 && window.innerHeight > window.innerWidth);
     read();
     window.addEventListener("resize", read);
@@ -233,13 +252,14 @@ export function ArcadeGame() {
     const player = { x: BOX_W, y: BOX_H };
     let facing: Facing = "down";
 
+    const pack = characterSprites(characterRef.current);
     const imgs: Partial<Record<Facing, HTMLImageElement>> = {};
-    (Object.keys(SPRITES) as Facing[]).forEach((dir) => {
+    (Object.keys(pack.still) as Facing[]).forEach((dir) => {
       const im = new Image();
       im.onload = () => {
         imgs[dir] = im;
       };
-      im.src = SPRITES[dir];
+      im.src = pack.still[dir];
     });
 
     const loadLoops = (set: Record<Facing, string[]>) => {
@@ -257,8 +277,29 @@ export function ArcadeGame() {
       });
       return out;
     };
-    const idleImgs = loadLoops(IDLE);
-    const walkImgs = loadLoops(WALK);
+    const idleImgs = loadLoops(pack.idle);
+    const walkImgs = loadLoops(pack.walk);
+    const WALK_MS = pack.walkMs;
+    const IDLE_MS = pack.idleMs;
+
+    /* Other players' sprite packs, loaded on first sight. */
+    type Pack = { walk: Partial<Record<Facing, HTMLImageElement[]>>; idle: Partial<Record<Facing, HTMLImageElement[]>>; walkMs: number; idleMs: number };
+    const remotePacks = new Map<string, Pack>();
+    const packFor = (id: string): Pack => {
+      const key = getCharacter(id).id;
+      let found = remotePacks.get(key);
+      if (!found) {
+        const sp = characterSprites(key);
+        found = { walk: loadLoops(sp.walk), idle: loadLoops(sp.idle), walkMs: sp.walkMs, idleMs: sp.idleMs };
+        remotePacks.set(key, found);
+      }
+      return found;
+    };
+
+    const selfId = userRef.current ?? `guest-${Math.random().toString(36).slice(2, 10)}`;
+    const presence = new FloorPresence({ id: selfId, broadcast: Boolean(userRef.current) });
+    presence.start();
+    let remotes: RemoteView[] = [];
 
     let carpet: HTMLImageElement | null = null;
     const cabinetImgs = new Map<string, HTMLImageElement>();
@@ -461,6 +502,22 @@ export function ArcadeGame() {
         else if (movedY < 0) facing = "up";
         else if (movedY > 0) facing = "down";
 
+        if (laidOut) {
+          const playingGame = racingRef.current ? cabinetRef.current : null;
+          presence.send(now, {
+            id: selfId,
+            name: nameRef.current || "PLAYER",
+            character: characterRef.current,
+            x: Math.round(player.x),
+            y: Math.round(player.y),
+            facing,
+            moving: dx !== 0 || dy !== 0,
+            playing: playingGame,
+            best: playingGame ? localBest(playingGame) : 0,
+          });
+        }
+        remotes = presence.view(now);
+
         const span = Math.min(w, h * 1.35);
         zoom = Math.max(ZOOM_MIN, Math.min(1, span / ZOOM_SPAN)) * ZOOM_CLOSE;
         const viewW = w / zoom;
@@ -494,6 +551,43 @@ export function ArcadeGame() {
           ctx.fillRect(0, 0, viewW, viewH);
         }
 
+        /* High-score boards: a floor sign in front of each playable machine. */
+        cabinets.forEach((c) => {
+          if (!c.playable) return;
+          const rows = boardsRef.current.get(c.id) ?? [];
+          const bw = Math.max(170, c.w);
+          const rowH = 17;
+          const bh = 30 + BOARD_ROWS * rowH + 8;
+          const bx = Math.round(c.x + c.w / 2 - bw / 2 - camX);
+          const by = Math.round(c.y + c.h + 196 - camY);
+          if (bx > viewW || bx + bw < 0 || by > viewH || by + bh < 0) return;
+          ctx.save();
+          ctx.fillStyle = "rgba(6, 2, 18, 0.86)";
+          ctx.fillRect(bx, by, bw, bh);
+          ctx.strokeStyle = c.glow;
+          ctx.lineWidth = 2;
+          ctx.shadowColor = c.glow;
+          ctx.shadowBlur = 10;
+          ctx.strokeRect(bx, by, bw, bh);
+          ctx.shadowBlur = 0;
+          ctx.textBaseline = "middle";
+          ctx.textAlign = "center";
+          ctx.fillStyle = "#ffe14a";
+          ctx.font = `700 12px ${displayFamily}`;
+          ctx.fillText(`${c.name} · TOP ${BOARD_ROWS}`, bx + bw / 2, by + 15);
+          ctx.font = `600 12px ${displayFamily}`;
+          for (let i = 0; i < BOARD_ROWS; i += 1) {
+            const r = rows[i];
+            const ry = by + 32 + i * rowH + rowH / 2 - 4;
+            ctx.fillStyle = r?.mine ? "#7ef6ff" : r ? "#fff6c2" : "rgba(255,246,194,0.3)";
+            ctx.textAlign = "left";
+            ctx.fillText(`${i + 1}. ${r ? r.name : "---"}`, bx + 10, ry);
+            ctx.textAlign = "right";
+            ctx.fillText(r ? String(r.score).padStart(6, "0") : "------", bx + bw - 10, ry);
+          }
+          ctx.restore();
+        });
+
         let spriteFrame = imgs[facing] ?? imgs.down;
         const walkLoop = walkImgs[facing];
         const idleLoop = idleImgs[facing];
@@ -515,6 +609,14 @@ export function ArcadeGame() {
 
         const close = laidOut ? cabinets.find(approached) ?? null : null;
         nearId = close?.playable ? close.id : null;
+        const occupant = nearId && !playingRef.current && !racingRef.current
+          ? remotes.find((r) => r.playing === nearId)
+          : undefined;
+        const watchKey = occupant ? `${occupant.id}:${occupant.playing}:${occupant.best}` : "";
+        if (watchKey !== watchKeyRef.current) {
+          watchKeyRef.current = watchKey;
+          setWatchable(occupant ? { id: occupant.id, name: occupant.name, game: occupant.playing!, best: occupant.best } : null);
+        }
 
         const drawPlayer = () => {
           if (!spriteFrame) {
@@ -543,6 +645,40 @@ export function ArcadeGame() {
           },
         }));
         order.push({ foot: player.y + BOX_H, draw: drawPlayer });
+        remotes.forEach((r) => {
+          if (r.playing) return; // inside a cabinet: not on the floor
+          order.push({
+            foot: r.y + BOX_H,
+            draw: () => {
+              const rp = packFor(r.character);
+              const loop = (r.moving ? rp.walk[r.facing] : rp.idle[r.facing]) ?? [];
+              const ms = r.moving ? rp.walkMs : rp.idleMs;
+              const frame = loop.length ? loop[Math.floor(now / ms) % loop.length] : undefined;
+              const rx = Math.round(r.x - camX);
+              const ry = Math.round(r.y - camY);
+              let headY = ry;
+              if (frame) {
+                const sw = frame.width * SCALE;
+                const sh = frame.height * SCALE;
+                ctx.save();
+                ctx.globalAlpha = 0.92;
+                ctx.drawImage(frame, Math.round(rx + (BOX_W - sw) / 2), Math.round(ry + BOX_H - sh), sw, sh);
+                ctx.restore();
+                headY = ry + BOX_H - sh;
+              }
+              ctx.save();
+              ctx.font = `700 ${Math.max(11, 12 / zoom)}px ${displayFamily}`;
+              ctx.textAlign = "center";
+              ctx.textBaseline = "bottom";
+              ctx.fillStyle = "rgba(6, 4, 16, 0.75)";
+              const tw = ctx.measureText(r.name).width + 10;
+              ctx.fillRect(rx + BOX_W / 2 - tw / 2, headY - 22, tw, 18);
+              ctx.fillStyle = getCharacter(r.character).color;
+              ctx.fillText(r.name, rx + BOX_W / 2, headY - 6);
+              ctx.restore();
+            },
+          });
+        });
         order.sort((a, b) => a.foot - b.foot);
         order.forEach((item) => item.draw());
 
@@ -624,6 +760,7 @@ export function ArcadeGame() {
     canvas.addEventListener("pointerdown", onPointerDown);
 
     return () => {
+      presence.stop();
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", resize);
       window.removeEventListener("keydown", onKeyDown);
@@ -641,15 +778,47 @@ export function ArcadeGame() {
         aria-label="Arcade. Tap the floor to walk Charlie. Tap a machine to play. WASD and E still work."
       />
       {racing && cabinet === "neon-chase" && (
-        <NeonChase onExit={() => { setRacing(false); setPlaying(true); }} />
+        <NeonChase
+          onExit={() => { setRacing(false); setPlaying(true); }}
+          onGameOver={(score) => gameOver("neon-chase", score)}
+        />
       )}
       {racing && cabinet === "void-beast" && (
-        <VoidBeast onExit={() => { setRacing(false); setPlaying(true); }} />
+        <VoidBeast
+          onExit={() => { setRacing(false); setPlaying(true); }}
+          onGameOver={(score) => gameOver("void-beast", score)}
+        />
       )}
       {racing && cabinet === "aquatic-rush" && (
-        <AquaticRush onExit={() => { setRacing(false); setPlaying(true); }} />
+        <AquaticRush
+          onExit={() => { setRacing(false); setPlaying(true); }}
+          onGameOver={(score) => gameOver("aquatic-rush", score)}
+        />
       )}
       {(playing || racing) && <EdgeBack onBack={backOut} />}
+      {watchable && !playing && !racing && !spectating && (
+        <button type="button" className="arcade-watch-btn" onClick={() => setSpectating(watchable)}>
+          WATCH {watchable.name.toUpperCase()}
+        </button>
+      )}
+      {spectating && !playing && !racing && (
+        <div className="arcade-spectate" role="dialog" aria-label={`Watching ${spectating.name}`}>
+          <button
+            type="button"
+            className="arcade-spectate-close"
+            aria-label="Close spectator window"
+            onClick={() => setSpectating(null)}
+          >
+            ×
+          </button>
+          <p className="arcade-spectate-name">{spectating.name.toUpperCase()}</p>
+          <p className="arcade-spectate-game">
+            {ATTRACT[spectating.game as GameId]?.title ?? spectating.game.toUpperCase()} · HI{" "}
+            {String(spectating.best).padStart(6, "0")}
+          </p>
+          <div className="arcade-spectate-screen">LIVE VIEW COMING SOON</div>
+        </div>
+      )}
       {playing && !racing && (
         <div className="game-overlay" role="dialog" aria-label={ATTRACT[cabinet].title}>
           <button type="button" className="neon-close" onClick={backOut} aria-label="Close">
