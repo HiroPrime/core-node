@@ -130,7 +130,7 @@ export default function NexusAuthModal({ open, onClose, user, onUserChange }: Pr
           queryParams?: { prompt: string };
         } = {
           // Always return to the host the user started on (local / preview / prod).
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(window.location.pathname)}`,
         };
         const { error } = await supabase.auth.signInWithOAuth({
           provider,

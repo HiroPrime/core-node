@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ArcadeGame } from "@/components/ArcadeGame";
+import { ArcadeShell } from "@/components/arcade/ArcadeShell";
 
 export const metadata: Metadata = {
   title: "Arcade",
@@ -17,7 +17,7 @@ export default function ArcadePage() {
   return (
     <main className="arcade">
       <h1 className="sr-only">The Core Node Arcade</h1>
-      <ArcadeGame />
+      <ArcadeShell />
     </main>
   );
 }
