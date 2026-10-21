@@ -55,7 +55,7 @@ export function ArcadeStartScreen({ signedIn, playerName, authReady, onStart, on
         ) : (
           <>
             <button ref={primaryRef} type="button" className="arcade-start-btn" onClick={onSignIn} disabled={!authReady}>
-              {authReady ? "PRESS START · SIGN IN" : "LOADING..."}
+              {authReady ? "PRESS START" : "LOADING..."}
             </button>
             <button type="button" className="arcade-start-guest" onClick={onGuest}>
               PLAY AS GUEST
