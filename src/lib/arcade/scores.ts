@@ -2,8 +2,8 @@
 
 import { createClient } from "@/lib/supabase/client";
 
-export type ArcadeGameId = "neon-chase" | "void-beast" | "aquatic-rush";
-export const ARCADE_GAME_IDS: ArcadeGameId[] = ["neon-chase", "void-beast", "aquatic-rush"];
+export type ArcadeGameId = "neon-chase" | "void-beast" | "aquatic-rush" | "spin-ball";
+export const ARCADE_GAME_IDS: ArcadeGameId[] = ["neon-chase", "void-beast", "aquatic-rush", "spin-ball"];
 
 export type BoardRow = { rank: number; name: string; score: number; mine?: boolean };
 

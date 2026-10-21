@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { AquaticRush } from "@/components/AquaticRush";
+import { Pinball } from "@/components/Pinball";
 import { NeonChase } from "@/components/NeonChase";
 import { VoidBeast } from "@/components/VoidBeast";
 import { characterSprites, getCharacter } from "@/lib/arcade/roster";
@@ -60,7 +61,7 @@ const CARPET_SCALE = 0.42;
 const ZOOM_SPAN = 840;
 const ZOOM_MIN = 0.32;
 const ZOOM_CLOSE = 1.25;
-type GameId = "neon-chase" | "void-beast" | "aquatic-rush";
+type GameId = "neon-chase" | "void-beast" | "aquatic-rush" | "spin-ball";
 
 const ATTRACT: Record<GameId, { src: string; mobile: string; title: string }> = {
   "neon-chase": {
@@ -77,6 +78,11 @@ const ATTRACT: Record<GameId, { src: string; mobile: string; title: string }> = 
     src: "/arcade-bk/Aquatic%20Rush/start.jpg",
     mobile: "/arcade-bk/Aquatic%20Rush/startmobile.jpg",
     title: "AQUATIC RUSH",
+  },
+  "spin-ball": {
+    src: "/arcade/spin-ball/start.webp",
+    mobile: "/arcade/spin-ball/startmobile.webp",
+    title: "SPIN-BALL",
   },
 };
 
@@ -115,7 +121,7 @@ const CABINETS: CabinetSpec[] = [
   { id: "aquatic-rush", name: "AQUATIC RUSH", playable: true, glow: "#3d8bff" },
   { id: "kakariko-chronicles", name: "KAKARIKO CHRONICLES", glow: "#ff4ad2" },
   { id: "dungeon-delve", name: "DUNGEON DELVE", glow: "#3dff8a" },
-  { id: "spin-ball", name: "SPIN-BALL", glow: "#ffe14a" },
+  { id: "spin-ball", name: "SPIN-BALL", playable: true, glow: "#ffe14a" },
   { id: "mecha-force", name: "MECHA FORCE", glow: "#3df0ff" },
   { id: "tomb-crusade", name: "TOMB CRUSADE", glow: "#ff5a3d" },
   { id: "fast-food-fight", name: "FAST FOOD FIGHT", glow: "#ff8a3d" },
@@ -165,7 +171,7 @@ export function ArcadeGame({
   const watchKeyRef = useRef("");
   const refreshBoards = useRef<() => void>(() => {});
   refreshBoards.current = () => {
-    (["neon-chase", "void-beast", "aquatic-rush"] as ArcadeGameId[]).forEach((id) => {
+    (["neon-chase", "void-beast", "aquatic-rush", "spin-ball"] as ArcadeGameId[]).forEach((id) => {
       void fetchTopScores(id, BOARD_ROWS, userRef.current).then((rows) => boardsRef.current.set(id, rows));
     });
   };
@@ -205,7 +211,7 @@ export function ArcadeGame({
     depthRef.current = 1;
   };
   openRef.current = (id: string) => {
-    if (id !== "neon-chase" && id !== "void-beast" && id !== "aquatic-rush") return;
+    if (id !== "neon-chase" && id !== "void-beast" && id !== "aquatic-rush" && id !== "spin-ball") return;
     setCabinet(id);
     setPlaying(true);
     rememberFloor();
@@ -387,6 +393,8 @@ export function ArcadeGame({
       else if (qa === "play") openRef.current("neon-chase");
       else if (qa === "vplay") openRef.current("void-beast");
       else if (qa === "aplay") openRef.current("aquatic-rush");
+      else if (qa === "pinball") bootRef.current("spin-ball");
+      else if (qa === "pplay") openRef.current("spin-ball");
     };
 
     const assetReady = () => {
@@ -842,6 +850,13 @@ export function ArcadeGame({
         <AquaticRush
           onExit={() => { setRacing(false); setPlaying(true); }}
           onGameOver={(score) => gameOver("aquatic-rush", score)}
+          onScore={(score) => { liveScoreRef.current = score; }}
+        />
+      )}
+      {racing && cabinet === "spin-ball" && (
+        <Pinball
+          onExit={() => { setRacing(false); setPlaying(true); }}
+          onGameOver={(score) => gameOver("spin-ball", score)}
           onScore={(score) => { liveScoreRef.current = score; }}
         />
       )}
