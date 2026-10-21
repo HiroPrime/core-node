@@ -1,18 +1,15 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { drawBall, drawCap, drawFlipper, drawLeftOval, drawSling, drawTable, makeLogo } from "@/components/pinball-art";
 
 /**
  * SPIN-BALL: the pinball machine from the arcade floor, playable.
  *
- * The table art IS the cabinet's screen from the sprite sheet
- * (public/arcade/spin-ball/playfield.png, cropped straight out of
- * arcade-bk/arcade-sprites.jpg) and the marquee logo is cropped from the same
- * cabinet. Physics shapes are laid over that art in its own pixel space
- * (850 x 720 = the 170 x 144 crop at 5x), so bumpers, slingshots, targets,
- * rails and flippers sit exactly where the source draws them. Only the moving
- * parts are drawn on top: the two flippers (painted out of the still art and
- * redrawn in the source's red/white), the ball, hit flashes and target lights.
+ * The table is a clean, code-drawn remake of the cabinet screen in
+ * arcade-bk/arcade-sprites.jpg (see pinball-art.ts): same layout, element
+ * types, positions and palette, rendered crisp at any resolution. Colliders
+ * live in the same 850 x 720 table space as the art, so they line up.
  *
  * Desktop: Z / Left Shift / Left arrow = left flipper, M / / / Right Shift /
  * Right arrow = right flipper, Space (hold, release) = plunger.
@@ -20,7 +17,6 @@ import { useEffect, useRef } from "react";
  * waits in the shooter lane, hold and release anywhere to launch.
  */
 
-const ROOT = "/arcade/spin-ball/";
 const FW = 850;
 const FH = 720;
 const HUD = 76;
@@ -28,7 +24,6 @@ const BALLS = 3;
 const R = 11;
 const G = 1250;
 const MAX_V = 2000;
-const FIELD = "#2b3f97";
 
 type V = { x: number; y: number };
 type Seg = { a: V; b: V; kick?: number; pts?: number; flash?: number };
@@ -40,12 +35,6 @@ type Phase = "controls" | "play" | "over";
 
 const v = (x: number, y: number): V => ({ x, y });
 const chain = (pts: V[]): Seg[] => pts.slice(1).map((b, i) => ({ a: pts[i], b }));
-
-function load(src: string, into: (img: HTMLImageElement) => void) {
-  const img = new Image();
-  img.onload = () => into(img);
-  img.src = src;
-}
 
 export function Pinball({
   onExit,
@@ -75,28 +64,17 @@ export function Pinball({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    let table: HTMLCanvasElement | null = null;
-    let logo: HTMLImageElement | null = null;
-    load(ROOT + "playfield.png", (img) => {
-      // Paint the two still flippers out of the source art; live ones are drawn on top.
-      const c = document.createElement("canvas");
-      c.width = FW;
-      c.height = FH;
-      const t = c.getContext("2d")!;
-      t.imageSmoothingEnabled = false;
-      t.drawImage(img, 0, 0, FW, FH);
-      t.strokeStyle = FIELD;
-      t.lineCap = "round";
-      t.lineWidth = 40;
-      t.beginPath();
-      t.moveTo(352, 632);
-      t.lineTo(470, 702);
-      t.moveTo(614, 628);
-      t.lineTo(515, 696);
-      t.stroke();
-      table = c;
-    });
-    load(ROOT + "logo.png", (img) => (logo = img));
+    // Static table art, drawn once at 2x for crisp scaling.
+    const table = document.createElement("canvas");
+    table.width = FW * 2;
+    table.height = FH * 2;
+    {
+      const t = table.getContext("2d")!;
+      t.scale(2, 2);
+      drawTable(t);
+    }
+    let logo = makeLogo();
+    void document.fonts?.ready.then(() => (logo = makeLogo()));
 
     /* ---- table geometry, in source pixel space (850 x 720) ---- */
     const walls: Seg[] = [
@@ -125,6 +103,7 @@ export function Pinball({
       { x: 200, y: 218, r: 34, pts: 50, kick: 520, flash: 0 }, // left orange oval (bottom)
       { x: 465, y: 583, r: 32, pts: 150, kick: 620, flash: 0 }, // bottom orange target
     ];
+    const CAPS = ["green", "red", "orange", "smallgreen", "pill", null, null, "round"] as const;
     const lights: Light[] = [
       [315, 265], [520, 248], [325, 330], [330, 365], [335, 400], [540, 318], [545, 350], [545, 388],
     ].map(([x, y]) => ({ x, y, w: 22, h: 22, color: "#7fd8ff", lit: false }));
@@ -362,26 +341,6 @@ export function Pinball({
       ctx.fillText(s, x, y);
     };
 
-    const drawFlipper = (f: Flipper) => {
-      const t0 = tip(f);
-      ctx.lineCap = "round";
-      ctx.strokeStyle = "#140018";
-      ctx.lineWidth = 24;
-      ctx.beginPath();
-      ctx.moveTo(f.p.x, f.p.y);
-      ctx.lineTo(t0.x, t0.y);
-      ctx.stroke();
-      ctx.strokeStyle = "#e8283a";
-      ctx.lineWidth = 18;
-      ctx.stroke();
-      ctx.strokeStyle = "#ffd7ce";
-      ctx.lineWidth = 6;
-      ctx.beginPath();
-      ctx.moveTo(f.p.x, f.p.y - 3);
-      ctx.lineTo(t0.x, t0.y - 3);
-      ctx.stroke();
-    };
-
     const draw = () => {
       ctx.fillStyle = "#070014";
       ctx.fillRect(0, 0, w, h);
@@ -401,56 +360,62 @@ export function Pinball({
       const sh = shake > 0 ? (Math.random() - 0.5) * 8 : 0;
       ctx.translate(ox + sh, oy);
       ctx.scale(scale, scale);
-      if (table) ctx.drawImage(table, 0, 0);
-      else {
-        ctx.fillStyle = FIELD;
-        ctx.fillRect(0, 0, FW, FH);
-      }
+      ctx.imageSmoothingEnabled = true;
+      ctx.drawImage(table, 0, 0, FW, FH);
+      drawLeftOval(ctx, Math.max(bumpers[5].flash, bumpers[6].flash) / 0.15);
+      bumpers.forEach((k, i) => {
+        const kind = CAPS[i];
+        if (kind) drawCap(ctx, kind, k.x, k.y, k.r, k.flash / 0.15);
+      });
+      drawSling(ctx, [212, 420], [320, 548], [216, 522], (slings[0].flash ?? 0) / 0.12);
+      drawSling(ctx, [668, 388], [598, 540], [688, 505], (slings[3].flash ?? 0) / 0.12);
       // Lit rollovers / targets.
+      const pulse = 0.6 + 0.4 * Math.sin(performance.now() / 160);
       for (const l of lights) {
-        if (!l.lit) continue;
         ctx.shadowColor = l.color;
-        ctx.shadowBlur = 18;
+        ctx.shadowBlur = l.lit ? 22 * pulse : 0;
+        ctx.globalAlpha = l.lit ? 1 : 0.35;
         ctx.fillStyle = l.color;
-        ctx.fillRect(l.x - l.w / 2, l.y - l.h / 2, l.w, l.h);
+        ctx.beginPath();
+        if (l.w === l.h && l.color !== "#7fd8ff") ctx.arc(l.x, l.y, l.w / 2, 0, Math.PI * 2);
+        else ctx.roundRect(l.x - l.w / 2, l.y - l.h / 2, l.w, l.h, 4);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = "rgba(255,255,255,0.7)";
+        ctx.lineWidth = 2;
+        ctx.stroke();
       }
-      ctx.shadowBlur = 0;
       for (const d of drops) {
-        if (!d.down) continue;
-        ctx.fillStyle = "rgba(10,10,40,0.85)";
+        ctx.fillStyle = "#14082a";
+        ctx.fillRect(d.x - d.w / 2 - 2, d.y - d.h / 2 - 2, d.w + 4, d.h + 4);
+        if (d.down) continue;
+        const dg = ctx.createLinearGradient(0, d.y - d.h / 2, 0, d.y + d.h / 2);
+        dg.addColorStop(0, "#ffffff");
+        dg.addColorStop(0.3, d.color);
+        dg.addColorStop(1, "#3a0a20");
+        ctx.fillStyle = dg;
+        ctx.shadowColor = d.color;
+        ctx.shadowBlur = 10;
         ctx.fillRect(d.x - d.w / 2, d.y - d.h / 2, d.w, d.h);
+        ctx.shadowBlur = 0;
       }
-      for (const k of bumpers) {
-        if (k.flash <= 0) continue;
-        ctx.strokeStyle = `rgba(255,255,255,${Math.min(1, k.flash * 8)})`;
-        ctx.lineWidth = 6;
-        ctx.beginPath();
-        ctx.arc(k.x, k.y, k.r + 4, 0, Math.PI * 2);
-        ctx.stroke();
-      }
-      for (const s of slings) {
-        if (!s.flash || s.flash <= 0) continue;
-        ctx.strokeStyle = "#fff";
-        ctx.lineWidth = 6;
-        ctx.beginPath();
-        ctx.moveTo(s.a.x, s.a.y);
-        ctx.lineTo(s.b.x, s.b.y);
-        ctx.stroke();
-      }
-      flippers.forEach(drawFlipper);
+      flippers.forEach((f) => {
+        const t0 = tip(f);
+        drawFlipper(ctx, f.p.x, f.p.y, t0.x, t0.y);
+      });
       // Plunger.
-      ctx.fillStyle = "#c9ccd8";
+      const pg = ctx.createLinearGradient(816, 0, 836, 0);
+      pg.addColorStop(0, "#8a8fa8");
+      pg.addColorStop(0.5, "#ffffff");
+      pg.addColorStop(1, "#6a6f88");
+      ctx.fillStyle = pg;
       ctx.fillRect(816, 704 + charge * 14, 20, 12);
+      ctx.fillStyle = "#ff3b4a";
+      ctx.fillRect(822, 716 + charge * 14, 8, 30);
       // Ball.
       if (drainT <= 0 && phase !== "controls") {
-        const grd = ctx.createRadialGradient(b.x - 4, b.y - 4, 2, b.x, b.y, R);
-        grd.addColorStop(0, "#ffffff");
-        grd.addColorStop(0.5, "#c9ccd8");
-        grd.addColorStop(1, "#5a5f78");
-        ctx.fillStyle = grd;
-        ctx.beginPath();
-        ctx.arc(b.x, b.y, R, 0, Math.PI * 2);
-        ctx.fill();
+        drawBall(ctx, b.x, b.y, R);
       }
       for (const p of pops) {
         ctx.globalAlpha = Math.min(1, p.t * 2);
