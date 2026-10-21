@@ -133,6 +133,8 @@ type ArcadeGameProps = {
   sessionClaim?: { nonce: string; ts: number } | null;
   /** A newer login of the same account appeared on the floor. */
   onSuperseded?: () => void;
+  /** Signed-in only: open character select (button on the floor). */
+  onChangeCharacter?: () => void;
 };
 
 type SpectateTarget = { id: string; name: string; game: string; best: number };
@@ -143,6 +145,7 @@ export function ArcadeGame({
   userId = null,
   sessionClaim = null,
   onSuperseded,
+  onChangeCharacter,
 }: ArcadeGameProps = {}) {
   const claimRef = useRef(sessionClaim);
   claimRef.current = sessionClaim;
@@ -843,6 +846,11 @@ export function ArcadeGame({
         />
       )}
       {(playing || racing) && <EdgeBack onBack={backOut} />}
+      {onChangeCharacter && !playing && !racing && (
+        <button type="button" className="arcade-change-char" onClick={onChangeCharacter}>
+          CHANGE CHARACTER
+        </button>
+      )}
       {watchable && !playing && !racing && !spectating && (
         <button type="button" className="arcade-watch-btn" onClick={() => setSpectating(watchable)}>
           WATCH {watchable.name.toUpperCase()}

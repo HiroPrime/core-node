@@ -1618,3 +1618,38 @@ body:has(.game-shell) {
     height: 92px;
   }
 }
+
+/* Signed-in players: change character from the floor. */
+.arcade-change-char {
+  position: absolute;
+  top: calc(12px + env(safe-area-inset-top, 0px));
+  left: calc(12px + env(safe-area-inset-left, 0px));
+  z-index: 20;
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 3px solid #7ef6ff;
+  background: rgba(8, 0, 24, 0.86);
+  color: #7ef6ff;
+  font-family: var(--font-pixel), "Courier New", monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  box-shadow: 0 0 12px rgba(126, 246, 255, 0.4);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.arcade-change-char:hover,
+.arcade-change-char:focus-visible {
+  background: #ffe14a;
+  border-color: #ffe14a;
+  color: #140018;
+  outline: none;
+}
+
+@media (max-width: 640px) {
+  .arcade-change-char {
+    min-height: 40px;
+    padding: 6px 10px;
+    font-size: 9px;
+  }
+}

@@ -151,12 +151,13 @@ export function ArcadeShell() {
           }}
           onSignIn={() => setAuthOpen(true)}
           onGuest={() => {
+            // Guests choose a character every time they play.
             setGuest(true);
-            void loadSavedCharacter(null).then((saved) => {
-              setCharacterId(saved);
-              setStage(saved ? "world" : "select");
-            });
+            void loadSavedCharacter(null);
+            setCharacterId(null);
+            setStage("select");
           }}
+          onChangeCharacter={user ? () => setStage("select") : undefined}
         />
       )}
       {stage === "select" && (
@@ -170,6 +171,7 @@ export function ArcadeShell() {
           userId={user?.id ?? null}
           sessionClaim={claim}
           onSuperseded={kick}
+          onChangeCharacter={user ? () => setStage("select") : undefined}
         />
       )}
       {hasSupabase() && (

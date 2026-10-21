@@ -29,9 +29,19 @@ export type ArcadeStartScreenProps = {
   onStart: () => void;
   onSignIn: () => void;
   onGuest: () => void;
+  /** Signed-in only: open character select (optional). */
+  onChangeCharacter?: () => void;
 };
 
-export function ArcadeStartScreen({ signedIn, playerName, authReady, onStart, onSignIn, onGuest }: ArcadeStartScreenProps) {
+export function ArcadeStartScreen({
+  signedIn,
+  playerName,
+  authReady,
+  onStart,
+  onSignIn,
+  onGuest,
+  onChangeCharacter,
+}: ArcadeStartScreenProps) {
   const primaryRef = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
@@ -51,6 +61,11 @@ export function ArcadeStartScreen({ signedIn, playerName, authReady, onStart, on
             <button ref={primaryRef} type="button" className="arcade-start-btn" onClick={onStart}>
               PRESS START
             </button>
+            {onChangeCharacter && (
+              <button type="button" className="arcade-start-guest" onClick={onChangeCharacter}>
+                CHANGE CHARACTER
+              </button>
+            )}
             <p className="arcade-start-note">PLAYING AS {(playerName || "PLAYER").toUpperCase()}</p>
           </>
         ) : (

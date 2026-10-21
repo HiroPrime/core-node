@@ -5,9 +5,22 @@ import { getCharacter } from "@/lib/arcade/roster";
 
 const LOCAL_CHAR = "arcade-character-v1";
 
-/** Saved character for this account (Supabase) or this device (guest). */
+/** Guests pick a character every visit: drop any choice stored by older builds. */
+function clearGuestCharacter() {
+  try {
+    localStorage.removeItem(`${LOCAL_CHAR}:guest`);
+  } catch {
+    /* private mode */
+  }
+}
+
+/** Saved character for this account (Supabase, with a per-account local cache). Guests: always null. */
 export async function loadSavedCharacter(userId: string | null): Promise<string | null> {
-  if (userId) {
+  if (!userId) {
+    clearGuestCharacter();
+    return null;
+  }
+  {
     try {
       const supabase = createClient();
       const { data, error } = await supabase
@@ -21,7 +34,7 @@ export async function loadSavedCharacter(userId: string | null): Promise<string 
     }
   }
   try {
-    const local = localStorage.getItem(`${LOCAL_CHAR}:${userId ?? "guest"}`);
+    const local = localStorage.getItem(`${LOCAL_CHAR}:${userId}`);
     return local ? getCharacter(local).id : null;
   } catch {
     return null;
@@ -30,12 +43,16 @@ export async function loadSavedCharacter(userId: string | null): Promise<string 
 
 export async function saveCharacter(userId: string | null, characterId: string): Promise<void> {
   const id = getCharacter(characterId).id;
+  // Guests' picks are never persisted.
+  if (!userId) {
+    clearGuestCharacter();
+    return;
+  }
   try {
-    localStorage.setItem(`${LOCAL_CHAR}:${userId ?? "guest"}`, id);
+    localStorage.setItem(`${LOCAL_CHAR}:${userId}`, id);
   } catch {
     /* private mode */
   }
-  if (!userId) return;
   try {
     const supabase = createClient();
     await supabase
