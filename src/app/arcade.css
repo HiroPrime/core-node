@@ -1550,3 +1550,71 @@ body:has(.game-shell) {
   color: #fff6c2;
   text-decoration: underline;
 }
+
+/* Character select: 10 playable characters. */
+.arcade-select {
+  overflow-y: auto;
+  justify-content: safe center;
+}
+
+.arcade-select-grid {
+  grid-template-columns: repeat(5, minmax(0, 128px));
+}
+
+.arcade-select-slot {
+  height: 196px;
+}
+
+.arcade-select-name {
+  max-width: 100%;
+  font-size: 9px;
+  line-height: 1.3;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.arcade-select-portrait {
+  width: auto;
+  max-width: 100%;
+  height: 140px;
+  object-fit: contain;
+}
+
+@media (max-width: 640px) {
+  .arcade-select-grid {
+    width: 100%;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .arcade-select-slot {
+    height: 132px;
+    padding: 6px 2px;
+    gap: 4px;
+  }
+
+  .arcade-select-portrait {
+    height: 92px;
+  }
+
+  .arcade-select-name {
+    font-size: 6px;
+    letter-spacing: 0.02em;
+    text-align: center;
+  }
+}
+
+@media (max-height: 600px) and (orientation: landscape) {
+  .arcade-select {
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .arcade-select-slot {
+    height: 132px;
+  }
+
+  .arcade-select-portrait {
+    height: 92px;
+  }
+}

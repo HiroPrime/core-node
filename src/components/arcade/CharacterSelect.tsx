@@ -9,7 +9,7 @@ type Props = {
   onPick: (characterId: string) => void;
 };
 
-/** Up to 5 slots from the roster. Locked slots show as "???". */
+/** Every roster slot (10). Locked slots, if any, show as "???". */
 export function CharacterSelect({ initial, playerName, onPick }: Props) {
   const [sel, setSel] = useState(() => getCharacter(initial).id);
 
@@ -50,8 +50,13 @@ export function CharacterSelect({ initial, playerName, onPick }: Props) {
               {c.locked || !c.sprites ? (
                 <span className="arcade-select-lock">?</span>
               ) : (
-                // eslint-disable-next-line @next/next/no-img-element -- tiny pixel sprite
-                <img src={characterSprites(c.id).still.down} alt="" className="arcade-select-sprite" />
+                // eslint-disable-next-line @next/next/no-img-element -- small static portrait
+                <img
+                  src={c.portrait ?? characterSprites(c.id).still.down}
+                  alt=""
+                  className={c.portrait ? "arcade-select-portrait" : "arcade-select-sprite"}
+                  loading="lazy"
+                />
               )}
               <span className="arcade-select-name">{c.locked ? "LOCKED" : c.name}</span>
             </button>
