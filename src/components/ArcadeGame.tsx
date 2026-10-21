@@ -167,7 +167,7 @@ export function ArcadeGame({
     });
   };
   const gameOver = (id: GameId, score: number) => {
-    void submitScore(id, score).then(() => refreshBoards.current());
+    void submitScore(id, score, userRef.current).then(() => refreshBoards.current());
   };
   const shellRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -552,7 +552,10 @@ export function ArcadeGame({
             facing,
             moving: dx !== 0 || dy !== 0,
             playing: playingGame,
-            best: playingGame ? localBest(playingGame) : 0,
+            best: playingGame
+              ? (boardsRef.current.get(playingGame)?.find((r) => r.mine)?.score ??
+                (userRef.current ? 0 : localBest(playingGame)))
+              : 0,
             sid: claimRef.current?.nonce,
             since: claimRef.current?.ts,
           });

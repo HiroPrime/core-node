@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import type { User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
+import "./nexus-auth.css";
 import { markFreshSignIn } from "@/lib/session-guard";
 
 type AuthView = "landing" | "login" | "signup" | "forgot" | "update_password" | "onboarding";
@@ -281,19 +282,19 @@ export default function NexusAuthModal({ open, onClose, user, onUserChange }: Pr
   if (!show) return null;
 
   const inputClass =
-    "w-full bg-black/50 border border-white/15 rounded-xl px-4 py-3.5 text-white outline-none focus:border-[#FF5F1F] transition-colors";
+    "nexus-auth-input w-full bg-black/50 border border-white/15 rounded-xl px-4 py-3.5 text-white outline-none focus:border-[#FF5F1F] transition-colors";
   const btnPrimary =
-    "w-full bg-[#FF5F1F] text-[#050505] py-3.5 rounded-2xl font-black uppercase tracking-widest text-sm hover:scale-[1.02] transition-all disabled:opacity-50";
+    "nexus-auth-primary w-full bg-[#FF5F1F] text-[#050505] py-3.5 rounded-2xl font-black uppercase tracking-widest text-sm hover:scale-[1.02] transition-all disabled:opacity-50";
   const btnGhost =
-    "w-full bg-white/5 border border-white/15 text-white py-3.5 rounded-2xl font-black uppercase tracking-widest text-sm hover:bg-white/10 transition-all";
+    "nexus-auth-ghost w-full bg-white/5 border border-white/15 text-white py-3.5 rounded-2xl font-black uppercase tracking-widest text-sm hover:bg-white/10 transition-all";
 
   return (
-    <div className="fixed inset-0 z-[9999] bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+    <div className="nexus-auth fixed inset-0 z-[9999] bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
       <div
-        className="relative w-full max-w-md overflow-hidden rounded-[28px] border border-[#FF5F1F]/35 bg-[#0a0a0a]/95 p-8 shadow-[0_0_50px_rgba(255,95,31,0.25)]"
+        className="nexus-auth-card relative w-full max-w-md overflow-hidden rounded-[28px] border border-[#FF5F1F]/35 bg-[#0a0a0a]/95 p-8 shadow-[0_0_50px_rgba(255,95,31,0.25)]"
         style={{ fontFamily: "var(--font-space), ui-sans-serif, system-ui, sans-serif" }}
       >
-        <div className="pointer-events-none absolute top-0 left-1/2 h-32 w-full -translate-x-1/2 bg-[#FF5F1F] opacity-20 blur-3xl" />
+        <div className="nexus-auth-glow pointer-events-none absolute top-0 left-1/2 h-32 w-full -translate-x-1/2 bg-[#FF5F1F] opacity-20 blur-3xl" />
 
         {view !== "onboarding" && (
           <button
@@ -303,7 +304,7 @@ export default function NexusAuthModal({ open, onClose, user, onUserChange }: Pr
               setView("landing");
               setMessage({ type: "", text: "" });
             }}
-            className="absolute top-5 right-5 z-50 rounded-full border border-white/15 bg-black/40 px-3 py-1 text-xs font-bold uppercase tracking-widest text-white/60 hover:text-white"
+            className="nexus-auth-close absolute top-5 right-5 z-50 rounded-full border border-white/15 bg-black/40 px-3 py-1 text-xs font-bold uppercase tracking-widest text-white/60 hover:text-white"
           >
             Close
           </button>
@@ -532,7 +533,7 @@ function OAuthRow({
 }) {
   return (
     <>
-      <div className="relative mb-6 flex items-center justify-center">
+      <div className="nexus-auth-divider relative mb-6 flex items-center justify-center">
         <div className="absolute inset-0 flex items-center">
           <div className="w-full border-t border-white/10" />
         </div>
@@ -540,7 +541,7 @@ function OAuthRow({
           Or continue with
         </span>
       </div>
-      <div className="flex gap-3">
+      <div className="nexus-auth-oauth flex gap-3">
         <button
           type="button"
           onClick={onGoogle}

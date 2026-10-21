@@ -36,26 +36,59 @@ function hasSupabaseEnv() {
 }
 
 /**
- * Record a finished run. Always kept locally; also written to Supabase when
- * signed in. Never throws: a failed upload just stays local.
+ * Record a finished run.
+ * - Guests (no userId): localStorage only. Never sent to Supabase.
+ * - Signed in: written to Supabase for that account (RLS also requires a
+ *   real, non-anonymous session whose uid matches).
+ * Never throws.
  */
-export async function submitScore(gameId: ArcadeGameId, score: number): Promise<"remote" | "local"> {
+export async function submitScore(
+  gameId: ArcadeGameId,
+  score: number,
+  userId: string | null,
+): Promise<"remote" | "local" | "failed"> {
   const value = Math.max(0, Math.floor(Number(score) || 0));
-  writeLocal(gameId, value);
-  if (value <= 0 || !hasSupabaseEnv()) return "local";
+  if (!userId) {
+    writeLocal(gameId, value);
+    return "local";
+  }
+  if (value <= 0 || !hasSupabaseEnv()) return "failed";
   try {
     const supabase = createClient();
     const { data } = await supabase.auth.getUser();
-    const user = data.user;
-    if (!user) return "local";
-    const { error } = await supabase.from("arcade_scores").insert({ user_id: user.id, game_id: gameId, score: value });
-    return error ? "local" : "remote";
+    if (!data.user || data.user.id !== userId || data.user.is_anonymous) return "failed";
+    const { error } = await supabase.from("arcade_scores").insert({ user_id: userId, game_id: gameId, score: value });
+    return error ? "failed" : "remote";
   } catch {
-    return "local";
+    return "failed";
   }
 }
 
-/** Top N for a game's active season. Falls back to this device's scores. */
+/**
+ * On sign-in: save this browser's guest best per game to the account, then
+ * clear the guest scores so they are only uploaded once. Returns how many
+ * games were saved.
+ */
+export async function syncGuestScores(userId: string): Promise<number> {
+  const all = readLocal();
+  const bests = ARCADE_GAME_IDS.map((g) => [g, (all[g] ?? [])[0] ?? 0] as const).filter(([, v]) => v > 0);
+  if (!bests.length || !hasSupabaseEnv()) return 0;
+  try {
+    const supabase = createClient();
+    const { data } = await supabase.auth.getUser();
+    if (!data.user || data.user.id !== userId || data.user.is_anonymous) return 0;
+    const { error } = await supabase
+      .from("arcade_scores")
+      .insert(bests.map(([game_id, score]) => ({ user_id: userId, game_id, score })));
+    if (error) return 0;
+    localStorage.removeItem(LOCAL_KEY);
+    return bests.length;
+  } catch {
+    return 0;
+  }
+}
+
+/** Top N for a game's active season. Falls back to this device's guest scores. */
 export async function fetchTopScores(gameId: ArcadeGameId, limit = 5, myUserId?: string | null): Promise<BoardRow[]> {
   if (hasSupabaseEnv()) {
     try {
@@ -77,7 +110,7 @@ export async function fetchTopScores(gameId: ArcadeGameId, limit = 5, myUserId?:
   return local.slice(0, limit).map((score, i) => ({ rank: i + 1, name: LOCAL_NAME, score, mine: true }));
 }
 
-/** Best score this player has on record (remote if signed in, else local). */
+/** Best guest score on this device. */
 export function localBest(gameId: ArcadeGameId): number {
   return (readLocal()[gameId] ?? [])[0] ?? 0;
 }
