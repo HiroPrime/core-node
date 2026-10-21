@@ -132,9 +132,12 @@ export default function NexusAuthModal({ open, onClose, user, onUserChange }: Pr
           queryParams?: { prompt: string };
         } = {
           // Always return to the host the user started on (local / preview / prod).
-          redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(window.location.pathname)}`,
+          // Exact callback URL (no query) so it matches the Supabase redirect allow list;
+          // the return path travels in a short-lived cookie instead.
+          redirectTo: `${window.location.origin}/auth/callback`,
         };
         markFreshSignIn();
+        document.cookie = `auth_next=${encodeURIComponent(window.location.pathname)}; Path=/; Max-Age=600; SameSite=Lax${window.location.protocol === "https:" ? "; Secure" : ""}`;
         const { error } = await supabase.auth.signInWithOAuth({
           provider,
           options: oauthOptions,

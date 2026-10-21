@@ -15,6 +15,14 @@ export default async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Safety net: if Supabase falls back to the Site URL ("/?code=..."), finish the
+  // OAuth exchange in /auth/callback (which returns to the saved path).
+  if (pathname === "/" && request.nextUrl.searchParams.has("code") && !request.nextUrl.searchParams.has("reset")) {
+    const cb = request.nextUrl.clone();
+    cb.pathname = "/auth/callback";
+    return NextResponse.redirect(cb);
+  }
+
   let response = NextResponse.next({ request });
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
