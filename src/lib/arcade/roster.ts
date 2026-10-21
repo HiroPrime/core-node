@@ -65,7 +65,7 @@ export const ROSTER: ArcadeCharacter[] = [
   chibi("blue-cap", "BLUE CAP", "#3d8bff"),
   chibi("red-cap", "RED CAP", "#ff5a3d"),
   chibi("wizard-hood", "WIZARD HOOD", "#9b5cff"),
-  chibi("afro-windbreaker", "AFRO WINDBREAKER", "#ffe14a"),
+  chibi("afro-windbreaker", "AFRO", "#ffe14a"),
   chibi("glasses-stripe", "GLASSES STRIPE", "#7ef6ff"),
   chibi("glasses-polo", "GLASSES POLO", "#3df0ff"),
   chibi("blonde-buns", "BLONDE BUNS", "#ffb3d4"),
