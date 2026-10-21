@@ -8,6 +8,7 @@ import { ArcadeStartScreen } from "@/components/arcade/ArcadeStartScreen";
 import { CharacterSelect } from "@/components/arcade/CharacterSelect";
 import { loadDisplayName, loadSavedCharacter, saveCharacter } from "@/lib/arcade/player";
 import { createClient } from "@/lib/supabase/client";
+import { clearClaim, currentClaim, startSessionGuard, type SessionClaim } from "@/lib/session-guard";
 
 /**
  * Arcade outer shell: start screen -> sign in -> character select -> floor.
@@ -31,6 +32,38 @@ export function ArcadeShell() {
   const booted = useRef(false);
   const wantsSelect = useRef(false);
   const userIdRef = useRef<string | null>(null);
+  const [claim, setClaim] = useState<SessionClaim | null>(null);
+  const [claimFresh, setClaimFresh] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
+  const kicked = useRef(false);
+
+  /** Mint or reuse this browser's login claim for the user. */
+  const adopt = useCallback((u: User | null, freshLogin: boolean) => {
+    if (!u) {
+      setClaim(null);
+      return;
+    }
+    kicked.current = false;
+    const next = currentClaim(u.id, freshLogin);
+    setClaim(next.claim);
+    setClaimFresh(next.fresh);
+  }, []);
+
+  /** A newer login of this account exists: sign out here, back to start. */
+  const kick = useCallback(() => {
+    if (kicked.current) return;
+    kicked.current = true;
+    const uid = userIdRef.current;
+    if (uid) clearClaim(uid);
+    userIdRef.current = null;
+    setUser(null);
+    setClaim(null);
+    setAuthOpen(false);
+    setStage("start");
+    setNotice("Signed in on another device");
+    window.setTimeout(() => setNotice(null), 6000);
+    void createClient().auth.signOut({ scope: "local" }).catch(() => undefined);
+  }, []);
 
   const fallbackName = (u: User) =>
     (u.user_metadata?.username as string | undefined) ||
@@ -54,6 +87,7 @@ export function ArcadeShell() {
       const u = data.session?.user ?? null;
       userIdRef.current = u?.id ?? null;
       setUser(u);
+      adopt(u, false);
       setAuthReady(true);
       booted.current = true;
       void enterAs(u, true);
@@ -63,6 +97,7 @@ export function ArcadeShell() {
       const prev = userIdRef.current;
       userIdRef.current = u?.id ?? null;
       setUser(u);
+      if (booted.current && prev !== (u?.id ?? null)) adopt(u, Boolean(u));
       if (booted.current && u && prev !== u.id) {
         // Signed in from the modal (email/password) without leaving the page.
         setAuthOpen(false);
@@ -74,7 +109,13 @@ export function ArcadeShell() {
       alive = false;
       sub.subscription.unsubscribe();
     };
-  }, [enterAs]);
+  }, [enterAs, adopt]);
+
+  // Single session: listen on `session:<user_id>` for a newer login.
+  useEffect(() => {
+    if (!user || !claim || !hasSupabase()) return;
+    return startSessionGuard(createClient(), user.id, claim, claimFresh, kick);
+  }, [user, claim, claimFresh, kick]);
 
   const pick = (id: string) => {
     setCharacterId(id);
@@ -86,6 +127,11 @@ export function ArcadeShell() {
 
   return (
     <>
+      {notice && (
+        <p className="arcade-session-notice" role="status">
+          {notice}
+        </p>
+      )}
       {stage === "start" && (
         <ArcadeStartScreen
           signedIn={Boolean(user)}
@@ -114,6 +160,8 @@ export function ArcadeShell() {
           characterId={characterId ?? "charlie"}
           playerName={user ? name : null}
           userId={user?.id ?? null}
+          sessionClaim={claim}
+          onSuperseded={kick}
         />
       )}
       {hasSupabase() && (

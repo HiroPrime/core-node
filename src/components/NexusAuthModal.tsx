@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import type { User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
+import { markFreshSignIn } from "@/lib/session-guard";
 
 type AuthView = "landing" | "login" | "signup" | "forgot" | "update_password" | "onboarding";
 
@@ -132,6 +133,7 @@ export default function NexusAuthModal({ open, onClose, user, onUserChange }: Pr
           // Always return to the host the user started on (local / preview / prod).
           redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(window.location.pathname)}`,
         };
+        markFreshSignIn();
         const { error } = await supabase.auth.signInWithOAuth({
           provider,
           options: oauthOptions,
@@ -186,6 +188,11 @@ export default function NexusAuthModal({ open, onClose, user, onUserChange }: Pr
         setMessage({ type: "info", text: "Scanning credentials..." });
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
+        if (data.session) {
+          // Single session: newest login wins.
+          markFreshSignIn();
+          await supabase.auth.signOut({ scope: "others" }).catch(() => undefined);
+        }
         if (data.session) {
           onUserChange(data.user);
           onClose();

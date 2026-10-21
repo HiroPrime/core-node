@@ -3,6 +3,7 @@
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
 import type { Facing } from "@/lib/arcade/roster";
+import { supersedes } from "@/lib/session-guard";
 
 /**
  * Arcade floor presence over a Supabase Realtime broadcast channel.
@@ -28,6 +29,9 @@ export type FloorState = {
   playing: string | null;
   /** Best score for the game being played (for spectators). */
   best: number;
+  /** Session nonce + login time; newest login of a user wins. */
+  sid?: string;
+  since?: number;
 };
 
 type Sample = { t: number; x: number; y: number; facing: Facing; moving: boolean };
@@ -42,7 +46,9 @@ export class FloorPresence {
   private lastKey = "";
   private live = false;
 
-  constructor(private readonly me: { id: string; broadcast: boolean }) {}
+  constructor(
+    private readonly me: { id: string; broadcast: boolean; sid?: string; since?: number; onSuperseded?: () => void },
+  ) {}
 
   start() {
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) return;
@@ -88,10 +94,24 @@ export class FloorPresence {
   }
 
   private receive(p: FloorState) {
-    if (!p || typeof p.id !== "string" || p.id === this.me.id) return;
+    if (!p || typeof p.id !== "string") return;
+    const claim = p.sid && Number.isFinite(p.since) ? { nonce: p.sid, ts: Number(p.since) } : null;
+    if (p.id === this.me.id) {
+      // Same account on another device: if that login is newer, this one is out.
+      if (this.me.sid && this.me.since && supersedes(claim, { nonce: this.me.sid, ts: this.me.since })) {
+        this.me.onSuperseded?.();
+      }
+      return;
+    }
     if (!Number.isFinite(p.x) || !Number.isFinite(p.y)) return;
     const now = performance.now();
-    const r = this.remotes.get(p.id) ?? { state: p, samples: [], seen: now };
+    const existing = this.remotes.get(p.id);
+    // Dedupe by user id: keep only the newest session of each account.
+    if (existing && existing.state.sid && claim && existing.state.sid !== claim.nonce) {
+      if ((existing.state.since ?? 0) > claim.ts) return;
+      existing.samples = [];
+    }
+    const r = existing ?? { state: p, samples: [], seen: now };
     r.state = {
       ...p,
       name: String(p.name ?? "PLAYER").slice(0, 16),

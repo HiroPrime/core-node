@@ -1454,3 +1454,20 @@ body:has(.game-shell) {
   letter-spacing: 0.08em;
   color: rgba(255, 246, 194, 0.7);
 }
+
+.arcade-session-notice {
+  position: fixed;
+  top: calc(var(--chrome-h, 0px) + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 80;
+  margin: 0;
+  padding: 10px 16px;
+  border: 3px solid #ffe14a;
+  background: rgba(8, 0, 24, 0.92);
+  color: #fff6c2;
+  font-family: var(--font-pixel), "Courier New", monospace;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  box-shadow: 0 0 16px rgba(255, 225, 74, 0.4);
+}

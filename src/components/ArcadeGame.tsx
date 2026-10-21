@@ -126,11 +126,25 @@ type ArcadeGameProps = {
   playerName?: string | null;
   /** Supabase user id when signed in. Guests don't broadcast presence. */
   userId?: string | null;
+  /** This browser's login claim (single-session). */
+  sessionClaim?: { nonce: string; ts: number } | null;
+  /** A newer login of the same account appeared on the floor. */
+  onSuperseded?: () => void;
 };
 
 type SpectateTarget = { id: string; name: string; game: string; best: number };
 
-export function ArcadeGame({ characterId = "charlie", playerName = null, userId = null }: ArcadeGameProps = {}) {
+export function ArcadeGame({
+  characterId = "charlie",
+  playerName = null,
+  userId = null,
+  sessionClaim = null,
+  onSuperseded,
+}: ArcadeGameProps = {}) {
+  const claimRef = useRef(sessionClaim);
+  claimRef.current = sessionClaim;
+  const supersededRef = useRef(onSuperseded);
+  supersededRef.current = onSuperseded;
   const characterRef = useRef(characterId);
   characterRef.current = characterId;
   const nameRef = useRef(playerName);
@@ -297,7 +311,13 @@ export function ArcadeGame({ characterId = "charlie", playerName = null, userId 
     };
 
     const selfId = userRef.current ?? `guest-${Math.random().toString(36).slice(2, 10)}`;
-    const presence = new FloorPresence({ id: selfId, broadcast: Boolean(userRef.current) });
+    const presence = new FloorPresence({
+      id: selfId,
+      broadcast: Boolean(userRef.current),
+      sid: claimRef.current?.nonce,
+      since: claimRef.current?.ts,
+      onSuperseded: () => supersededRef.current?.(),
+    });
     presence.start();
     let remotes: RemoteView[] = [];
 
@@ -514,6 +534,8 @@ export function ArcadeGame({ characterId = "charlie", playerName = null, userId 
             moving: dx !== 0 || dy !== 0,
             playing: playingGame,
             best: playingGame ? localBest(playingGame) : 0,
+            sid: claimRef.current?.nonce,
+            since: claimRef.current?.ts,
           });
         }
         remotes = presence.view(now);
