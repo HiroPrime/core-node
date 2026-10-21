@@ -19,6 +19,7 @@
  * ============================================================================
  */
 
+import Link from "next/link";
 import { useEffect, useRef } from "react";
 
 export type ArcadeStartScreenProps = {
@@ -62,6 +63,11 @@ export function ArcadeStartScreen({ signedIn, playerName, authReady, onStart, on
             </button>
           </>
         )}
+        <nav className="arcade-start-legal" aria-label="Legal">
+          <Link href="/privacy">Privacy</Link>
+          <span aria-hidden="true">&middot;</span>
+          <Link href="/terms">Terms</Link>
+        </nav>
       </div>
       </div>
     </div>

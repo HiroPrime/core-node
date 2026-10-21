@@ -1471,3 +1471,26 @@ body:has(.game-shell) {
   letter-spacing: 0.06em;
   box-shadow: 0 0 16px rgba(255, 225, 74, 0.4);
 }
+
+/* Start screen: small Privacy / Terms links, below the buttons. */
+.arcade-start-legal {
+  display: flex;
+  gap: 6px;
+  padding: 2px 8px;
+  background: rgba(8, 0, 24, 0.6);
+  font-family: var(--font-pixel), "Courier New", monospace;
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  color: rgba(126, 246, 255, 0.75);
+}
+
+.arcade-start-legal a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.arcade-start-legal a:hover,
+.arcade-start-legal a:focus-visible {
+  color: #fff6c2;
+  text-decoration: underline;
+}

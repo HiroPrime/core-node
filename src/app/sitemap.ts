@@ -4,7 +4,7 @@ import { NODES } from "@/lib/universe";
 const BASE = "https://corenode.nexus";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const pages = ["", "/universe", "/select", "/arcade", "/stack", "/contact"];
+  const pages = ["", "/universe", "/select", "/arcade", "/stack", "/contact", "/privacy", "/terms"];
   return [
     ...pages.map((path) => ({
       url: `${BASE}${path}`,

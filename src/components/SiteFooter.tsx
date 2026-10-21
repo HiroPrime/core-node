@@ -9,6 +9,8 @@ export const SITE_LINKS = [
   { href: "/arcade", label: "Arcade" },
   { href: "/stack", label: "Stack" },
   { href: "/contact", label: "Contact" },
+  { href: "/privacy", label: "Privacy" },
+  { href: "/terms", label: "Terms" },
 ];
 
 /**
