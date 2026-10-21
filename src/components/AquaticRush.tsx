@@ -89,7 +89,16 @@ function rand(seed: number) {
   };
 }
 
-export function AquaticRush({ onExit, onGameOver }: { onExit: () => void; onGameOver?: (score: number) => void }) {
+export function AquaticRush({
+  onExit,
+  onGameOver,
+  onScore,
+}: {
+  onExit: () => void;
+  onGameOver?: (score: number) => void;
+  /** Live score for spectators (optional). */
+  onScore?: (score: number) => void;
+}) {
   const shellRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const onExitRef = useRef(onExit);
@@ -100,6 +109,8 @@ export function AquaticRush({ onExit, onGameOver }: { onExit: () => void; onGame
   onExitRef.current = onExit;
   const onGameOverRef = useRef(onGameOver);
   onGameOverRef.current = onGameOver;
+  const onScoreRef = useRef(onScore);
+  onScoreRef.current = onScore;
 
   useEffect(() => {
     const shell = shellRef.current;
@@ -584,6 +595,7 @@ export function AquaticRush({ onExit, onGameOver }: { onExit: () => void; onGame
           const gy = g.y + Math.sin(clock * 2.2 + g.bob) * 8;
           if (Math.hypot(g.x - sub.x, gy - sub.y) < 36 * u() + 18) {
             score += g.value;
+            onScoreRef.current?.(score);
             found.push(g.id);
             pops.push({ text: `+${g.value}`, x: g.x, y: gy, t: 0 });
             gems.splice(i, 1);

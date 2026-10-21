@@ -46,7 +46,16 @@ function load(src: string, into: (img: HTMLImageElement) => void) {
   img.src = src;
 }
 
-export function NeonChase({ onExit, onGameOver }: { onExit: () => void; onGameOver?: (score: number) => void }) {
+export function NeonChase({
+  onExit,
+  onGameOver,
+  onScore,
+}: {
+  onExit: () => void;
+  onGameOver?: (score: number) => void;
+  /** Live score for spectators (optional). */
+  onScore?: (score: number) => void;
+}) {
   const shellRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const onExitRef = useRef(onExit);
@@ -55,6 +64,8 @@ export function NeonChase({ onExit, onGameOver }: { onExit: () => void; onGameOv
   onExitRef.current = onExit;
   const onGameOverRef = useRef(onGameOver);
   onGameOverRef.current = onGameOver;
+  const onScoreRef = useRef(onScore);
+  onScoreRef.current = onScore;
 
   useEffect(() => {
     const shell = shellRef.current;
@@ -341,6 +352,7 @@ export function NeonChase({ onExit, onGameOver }: { onExit: () => void; onGameOv
             } else if (!car.scored && !car.wrecked && car.z < 0) {
               car.scored = true;
               passed += 1;
+              onScoreRef.current?.(passed);
               if (passed > high) {
                 high = passed;
                 saveHigh();
@@ -368,6 +380,7 @@ export function NeonChase({ onExit, onGameOver }: { onExit: () => void; onGameOv
             }
             onGameOverRef.current?.(passed);
             passed = 0;
+            onScoreRef.current?.(0);
             dead = 1.2;
           }
         }

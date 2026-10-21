@@ -1,11 +1,34 @@
 # Arcade spectator mode: design (phase 1 = stub only)
 
-_Status: design. Phase 1 ships only the UI stub on branch `arcade-online`._
+_Status: phase 1 (peer-to-peer WebRTC) is built on branch `arcade-online`. Phase 2 (LiveKit SFU and TURN) is still design._
 
-## What exists now (stub)
-- Each client on the floor broadcasts `playing: <gameId> | null` and `best` (its best score for that game) on the Realtime channel `arcade-floor`.
-- When you stand at a machine someone else is playing, a **WATCH <NAME>** button appears. Clicking it opens a small corner window (not fullscreen) with the player's name, the game, their high score and a "LIVE VIEW COMING SOON" area.
-- No video is sent anywhere yet.
+## What's built (phase 1)
+- **Flag:** `NEXT_PUBLIC_ARCADE_SPECTATE`. It's on when unset; set it to `0` or `false` to disable both sides.
+- **Discovery:** the existing `arcade-floor` presence (`playing: <gameId>`, `best`). Standing at a machine someone else is playing shows **WATCH <NAME>**.
+- **Signalling:** Supabase Realtime broadcast on `spectate:<player_user_id>`, event `sig`, with messages
+  `join / offer / answer / ice / leave / full / unavailable / ended`.
+- **Player side (`SpectateHost`, `src/lib/arcade/spectate.ts`):**
+  - It listens only while the player is inside a cabinet and signed in.
+  - On the first `join` it starts `canvas.captureStream(30)` on the game canvas. Nothing is encoded before that.
+  - Each viewer gets one `RTCPeerConnection`, capped at about 1.2 Mbps and about 540p (`scaleResolutionDownBy`).
+  - There are at most **3 viewers**; extras get `full`.
+  - When the last viewer leaves, the capture stops. Leaving the cabinet sends `ended` and tears everything down.
+  - The live score and game go over a `meta` data channel every 500 ms. The games report their score through an optional `onScore` prop, with no gameplay change.
+- **Viewer side (`SpectateViewer` + `SpectateWindow`):**
+  - The small corner window shows the name, game, live score and high score, plus a `<video autoplay muted playsinline>`.
+  - States: CONNECTING, LIVE, GAME ENDED, UNAVAILABLE (no answer within 12 s, ICE failed, or the player isn't streaming) and TOO MANY VIEWERS.
+  - **BACK TO ARCADE** sends `leave` and closes the peer.
+- **ICE:** public STUN `stun:stun.l.google.com:19302` only. **No TURN**, so strict or symmetric NATs (some mobile carriers, corporate networks) may stay on UNAVAILABLE. Phase 2 fixes this (TURN or LiveKit, below).
+
+## How to test
+1. Use two browsers or devices on **two different accounts**. Single-session login signs out a second login of the same account.
+2. Both open `/arcade`, sign in, pick a character and walk onto the floor. Each should see the other walking.
+3. Player A walks to NEON CHASE, VOID BEAST or AQUATIC RUSH and presses PLAY.
+4. Player B walks up to the same machine. **WATCH A** appears at the bottom; click it.
+5. The corner window should go CONNECTING, then LIVE with A's game and a rising SCORE.
+6. A leaves the cabinet (X or Esc): B sees GAME ENDED. B's BACK TO ARCADE closes the window and the peer.
+7. For the viewer cap, open 4 viewers on 4 accounts: the 4th gets TOO MANY VIEWERS.
+8. Local testing over LAN: run `next start -H 0.0.0.0` and open `http://<pc-ip>:3001` on the tablet. Note that `getUserMedia`/WebRTC work over plain http, but some mobile browsers want HTTPS. The cloudflared tunnel gives you that.
 
 ## Goal
 One player plays, and at most one nearby viewer (expected) watches a live video of their game in that small window, with low latency (under 1 s) and very low cost, given low expected player counts.

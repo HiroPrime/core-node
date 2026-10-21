@@ -63,13 +63,24 @@ function load(src: string, into: (img: HTMLImageElement) => void) {
   img.src = src;
 }
 
-export function VoidBeast({ onExit, onGameOver }: { onExit: () => void; onGameOver?: (score: number) => void }) {
+export function VoidBeast({
+  onExit,
+  onGameOver,
+  onScore,
+}: {
+  onExit: () => void;
+  onGameOver?: (score: number) => void;
+  /** Live score for spectators (optional). */
+  onScore?: (score: number) => void;
+}) {
   const shellRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const onExitRef = useRef(onExit);
   onExitRef.current = onExit;
   const onGameOverRef = useRef(onGameOver);
   onGameOverRef.current = onGameOver;
+  const onScoreRef = useRef(onScore);
+  onScoreRef.current = onScore;
 
   useEffect(() => {
     const shell = shellRef.current;
@@ -237,6 +248,7 @@ export function VoidBeast({ onExit, onGameOver }: { onExit: () => void; onGameOv
 
     const addScore = (n: number) => {
       score += n;
+      onScoreRef.current?.(score);
       saveHigh();
     };
 

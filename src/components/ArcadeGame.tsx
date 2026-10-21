@@ -7,6 +7,9 @@ import { VoidBeast } from "@/components/VoidBeast";
 import { characterSprites, getCharacter } from "@/lib/arcade/roster";
 import { fetchTopScores, localBest, submitScore, type ArcadeGameId, type BoardRow } from "@/lib/arcade/scores";
 import { FloorPresence, type RemoteView } from "@/lib/arcade/presence";
+import { SPECTATE_ENABLED, SpectateHost } from "@/lib/arcade/spectate";
+import { SpectateWindow } from "@/components/arcade/SpectateWindow";
+import { createClient } from "@/lib/supabase/client";
 
 /**
  * ArcadeGame â€” the house arcade floor.
@@ -154,6 +157,8 @@ export function ArcadeGame({
   const boardsRef = useRef(new Map<string, BoardRow[]>());
   const [watchable, setWatchable] = useState<SpectateTarget | null>(null);
   const [spectating, setSpectating] = useState<SpectateTarget | null>(null);
+  const liveScoreRef = useRef(0);
+  const [viewerId] = useState(() => userId ?? `guest-${Math.random().toString(36).slice(2, 10)}`);
   const watchKeyRef = useRef("");
   const refreshBoards = useRef<() => void>(() => {});
   refreshBoards.current = () => {
@@ -244,6 +249,20 @@ export function ArcadeGame({
     const t = window.setInterval(() => refreshBoards.current(), BOARD_REFRESH_MS);
     return () => window.clearInterval(t);
   }, []);
+
+  /* Live spectating (player side): listen while inside a cabinet; encode only once a viewer joins. */
+  useEffect(() => {
+    if (!racing || !userId || !SPECTATE_ENABLED) return;
+    liveScoreRef.current = 0;
+    const host = new SpectateHost(
+      createClient(),
+      userId,
+      () => shellRef.current?.querySelector<HTMLCanvasElement>(".game-overlay canvas") ?? null,
+      () => ({ score: liveScoreRef.current, game: cabinetRef.current }),
+    );
+    host.start();
+    return () => host.stop();
+  }, [racing, userId]);
 
   useEffect(() => {
     const read = () => setPortrait(window.innerWidth < 900 && window.innerHeight > window.innerWidth);
@@ -803,18 +822,21 @@ export function ArcadeGame({
         <NeonChase
           onExit={() => { setRacing(false); setPlaying(true); }}
           onGameOver={(score) => gameOver("neon-chase", score)}
+          onScore={(score) => { liveScoreRef.current = score; }}
         />
       )}
       {racing && cabinet === "void-beast" && (
         <VoidBeast
           onExit={() => { setRacing(false); setPlaying(true); }}
           onGameOver={(score) => gameOver("void-beast", score)}
+          onScore={(score) => { liveScoreRef.current = score; }}
         />
       )}
       {racing && cabinet === "aquatic-rush" && (
         <AquaticRush
           onExit={() => { setRacing(false); setPlaying(true); }}
           onGameOver={(score) => gameOver("aquatic-rush", score)}
+          onScore={(score) => { liveScoreRef.current = score; }}
         />
       )}
       {(playing || racing) && <EdgeBack onBack={backOut} />}
@@ -824,22 +846,14 @@ export function ArcadeGame({
         </button>
       )}
       {spectating && !playing && !racing && (
-        <div className="arcade-spectate" role="dialog" aria-label={`Watching ${spectating.name}`}>
-          <button
-            type="button"
-            className="arcade-spectate-close"
-            aria-label="Close spectator window"
-            onClick={() => setSpectating(null)}
-          >
-            ×
-          </button>
-          <p className="arcade-spectate-name">{spectating.name.toUpperCase()}</p>
-          <p className="arcade-spectate-game">
-            {ATTRACT[spectating.game as GameId]?.title ?? spectating.game.toUpperCase()} · HI{" "}
-            {String(spectating.best).padStart(6, "0")}
-          </p>
-          <div className="arcade-spectate-screen">LIVE VIEW COMING SOON</div>
-        </div>
+        <SpectateWindow
+          playerId={spectating.id}
+          playerName={spectating.name}
+          gameTitle={ATTRACT[spectating.game as GameId]?.title ?? spectating.game.toUpperCase()}
+          best={spectating.best}
+          viewerId={viewerId}
+          onClose={() => setSpectating(null)}
+        />
       )}
       {playing && !racing && (
         <div className="game-overlay" role="dialog" aria-label={ATTRACT[cabinet].title}>

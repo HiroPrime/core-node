@@ -1472,6 +1472,62 @@ body:has(.game-shell) {
   box-shadow: 0 0 16px rgba(255, 225, 74, 0.4);
 }
 
+/* Live spectator window (phase 1 WebRTC). */
+.arcade-spectate-screen {
+  position: relative;
+  overflow: hidden;
+}
+
+.arcade-spectate-screen video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000;
+  opacity: 0;
+}
+
+.arcade-spectate-screen video.is-live {
+  opacity: 1;
+}
+
+.arcade-spectate-msg {
+  position: relative;
+  z-index: 1;
+}
+
+.arcade-spectate-state {
+  margin-left: 8px;
+  padding: 2px 6px;
+  font-size: 9px;
+  vertical-align: middle;
+  border: 1px solid currentColor;
+  color: #d7e2ee;
+}
+
+.arcade-spectate-state.is-live {
+  color: #ff3355;
+}
+
+.arcade-spectate-state.is-connecting {
+  color: #ffe14a;
+}
+
+.arcade-spectate-back {
+  display: block;
+  width: 100%;
+  min-height: 40px;
+  margin-top: 10px;
+  border: 2px solid #7ef6ff;
+  background: rgba(8, 0, 24, 0.9);
+  color: #7ef6ff;
+  font-family: var(--font-pixel), "Courier New", monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+}
+
 /* Start screen: small Privacy / Terms links, below the buttons. */
 .arcade-start-legal {
   display: flex;
