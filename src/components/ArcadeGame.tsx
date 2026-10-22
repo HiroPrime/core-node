@@ -55,8 +55,8 @@ const BOARD_REFRESH_MS = 30000;
 const CABINET_H = 300;
 const CABINET_GAP = 52;
 const FLOOR_FRONT = 780;
-const CARPET = "/arcade-bk/Gemini_Generated_Image_kdli4mkdli4mkdli.jpg";
-const CARPET_SCALE = 0.42;
+const CARPET = "/arcade/floor/carpet.webp";
+const CARPET_SCALE = 0.84;
 /** Window span (px) where the camera is at its closest. Smaller than this zooms out. */
 const ZOOM_SPAN = 840;
 const ZOOM_MIN = 0.32;

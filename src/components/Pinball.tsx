@@ -428,6 +428,8 @@ export function Pinball({
       const cx = w / 2;
       const cy = oy + (TH * scale) / 2;
       const u = Math.max(0.6, Math.min(1.3, (TW * scale) / 600));
+      // Big prompts (countdown, ball lost, GAME OVER) scale with the viewport, not the narrow table.
+      const U = Math.max(0.75, Math.min(2.2, Math.min(w / 640, h / 700)));
       if (labelT > 0 && phase === "play") {
         ctx.textAlign = "center";
         ctx.globalAlpha = Math.min(1, labelT * 2);
@@ -448,39 +450,39 @@ export function Pinball({
       if (lostT > 0 && phase === "play") {
         ctx.textAlign = "center";
         ctx.fillStyle = "#ff4ad2";
-        ctx.font = `${Math.round(26 * u)}px ${pixelFont}`;
+        ctx.font = `${Math.round(26 * U)}px ${pixelFont}`;
         ctx.fillText("BALL LOST", cx, cy);
       }
       if (phase === "count") {
         const lbl = countT < 3 ? String(3 - Math.floor(countT)) : "GO!!!";
         ctx.textAlign = "center";
         ctx.fillStyle = "#ffe14a";
-        ctx.font = `${Math.round(54 * u)}px ${pixelFont}`;
+        ctx.font = `${Math.round(54 * U)}px ${pixelFont}`;
         ctx.fillText(lbl, cx, cy);
       }
       if (phase === "boom") {
         ctx.textAlign = "center";
         ctx.fillStyle = "#ff4ad2";
-        ctx.font = `${Math.round(26 * u)}px ${pixelFont}`;
+        ctx.font = `${Math.round(26 * U)}px ${pixelFont}`;
         ctx.fillText("LAST BALL LOST", cx, cy);
       }
       if (phase === "over") {
         ctx.fillStyle = "rgba(3,0,20,0.86)";
         ctx.fillRect(0, 0, w, h);
         ctx.textAlign = "center";
-        let y = h / 2 - 70 * u;
+        let y = h / 2 - 70 * U;
         ctx.fillStyle = "#ff4ad2";
-        ctx.font = `${Math.round(24 * u)}px ${pixelFont}`;
+        ctx.font = `${Math.round(24 * U)}px ${pixelFont}`;
         ctx.fillText("GAME OVER", cx, y);
-        y += 46 * u;
+        y += 46 * U;
         ctx.fillStyle = "#ffe14a";
-        ctx.font = `${Math.round(18 * u)}px ${pixelFont}`;
+        ctx.font = `${Math.round(18 * U)}px ${pixelFont}`;
         ctx.fillText(pad(score), cx, y);
-        y += 32 * u;
+        y += 32 * U;
         ctx.fillStyle = "#7ef6ff";
-        ctx.font = `${Math.round(13 * u)}px ${pixelFont}`;
+        ctx.font = `${Math.round(13 * U)}px ${pixelFont}`;
         ctx.fillText(`HI ${pad(high)}`, cx, y);
-        y += 30 * u;
+        y += 30 * U;
         ctx.fillText("ENTER OR CLICK", cx, y);
       }
       if (phase === "controls") {
