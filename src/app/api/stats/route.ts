@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createServiceClient, createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/server";
 import { SITE_ID } from "@/lib/site-ids";
 
 const METRIC_LABEL = "Population";
@@ -33,7 +33,14 @@ export async function OPTIONS(request: Request) {
 
 export async function GET(request: Request) {
   try {
-    const supabase = createServiceClient() ?? (await createClient());
+    const supabase = createServiceClient();
+    if (!supabase) {
+      console.error("stats unavailable: SUPABASE_SERVICE_ROLE_KEY is not set");
+      return NextResponse.json(
+        { error: "stats unavailable" },
+        { status: 503, headers: { ...corsHeaders(request), "Cache-Control": "no-store" } }
+      );
+    }
     const { data, error } = await supabase
       .from("site_metrics")
       .select("total_unique_visitors")
