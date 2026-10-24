@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/server";
+
+const PLANETS = new Set(["core", "prime", "grimm", "shipyard", "savepoint"]);
 
 export async function POST(request: Request) {
   try {
@@ -7,11 +9,16 @@ export async function POST(request: Request) {
     const planetId =
       typeof body?.planetId === "string" ? body.planetId.trim() : "";
 
-    if (!planetId) {
+    if (!planetId || !PLANETS.has(planetId)) {
       return NextResponse.json({ error: "planetId required" }, { status: 400 });
     }
 
-    const supabase = await createClient();
+    // Server-only service role. No anon fallback: without the key, skip tracking.
+    const supabase = createServiceClient();
+    if (!supabase) {
+      return NextResponse.json({ ok: true, tracked: false });
+    }
+
     const { error } = await supabase.rpc("track_core_node_explore", {
       p_planet_id: planetId,
     });
