@@ -14,7 +14,7 @@ import { createClient, createServiceClient } from "@/lib/supabase/server";
  *       Ends the active season and starts a new active one. Old scores stay.
  */
 
-const GAME_IDS = new Set(["neon-chase", "void-beast", "aquatic-rush"]);
+const GAME_IDS = new Set(["neon-chase", "void-beast", "aquatic-rush", "spin-ball"]);
 
 function adminEmails() {
   return (process.env.ARCADE_ADMIN_EMAILS ?? "")

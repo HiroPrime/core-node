@@ -67,11 +67,14 @@ export function VoidBeast({
   onExit,
   onGameOver,
   onScore,
+  onRunStart,
 }: {
   onExit: () => void;
   onGameOver?: (score: number) => void;
   /** Live score for spectators (optional). */
   onScore?: (score: number) => void;
+  /** Fired once when a run's countdown starts. */
+  onRunStart?: () => void;
 }) {
   const shellRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -81,6 +84,10 @@ export function VoidBeast({
   onGameOverRef.current = onGameOver;
   const onScoreRef = useRef(onScore);
   onScoreRef.current = onScore;
+  const onRunStartRef = useRef(onRunStart);
+  useEffect(() => {
+    onRunStartRef.current = onRunStart;
+  }, [onRunStart]);
 
   useEffect(() => {
     const shell = shellRef.current;
@@ -193,6 +200,7 @@ export function VoidBeast({
     const begin = () => {
       phase = "count";
       countT = 0;
+      onRunStartRef.current?.();
     };
 
     const boot = () => {
@@ -200,6 +208,7 @@ export function VoidBeast({
       booted = true;
       fresh();
       phase = mobile() ? "count" : "controls";
+      if (phase === "count") onRunStartRef.current?.();
     };
 
     const pad = (n: number) => String(n).padStart(6, "0");

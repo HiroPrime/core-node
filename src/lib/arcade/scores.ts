@@ -35,12 +35,45 @@ function hasSupabaseEnv() {
   return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 }
 
+type TopScoreRow = {
+  rank: number;
+  display_name: string;
+  score: number;
+  created_at: string;
+  mine: boolean;
+};
+
+/**
+ * One in-flight run token per game. Issued when the countdown starts and
+ * consumed when that run's score is submitted. Guests never call the RPC.
+ */
+const pendingRuns = new Map<ArcadeGameId, Promise<string | null>>();
+
+async function requestRun(gameId: ArcadeGameId): Promise<string | null> {
+  if (!hasSupabaseEnv()) return null;
+  try {
+    const supabase = createClient();
+    const { data: auth } = await supabase.auth.getUser();
+    if (!auth.user || auth.user.is_anonymous) return null;
+    const { data, error } = await supabase.rpc("arcade_start_run", { p_game: gameId });
+    if (error || typeof data !== "string" || data.length === 0) return null;
+    return data;
+  } catch {
+    return null;
+  }
+}
+
+/** Ask the server for a single-use run token. Safe to call for guests. */
+export function startRun(gameId: ArcadeGameId): void {
+  pendingRuns.set(gameId, requestRun(gameId));
+}
+
 /**
  * Record a finished run.
- * - Guests (no userId): localStorage only. Never sent to Supabase.
- * - Signed in: written to Supabase for that account (RLS also requires a
- *   real, non-anonymous session whose uid matches).
- * Never throws.
+ * - Guests (no userId): localStorage only. Never sent to Supabase, including
+ *   after the guest later signs in.
+ * - Signed in: arcade_submit_score for the token issued at countdown.
+ * Never throws. Never inserts into arcade_scores from the browser.
  */
 export async function submitScore(
   gameId: ArcadeGameId,
@@ -48,58 +81,40 @@ export async function submitScore(
   userId: string | null,
 ): Promise<"remote" | "local" | "failed"> {
   const value = Math.max(0, Math.floor(Number(score) || 0));
+  const runPromise = pendingRuns.get(gameId) ?? null;
+  pendingRuns.delete(gameId);
+
   if (!userId) {
     writeLocal(gameId, value);
     return "local";
   }
   if (value <= 0 || !hasSupabaseEnv()) return "failed";
+
   try {
     const supabase = createClient();
-    const { data } = await supabase.auth.getUser();
-    if (!data.user || data.user.id !== userId || data.user.is_anonymous) return "failed";
-    const { error } = await supabase.from("arcade_scores").insert({ user_id: userId, game_id: gameId, score: value });
-    return error ? "failed" : "remote";
+    const authPromise = supabase.auth.getUser();
+    const [authResult, runId] = await Promise.all([authPromise, runPromise ?? Promise.resolve(null)]);
+    const user = authResult.data.user;
+    if (!user || user.id !== userId || user.is_anonymous || !runId) return "failed";
+    const { data, error } = await supabase.rpc("arcade_submit_score", { p_run_id: runId, p_score: value });
+    return error || data !== true ? "failed" : "remote";
   } catch {
     return "failed";
   }
 }
 
-/**
- * On sign-in: save this browser's guest best per game to the account, then
- * clear the guest scores so they are only uploaded once. Returns how many
- * games were saved.
- */
-export async function syncGuestScores(userId: string): Promise<number> {
-  const all = readLocal();
-  const bests = ARCADE_GAME_IDS.map((g) => [g, (all[g] ?? [])[0] ?? 0] as const).filter(([, v]) => v > 0);
-  if (!bests.length || !hasSupabaseEnv()) return 0;
-  try {
-    const supabase = createClient();
-    const { data } = await supabase.auth.getUser();
-    if (!data.user || data.user.id !== userId || data.user.is_anonymous) return 0;
-    const { error } = await supabase
-      .from("arcade_scores")
-      .insert(bests.map(([game_id, score]) => ({ user_id: userId, game_id, score })));
-    if (error) return 0;
-    localStorage.removeItem(LOCAL_KEY);
-    return bests.length;
-  } catch {
-    return 0;
-  }
-}
-
 /** Top N for a game's active season. Falls back to this device's guest scores. */
-export async function fetchTopScores(gameId: ArcadeGameId, limit = 5, myUserId?: string | null): Promise<BoardRow[]> {
+export async function fetchTopScores(gameId: ArcadeGameId, limit = 5): Promise<BoardRow[]> {
   if (hasSupabaseEnv()) {
     try {
       const supabase = createClient();
-      const { data, error } = await supabase.rpc("arcade_top_scores", { p_game_id: gameId, p_limit: limit });
+      const { data, error } = await supabase.rpc("arcade_top_scores", { p_game: gameId, p_limit: limit });
       if (!error && Array.isArray(data)) {
-        return (data as { rank: number; user_id: string; username: string; score: number }[]).map((r) => ({
+        return (data as TopScoreRow[]).map((r) => ({
           rank: Number(r.rank),
-          name: (r.username || "PLAYER").toUpperCase().slice(0, 12),
-          score: r.score,
-          mine: Boolean(myUserId && r.user_id === myUserId),
+          name: (r.display_name || "PLAYER").toUpperCase().slice(0, 12),
+          score: Number(r.score),
+          mine: r.mine === true,
         }));
       }
     } catch {

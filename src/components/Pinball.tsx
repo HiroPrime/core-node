@@ -70,22 +70,27 @@ export function Pinball({
   onExit,
   onGameOver,
   onScore,
+  onRunStart,
 }: {
   onExit: () => void;
   onGameOver?: (score: number) => void;
   /** Live score while playing (spectator feed). */
   onScore?: (score: number) => void;
+  /** Fired once when a run's countdown starts. */
+  onRunStart?: () => void;
 }) {
   const shellRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const onExitRef = useRef(onExit);
   const onGameOverRef = useRef(onGameOver);
   const onScoreRef = useRef(onScore);
+  const onRunStartRef = useRef(onRunStart);
   useEffect(() => {
     onExitRef.current = onExit;
     onGameOverRef.current = onGameOver;
     onScoreRef.current = onScore;
-  });
+    onRunStartRef.current = onRunStart;
+  }, [onExit, onGameOver, onScore, onRunStart]);
 
   useEffect(() => {
     const shell = shellRef.current;
@@ -220,6 +225,7 @@ export function Pinball({
       phase = "count";
       countT = 0;
       table.flippers.forEach((f) => (f.held = false));
+      onRunStartRef.current?.();
     };
     const again = () => {
       fresh();

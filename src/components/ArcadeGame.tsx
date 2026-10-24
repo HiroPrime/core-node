@@ -6,7 +6,7 @@ import { Pinball } from "@/components/Pinball";
 import { NeonChase } from "@/components/NeonChase";
 import { VoidBeast } from "@/components/VoidBeast";
 import { characterSprites, getCharacter } from "@/lib/arcade/roster";
-import { fetchTopScores, localBest, submitScore, type ArcadeGameId, type BoardRow } from "@/lib/arcade/scores";
+import { fetchTopScores, localBest, startRun, submitScore, type ArcadeGameId, type BoardRow } from "@/lib/arcade/scores";
 import { FloorPresence, type RemoteView } from "@/lib/arcade/presence";
 import { SPECTATE_ENABLED, SpectateHost } from "@/lib/arcade/spectate";
 import { SpectateWindow } from "@/components/arcade/SpectateWindow";
@@ -172,7 +172,7 @@ export function ArcadeGame({
   const refreshBoards = useRef<() => void>(() => {});
   refreshBoards.current = () => {
     (["neon-chase", "void-beast", "aquatic-rush", "spin-ball"] as ArcadeGameId[]).forEach((id) => {
-      void fetchTopScores(id, BOARD_ROWS, userRef.current).then((rows) => boardsRef.current.set(id, rows));
+      void fetchTopScores(id, BOARD_ROWS).then((rows) => boardsRef.current.set(id, rows));
     });
   };
   const gameOver = (id: GameId, score: number) => {
@@ -835,6 +835,7 @@ export function ArcadeGame({
       {racing && cabinet === "neon-chase" && (
         <NeonChase
           onExit={() => { setRacing(false); setPlaying(true); }}
+          onRunStart={() => { if (userRef.current) startRun("neon-chase"); }}
           onGameOver={(score) => gameOver("neon-chase", score)}
           onScore={(score) => { liveScoreRef.current = score; }}
         />
@@ -842,6 +843,7 @@ export function ArcadeGame({
       {racing && cabinet === "void-beast" && (
         <VoidBeast
           onExit={() => { setRacing(false); setPlaying(true); }}
+          onRunStart={() => { if (userRef.current) startRun("void-beast"); }}
           onGameOver={(score) => gameOver("void-beast", score)}
           onScore={(score) => { liveScoreRef.current = score; }}
         />
@@ -849,6 +851,7 @@ export function ArcadeGame({
       {racing && cabinet === "aquatic-rush" && (
         <AquaticRush
           onExit={() => { setRacing(false); setPlaying(true); }}
+          onRunStart={() => { if (userRef.current) startRun("aquatic-rush"); }}
           onGameOver={(score) => gameOver("aquatic-rush", score)}
           onScore={(score) => { liveScoreRef.current = score; }}
         />
@@ -856,6 +859,7 @@ export function ArcadeGame({
       {racing && cabinet === "spin-ball" && (
         <Pinball
           onExit={() => { setRacing(false); setPlaying(true); }}
+          onRunStart={() => { if (userRef.current) startRun("spin-ball"); }}
           onGameOver={(score) => gameOver("spin-ball", score)}
           onScore={(score) => { liveScoreRef.current = score; }}
         />
