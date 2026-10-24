@@ -8,15 +8,18 @@
 - OAuth now returns to the page it started on (`/auth/callback?next=<path>`).
 
 ## To turn it on (BasicHiro)
-1. **Apply the migrations** in `supabase/migrations` in filename order
-   (`supabase db push`, or paste them into the SQL editor). `20261020120000_arcade_online.sql`
+1. **Apply the migrations** in `supabase/migrations` in filename order with
+   `supabase db push` or the Supabase connector. Both wrap each file in a single transaction.
+   `20261020120000_arcade_online.sql`
    creates `arcade_seasons` (seeded with `all-time`, active), `arcade_players`, `arcade_scores`, RLS, and the
    leaderboard. `20261024043000_arcade_score_hardening.sql` removes direct inserts and public table
-   reads. Scores go through `arcade_start_run`, `arcade_checkpoint` (about every 5 seconds while a
+   reads. Apply that file only through `supabase db push` or the Supabase connector.
+   Scores go through `arcade_start_run`, `arcade_checkpoint` (about every 5 seconds while a
    signed-in run is in progress), and `arcade_submit_score`. `arcade_board(game, limit)` returns a
    display name, score, date, and `mine` with no user id. The first score on a board, any score that
    would place in the top 3, and a score near that game's cap are stored as `pending` and stay off the
-   board until an admin approves them. The deployed client still calls
+   board until an admin approves them. A newer pending score replaces that player's older pending
+   score for the same game, so the review queue keeps one pending row per player per game. The deployed client still calls
    `arcade_top_scores(p_game_id, p_limit, p_season_id)`, which returns no user id. It assumes
    `public.profiles(id, username)` exists (it does).
    `supabase/scripts/audit_arcade_scores.sql` is a read-only check for scores above the new caps.

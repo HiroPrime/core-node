@@ -4,12 +4,9 @@
 -- The server stamps started_at, used, created_at, and the checkpoint clock.
 -- Clients have no insert, update, or delete grant on scores or runs.
 --
--- NOT applied automatically. Review, then run with `supabase db push`
--- or paste into the Supabase SQL editor. Do not apply from the app.
---
--- The file is one transaction. If the runner has already issued BEGIN,
--- this BEGIN is a no-op warning and this COMMIT commits that transaction.
--- A later COMMIT from the runner warns and leaves the changes in place.
+-- NOT applied automatically. Apply only with `supabase db push` or the
+-- Supabase connector. Both wrap this file in a single transaction.
+-- Do not apply from the app.
 --
 -- Heartbeats stop "start, sleep, submit the cap": credited time only
 -- advances across short gaps between server-timed checkpoints, and a run
@@ -18,9 +15,9 @@
 -- sustained rate below. That is why the caps are low, each run has a
 -- maximum age, only one token is open, and a score near the cap, the
 -- first score on an empty board, or any score that would place in the
--- top 3 is stored as pending and left off the public board.
-
-begin;
+-- top 3 is stored as pending and left off the public board. A newer
+-- pending score replaces that player's older pending score for the same
+-- game, inside the submit lock, so the review queue keeps one of them.
 
 -- ---------------------------------------------------------------
 -- Per-game limits. Rates are sustained play, not a one-frame burst.
@@ -149,6 +146,27 @@ alter table public.arcade_scores
 
 create index if not exists arcade_scores_user_game_created
   on public.arcade_scores (user_id, game_id, created_at desc);
+
+-- Review list and the locked replace below. Pending is the small set.
+create index if not exists arcade_scores_pending
+  on public.arcade_scores (user_id, game_id, created_at)
+  where status = 'pending';
+
+-- Collapse anything already queued to the latest pending row per player
+-- and game. Later submits do this again under the advisory lock.
+delete from public.arcade_scores as older
+where older.status = 'pending'
+  and exists (
+    select 1
+    from public.arcade_scores as newer
+    where newer.user_id = older.user_id
+      and newer.game_id = older.game_id
+      and newer.status = 'pending'
+      and (
+        newer.created_at > older.created_at
+        or (newer.created_at = older.created_at and newer.id > older.id)
+      )
+  );
 
 create or replace function public.arcade_scores_set_season()
 returns trigger
@@ -537,6 +555,16 @@ begin
     or (v_season_rank is not null and v_season_rank <= 3)
     or (v_all_rank is not null and v_all_rank <= 3);
 
+  -- Same function, same pg_advisory_xact_lock taken above. A second
+  -- submit for this user and game waits until this transaction ends,
+  -- so it cannot insert a pending row between the delete and the insert.
+  if v_hold then
+    delete from public.arcade_scores
+    where user_id = auth.uid()
+      and game_id = v_game
+      and status = 'pending';
+  end if;
+
   insert into public.arcade_scores (user_id, game_id, score, status)
   values (auth.uid(), v_game, p_score, case when v_hold then 'pending' else 'approved' end);
 
@@ -762,5 +790,3 @@ $$;
 
 revoke all on function public.arcade_max_score(text) from public, anon, authenticated, service_role;
 grant execute on function public.arcade_max_score(text) to service_role;
-
-commit;
