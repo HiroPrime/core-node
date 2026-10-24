@@ -1,7 +1,7 @@
 import { timingSafeEqual } from "crypto";
 import { NextResponse } from "next/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -74,57 +74,62 @@ function earliestProvider(
   return typeof fallback === "string" && fallback ? fallback : null;
 }
 
+function asNumber(data: unknown): number | null {
+  if (typeof data === "number" && Number.isFinite(data)) return data;
+  if (typeof data === "string" && data.trim() !== "") {
+    const value = Number(data);
+    return Number.isFinite(value) ? value : null;
+  }
+  return null;
+}
+
+/** Approved rows only, through arcade_count_scores. Pending scores are not plays. */
 async function countScores(
   supabase: SupabaseClient,
   opts: { gameId?: string; since?: string },
 ): Promise<number | null> {
   try {
-    let query = supabase.from("arcade_scores").select("score", { count: "exact", head: true });
-    if (opts.gameId) query = query.eq("game_id", opts.gameId);
-    if (opts.since) query = query.gte("created_at", opts.since);
-    const { count, error } = await query;
-    if (error || count === null) {
-      if (error) console.error("nexus-status arcade_scores count failed:", error.message);
+    const { data, error } = await supabase.rpc("arcade_count_scores", {
+      p_game: opts.gameId ?? null,
+      p_since: opts.since ?? null,
+    });
+    if (error) {
+      console.error("nexus-status arcade_count_scores failed:", error.message);
       return null;
     }
-    return count;
+    return asNumber(data);
   } catch (err) {
-    console.error("nexus-status arcade_scores count failed:", err instanceof Error ? err.message : "Unknown error");
+    console.error("nexus-status arcade_count_scores failed:", err instanceof Error ? err.message : "Unknown error");
     return null;
   }
 }
 
+/** Highest approved score, through arcade_max_score. */
 async function maxScore(supabase: SupabaseClient, gameId?: string): Promise<number | null> {
   try {
-    let query = supabase.from("arcade_scores").select("score");
-    if (gameId) query = query.eq("game_id", gameId);
-    const { data, error } = await query.order("score", { ascending: false }).limit(1);
+    const { data, error } = await supabase.rpc("arcade_max_score", { p_game: gameId ?? null });
     if (error) {
-      console.error("nexus-status arcade_scores max failed:", error.message);
+      console.error("nexus-status arcade_max_score failed:", error.message);
       return null;
     }
-    const raw = data?.[0]?.score;
-    if (raw === undefined || raw === null) return null;
-    const value = typeof raw === "number" ? raw : Number(raw);
-    return Number.isFinite(value) ? value : null;
+    return asNumber(data);
   } catch (err) {
-    console.error("nexus-status arcade_scores max failed:", err instanceof Error ? err.message : "Unknown error");
+    console.error("nexus-status arcade_max_score failed:", err instanceof Error ? err.message : "Unknown error");
     return null;
   }
 }
 
+/** arcade_count_players is security definer. The table itself is not world-readable. */
 async function countPlayers(supabase: SupabaseClient): Promise<number | null> {
   try {
-    const { count, error } = await supabase
-      .from("arcade_players")
-      .select("character_id", { count: "exact", head: true });
-    if (error || count === null) {
-      if (error) console.error("nexus-status arcade_players count failed:", error.message);
+    const { data, error } = await supabase.rpc("arcade_count_players");
+    if (error) {
+      console.error("nexus-status arcade_count_players failed:", error.message);
       return null;
     }
-    return count;
+    return asNumber(data);
   } catch (err) {
-    console.error("nexus-status arcade_players count failed:", err instanceof Error ? err.message : "Unknown error");
+    console.error("nexus-status arcade_count_players failed:", err instanceof Error ? err.message : "Unknown error");
     return null;
   }
 }
@@ -217,17 +222,10 @@ async function buildStatus(): Promise<NexusStatus> {
   const blankGames: GameStat[] = GAMES.map((game) => ({ name: game.name, plays: null, highScore: null }));
   const service = createServiceClient();
 
-  let db: SupabaseClient | null = service;
-  if (!db) {
-    try {
-      db = await createClient();
-    } catch (err) {
-      console.error("nexus-status client failed:", err instanceof Error ? err.message : "Unknown error");
-      db = null;
-    }
-  }
-
-  if (!db) {
+  // Score and player reads go through definer functions granted to the service
+  // role only. A cookie client cannot see those tables, and a zero from RLS
+  // would look like an empty arcade.
+  if (!service) {
     return statusPayload({
       updatedAt,
       plays7d: null,
@@ -242,23 +240,21 @@ async function buildStatus(): Promise<NexusStatus> {
 
   const since = new Date(Date.now() - WEEK_MS).toISOString();
   const [plays7d, topScore, signedIn, games, signups] = await Promise.all([
-    countScores(db, { since }),
-    maxScore(db),
-    countPlayers(db),
+    countScores(service, { since }),
+    maxScore(service),
+    countPlayers(service),
     Promise.all(
       GAMES.map(async (game) => ({
         name: game.name,
-        plays: await countScores(db, { gameId: game.id }),
-        highScore: await maxScore(db, game.id),
+        plays: await countScores(service, { gameId: game.id }),
+        highScore: await maxScore(service, game.id),
       })),
     ),
-    service
-      ? countSignups(service).then(async (counted) => {
-          if (counted) return counted;
-          const total = await countProfiles(service);
-          return { total, google: null as number | null, discord: null as number | null };
-        })
-      : Promise.resolve({ total: null as number | null, google: null as number | null, discord: null as number | null }),
+    countSignups(service).then(async (counted) => {
+      if (counted) return counted;
+      const total = await countProfiles(service);
+      return { total, google: null as number | null, discord: null as number | null };
+    }),
   ]);
 
   return statusPayload({

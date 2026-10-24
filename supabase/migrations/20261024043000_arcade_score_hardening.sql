@@ -1,54 +1,58 @@
 -- Arcade scores can no longer be inserted from the browser.
--- A signed-in player starts a run (arcade_start_run) and submits that run's
--- score (arcade_submit_score). The server stamps started_at / used /
--- created_at. Clients have no insert, update, or delete grant, and no
--- column through which they can set those fields.
+-- A signed-in player starts a run (arcade_start_run), reports progress
+-- (arcade_checkpoint), and submits that run's score (arcade_submit_score).
+-- The server stamps started_at, used, created_at, and the checkpoint clock.
+-- Clients have no insert, update, or delete grant on scores or runs.
 --
 -- NOT applied automatically. Review, then run with `supabase db push`
 -- or paste into the Supabase SQL editor. Do not apply from the app.
+--
+-- Heartbeats stop "start, sleep, submit the cap": credited time only
+-- advances across short gaps between server-timed checkpoints, and a run
+-- with no checkpoint is rejected once it is older than 15 seconds.
+-- A client that calls arcade_checkpoint on a timer can still climb at the
+-- sustained rate below. That is why the caps are low, each run has a
+-- maximum age, only one token is open, and a score near the cap or a new
+-- number one is stored as pending and left off the public board.
+
+begin;
 
 -- ---------------------------------------------------------------
--- Per-game ceilings, from the scoring loops:
+-- Per-game limits. Rates are sustained play, not a one-frame burst.
+-- Review holds a score at or above 85% of the cap.
 --
--- neon-chase (src/components/NeonChase.tsx)
---   Score is cars passed, one point each. The field keeps about 3 cars
---   and the fastest close is ~1.6 z/s, about 5 passes/s. Ceiling 8/s.
---   Cap 12000: ~40 minutes at 5/s, or 25 minutes at the ceiling.
+-- neon-chase: one point per car. Cruise is about 2/s; a boost close is
+--   about 5/s. Cap 900 is a long clean run. Max age 6 minutes.
+-- void-beast: 25 points per second plus kills. A full wave is a few
+--   hundred points every 1.15s, and a boss pays 2000+ in one checkpoint
+--   gap, so the sustained ceiling is 2000/s. Cap 450000. Max age 12 minutes.
+-- aquatic-rush: climb is 160 px/s and a deep lane is worth a few hundred
+--   points, with a rare crown at 3000. 1200/s allows a rich 5s stretch
+--   and rejects a crown on every lane. Cap 200000. Max age 8 minutes.
+-- spin-ball: one comet-boosted blue bumper is about 2200/s, and a lively
+--   ball is a couple of those. 5000/s covers that stretch. A stuck spinner
+--   (about 30000/s) and every bumper on cooldown (about 15000/s) are
+--   rejected. Cap 300000. Max age 10 minutes.
 --
--- void-beast (src/components/VoidBeast.tsx)
---   25 points per second alive, plus kills (swarm 100, sting 250,
---   carrier 500, boss 2000 + loop bonus). A full early wave is ~500
---   points every 1.15s. Sustained play is roughly 400-750 points/s.
---   Ceiling 1500/s. Cap 1500000: about an hour at a strong 400/s.
---
--- aquatic-rush (src/components/AquaticRush.tsx)
---   Score is treasure picked up. Climb is 160 px/s, lanes are 250-430 px
---   apart, and a lane rolls one gem (100-3000, crown only deep and rare).
---   Late game, if every lane were a crown, is under ~1900 points/s.
---   Ceiling 2500/s. Cap 2000000.
---
--- spin-ball (src/components/Pinball.tsx, src/lib/arcade/pinball-physics.ts)
---   3 balls. Bumpers score at most once per 0.45s (blue 100 / 500 boosted,
---   red 50 / 200, star 250; comet x2, charged x1.5). All seven bumpers on
---   that cooldown under comet is ~9300 points/s, plus slingshots, spinner
---   passes, and the 1000/10000 light bonuses. Ceiling 15000/s still rejects
---   a ball stuck in a spinner (the physics step can award that much faster).
---   Cap 2000000.
---
--- A run older than 6 hours is rejected. Score submissions are limited to
--- 100 per user per game per 10 minutes. Run starts are limited to 200 per
--- user per game per 10 minutes so the runs table cannot be flooded.
+-- First checkpoint must land within 20s of the start. Later checkpoints
+-- credit a gap only when it is between 3 and 12 seconds. Score submits
+-- are limited to 100 per user per game per 10 minutes. Run starts are
+-- limited to 200 per user per game per 10 minutes.
 -- ---------------------------------------------------------------
 
 -- ---------------------------------------------------------------
--- Runs: one single-use token per attempt. No API policies.
+-- Runs: one open token per user and game. No API policies.
 -- ---------------------------------------------------------------
 create table if not exists public.arcade_runs (
-  id          uuid primary key default gen_random_uuid(),
-  user_id     uuid not null references auth.users (id) on delete cascade,
-  game_id     text not null check (game_id in ('neon-chase', 'void-beast', 'aquatic-rush', 'spin-ball')),
-  started_at  timestamptz not null default now(),
-  used        boolean not null default false
+  id                uuid primary key default gen_random_uuid(),
+  user_id           uuid not null references auth.users (id) on delete cascade,
+  game_id           text not null check (game_id in ('neon-chase', 'void-beast', 'aquatic-rush', 'spin-ball')),
+  started_at        timestamptz not null default now(),
+  used              boolean not null default false,
+  last_beat         timestamptz,
+  beats             integer not null default 0 check (beats >= 0),
+  credited_seconds  numeric not null default 0 check (credited_seconds >= 0),
+  checkpoint_score  integer not null default 0 check (checkpoint_score >= 0)
 );
 
 create index if not exists arcade_runs_user_game_started
@@ -56,8 +60,10 @@ create index if not exists arcade_runs_user_game_started
 
 alter table public.arcade_runs enable row level security;
 
--- Clients never write started_at or used. Insert forces both; update can
--- only flip used false -> true and cannot move the clock or the owner.
+-- Clients never write the clock, the token, or the checkpoint columns.
+-- Insert forces them. Update can flip used false -> true and cannot move
+-- the owner or the start time. Checkpoint columns are left as the RPC set
+-- them; there is no client update grant on this table.
 create or replace function public.arcade_runs_stamp()
 returns trigger
 language plpgsql
@@ -70,6 +76,10 @@ begin
     end if;
     new.started_at := now();
     new.used := false;
+    new.last_beat := null;
+    new.beats := 0;
+    new.credited_seconds := 0;
+    new.checkpoint_score := 0;
   elsif tg_op = 'UPDATE' then
     new.id := old.id;
     new.user_id := old.user_id;
@@ -89,11 +99,49 @@ create trigger arcade_runs_stamp
   for each row execute function public.arcade_runs_stamp();
 
 revoke all on table public.arcade_runs from public, anon, authenticated;
-revoke all on function public.arcade_runs_stamp() from public, anon, authenticated;
+revoke all on function public.arcade_runs_stamp() from public, anon, authenticated, service_role;
 
 -- ---------------------------------------------------------------
--- Scores: drop the direct insert path. Keep created_at server-owned.
+-- Shared ceilings. Not an API. The score RPCs call it as the owner.
 -- ---------------------------------------------------------------
+create or replace function public.arcade_game_limit(p_game text)
+returns table (
+  min_seconds numeric,
+  max_per_second numeric,
+  max_score integer,
+  max_age_seconds integer,
+  review_at integer
+)
+language sql
+immutable
+set search_path = public, pg_temp
+as $$
+  select r.min_seconds, r.max_per_second, r.max_score, r.max_age_seconds, r.review_at
+  from (
+    values
+      ('neon-chase'::text, 2::numeric, 5::numeric, 900, 360, 765),
+      ('void-beast', 3, 2000, 450000, 720, 382500),
+      ('aquatic-rush', 3, 1200, 200000, 480, 170000),
+      ('spin-ball', 3, 5000, 300000, 600, 255000)
+  ) as r(game_id, min_seconds, max_per_second, max_score, max_age_seconds, review_at)
+  where r.game_id = p_game;
+$$;
+
+revoke all on function public.arcade_game_limit(text) from public, anon, authenticated, service_role;
+
+-- ---------------------------------------------------------------
+-- Scores: drop the direct insert path and the public read.
+-- status stays 'approved' for rows that already exist. Pending and
+-- rejected rows are stored but omitted from every public read.
+-- ---------------------------------------------------------------
+alter table public.arcade_scores
+  add column if not exists status text not null default 'approved';
+
+alter table public.arcade_scores drop constraint if exists arcade_scores_status_check;
+alter table public.arcade_scores
+  add constraint arcade_scores_status_check
+  check (status in ('approved', 'pending', 'rejected'));
+
 create index if not exists arcade_scores_user_game_created
   on public.arcade_scores (user_id, game_id, created_at desc);
 
@@ -115,18 +163,35 @@ begin
 end;
 $$;
 
-revoke all on function public.arcade_scores_set_season() from public, anon, authenticated;
+revoke all on function public.arcade_scores_set_season() from public, anon, authenticated, service_role;
 
 drop policy if exists "scores insert own" on public.arcade_scores;
+drop policy if exists "scores readable" on public.arcade_scores;
 
--- TRUNCATE, TRIGGER, REFERENCES, INSERT, UPDATE, DELETE, and SELECT on
--- user_id all go away. Leaderboards do not read this table.
 revoke all on table public.arcade_scores from public, anon, authenticated;
-grant select (game_id, score, season_id, created_at)
-  on table public.arcade_scores to anon, authenticated;
 
 -- ---------------------------------------------------------------
--- arcade_start_run(game) -> uuid token
+-- Seasons are read inside the definer functions. The service role keeps
+-- the grants it already has (admin reset). Nobody else does.
+-- ---------------------------------------------------------------
+drop policy if exists "seasons readable" on public.arcade_seasons;
+revoke all on table public.arcade_seasons from public, anon, authenticated;
+
+-- ---------------------------------------------------------------
+-- Players: a signed-in user can read and save only their own row.
+-- Anon gets nothing. No delete and no truncate for the API roles.
+-- ---------------------------------------------------------------
+drop policy if exists "players readable" on public.arcade_players;
+create policy "players readable" on public.arcade_players
+  for select to authenticated
+  using (auth.uid() = user_id);
+
+revoke all on table public.arcade_players from public, anon, authenticated;
+grant select, insert, update on table public.arcade_players to authenticated;
+
+-- ---------------------------------------------------------------
+-- arcade_start_run(game) -> uuid token.
+-- Starting another run for the same game burns the open token.
 -- ---------------------------------------------------------------
 create or replace function public.arcade_start_run(p_game text)
 returns uuid
@@ -160,8 +225,14 @@ begin
     and game_id = v_game
     and (
       (used = true and started_at < now() - interval '2 days')
-      or (used = false and started_at < now() - interval '6 hours')
+      or (used = false and started_at < now() - interval '20 minutes')
     );
+
+  update public.arcade_runs
+  set used = true
+  where user_id = auth.uid()
+    and game_id = v_game
+    and used = false;
 
   select count(*)::integer into v_recent
   from public.arcade_runs
@@ -181,11 +252,119 @@ begin
 end;
 $$;
 
-revoke all on function public.arcade_start_run(text) from public, anon, authenticated;
+revoke all on function public.arcade_start_run(text) from public, anon, authenticated, service_role;
 grant execute on function public.arcade_start_run(text) to authenticated;
 
 -- ---------------------------------------------------------------
--- arcade_submit_score(run_id, score) -> true when the row is stored
+-- arcade_checkpoint(run_id, score) -> true when this beat was credited.
+-- The client sends the live score only. The server writes the clock.
+-- ---------------------------------------------------------------
+create or replace function public.arcade_checkpoint(p_run_id uuid, p_score integer)
+returns boolean
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+declare
+  v_game text;
+  v_started timestamptz;
+  v_beats integer;
+  v_credited numeric;
+  v_checkpoint integer;
+  v_last timestamptz;
+  v_wall numeric;
+  v_gap numeric;
+  v_pps numeric;
+  v_cap integer;
+  v_max_age integer;
+begin
+  if auth.uid() is null
+     or coalesce((auth.jwt() ->> 'is_anonymous')::boolean, false) then
+    raise exception 'sign in required' using errcode = '28000';
+  end if;
+
+  if p_run_id is null or p_score is null or p_score < 0 or p_score > 10000000 then
+    return false;
+  end if;
+
+  select game_id into v_game
+  from public.arcade_runs
+  where id = p_run_id
+    and user_id = auth.uid()
+    and used = false;
+
+  if v_game is null then
+    return false;
+  end if;
+
+  perform pg_advisory_xact_lock(hashtext(auth.uid()::text || v_game));
+
+  v_game := null;
+  select game_id, started_at, beats, credited_seconds, checkpoint_score, last_beat
+  into v_game, v_started, v_beats, v_credited, v_checkpoint, v_last
+  from public.arcade_runs
+  where id = p_run_id
+    and user_id = auth.uid()
+    and used = false;
+
+  if v_game is null then
+    return false;
+  end if;
+
+  select g.max_per_second, g.max_score, g.max_age_seconds
+  into v_pps, v_cap, v_max_age
+  from public.arcade_game_limit(v_game) as g;
+
+  if v_pps is null then
+    return false;
+  end if;
+
+  v_wall := extract(epoch from (clock_timestamp() - v_started));
+  if v_wall < 0 or v_wall > v_max_age or p_score > v_cap then
+    return false;
+  end if;
+
+  if v_beats = 0 then
+    -- No prior beat: only a young run can start the clock. Credit the
+    -- whole wall gap. Sleeping past this window earns nothing.
+    if v_wall > 20 then
+      return false;
+    end if;
+    v_gap := v_wall;
+  else
+    v_gap := extract(epoch from (clock_timestamp() - v_last));
+    -- Too soon: ignore, leave the previous beat in place.
+    -- Too late: the idle stretch is not credited.
+    if v_gap <= 3 or v_gap > 12 then
+      return false;
+    end if;
+  end if;
+
+  if p_score < v_checkpoint or (p_score - v_checkpoint) > v_gap * v_pps then
+    return false;
+  end if;
+
+  update public.arcade_runs
+  set beats = v_beats + 1,
+      last_beat = clock_timestamp(),
+      credited_seconds = v_credited + v_gap,
+      checkpoint_score = p_score
+  where id = p_run_id
+    and user_id = auth.uid()
+    and used = false;
+
+  return found;
+end;
+$$;
+
+revoke all on function public.arcade_checkpoint(uuid, integer) from public, anon, authenticated, service_role;
+grant execute on function public.arcade_checkpoint(uuid, integer) to authenticated;
+
+-- ---------------------------------------------------------------
+-- arcade_submit_score(run_id, score) -> true when the row is stored.
+-- Pending rows are stored and return true, but public reads skip them.
+-- A failed check still burns the token (the function returns false
+-- instead of raising, so the consume commits).
 -- ---------------------------------------------------------------
 create or replace function public.arcade_submit_score(p_run_id uuid, p_score integer)
 returns boolean
@@ -196,10 +375,23 @@ as $$
 declare
   v_game text;
   v_started timestamptz;
+  v_beats integer;
+  v_credited numeric;
+  v_checkpoint integer;
+  v_last timestamptz;
   v_elapsed numeric;
+  v_gap numeric;
   v_min numeric;
   v_pps numeric;
   v_cap integer;
+  v_max_age integer;
+  v_review integer;
+  v_season text;
+  v_season_n integer;
+  v_season_best integer;
+  v_all_n integer;
+  v_all_best integer;
+  v_hold boolean;
   v_recent integer;
 begin
   if auth.uid() is null
@@ -220,8 +412,7 @@ begin
     raise exception 'invalid run' using errcode = '22023';
   end if;
 
-  -- Same key as arcade_start_run. Held until this transaction ends, so two
-  -- submits for one player and game cannot both pass the rate-limit count.
+  -- Same key as arcade_start_run and arcade_checkpoint.
   perform pg_advisory_xact_lock(hashtext(auth.uid()::text || v_game));
 
   v_game := null;
@@ -231,7 +422,8 @@ begin
   where id = p_run_id
     and user_id = auth.uid()
     and used = false
-  returning game_id, started_at into v_game, v_started;
+  returning game_id, started_at, beats, credited_seconds, checkpoint_score, last_beat
+  into v_game, v_started, v_beats, v_credited, v_checkpoint, v_last;
 
   if v_game is null then
     raise exception 'invalid run' using errcode = '22023';
@@ -247,51 +439,91 @@ begin
     return false;
   end if;
 
+  select g.min_seconds, g.max_per_second, g.max_score, g.max_age_seconds, g.review_at
+  into v_min, v_pps, v_cap, v_max_age, v_review
+  from public.arcade_game_limit(v_game) as g;
+
   v_elapsed := extract(epoch from (clock_timestamp() - v_started));
 
-  select r.min_seconds, r.max_per_second, r.max_score
-  into v_min, v_pps, v_cap
-  from (
-    values
-      ('neon-chase'::text, 2::numeric, 8::numeric, 12000),
-      ('void-beast', 3, 1500, 1500000),
-      ('aquatic-rush', 3, 2500, 2000000),
-      ('spin-ball', 3, 15000, 2000000)
-  ) as r(game_id, min_seconds, max_per_second, max_score)
-  where r.game_id = v_game;
-
-  if v_min is null
-     or v_elapsed < v_min
-     or v_elapsed > 6 * 3600
-     or p_score > v_cap
-     or p_score > v_elapsed * v_pps then
+  if v_min is null or v_elapsed < v_min or v_elapsed > v_max_age or p_score > v_cap then
     return false;
   end if;
 
-  insert into public.arcade_scores (user_id, game_id, score)
-  values (auth.uid(), v_game, p_score);
+  if v_beats = 0 then
+    -- A run that never checked in can only post a short crash.
+    if v_elapsed > 15 then
+      return false;
+    end if;
+    v_credited := v_elapsed;
+  else
+    v_gap := extract(epoch from (clock_timestamp() - v_last));
+    if v_last is null or v_gap < 0 or v_gap > 12 then
+      return false;
+    end if;
+    if p_score > v_checkpoint + v_gap * v_pps then
+      return false;
+    end if;
+    v_credited := v_credited + v_gap;
+  end if;
+
+  if p_score > v_credited * v_pps then
+    return false;
+  end if;
+
+  select s.id into v_season
+  from public.arcade_seasons s
+  where s.is_active
+  limit 1;
+  v_season := coalesce(v_season, 'all-time');
+
+  select
+    count(*) filter (where s.season_id = v_season)::integer,
+    max(s.score) filter (where s.season_id = v_season),
+    count(*)::integer,
+    max(s.score)
+  into v_season_n, v_season_best, v_all_n, v_all_best
+  from public.arcade_scores s
+  where s.game_id = v_game
+    and s.status = 'approved';
+
+  -- Near the cap, or a new number one on a board that already has a
+  -- score. The first approved score on an empty board is not held
+  -- unless it is near the cap. Ties do not take the top (earlier
+  -- created_at wins) and are not held.
+  v_hold := p_score >= v_review
+    or (v_season_n > 0 and p_score > v_season_best)
+    or (v_all_n > 0 and p_score > v_all_best);
+
+  insert into public.arcade_scores (user_id, game_id, score, status)
+  values (auth.uid(), v_game, p_score, case when v_hold then 'pending' else 'approved' end);
 
   return true;
 end;
 $$;
 
-revoke all on function public.arcade_submit_score(uuid, integer) from public, anon, authenticated;
+revoke all on function public.arcade_submit_score(uuid, integer) from public, anon, authenticated, service_role;
 grant execute on function public.arcade_submit_score(uuid, integer) to authenticated;
 
 -- ---------------------------------------------------------------
--- Leaderboard. No user ids. `mine` is computed inside the function.
--- Optional p_season: null = active season, 'all-time' = every season.
+-- Leaderboard. Approved rows only. No user ids leave the impl.
+--
+-- PostgreSQL identifies overloads by argument types, not names, so the
+-- new client function cannot also be (text, integer, text). It is
+-- (p_game, p_limit) and always uses the active season. The deployed
+-- client keeps calling (p_game_id, p_limit, p_season_id); that overload
+-- returns username and character_id and does not return user_id.
+-- Callers must pass argument names. A positional call with two arguments
+-- is ambiguous because p_season_id has a default, which the deployed
+-- client relies on.
 -- ---------------------------------------------------------------
-drop view if exists public.arcade_leaderboard_all_time;
-drop function if exists public.arcade_top_scores(text, int, text);
-
-create function public.arcade_top_scores(
+create or replace function public.arcade_top_scores_impl(
   p_game text,
-  p_limit integer default 10,
-  p_season text default null
+  p_limit integer,
+  p_season text
 )
 returns table (
   rank bigint,
+  user_id uuid,
   display_name text,
   score integer,
   created_at timestamptz,
@@ -328,10 +560,12 @@ begin
     select distinct on (s.user_id) s.user_id, s.score, s.created_at
     from public.arcade_scores s
     where s.game_id = v_game
+      and s.status = 'approved'
       and (v_season = 'all-time' or s.season_id = v_season)
     order by s.user_id, s.score desc, s.created_at asc
   )
   select row_number() over (order by b.score desc, b.created_at asc) as rank,
+         b.user_id,
          left(coalesce(nullif(btrim(p.username), ''), 'PLAYER'), 24) as display_name,
          b.score,
          b.created_at,
@@ -343,12 +577,73 @@ begin
 end;
 $$;
 
-revoke all on function public.arcade_top_scores(text, integer, text) from public;
+revoke all on function public.arcade_top_scores_impl(text, integer, text) from public, anon, authenticated, service_role;
+
+drop view if exists public.arcade_leaderboard_all_time;
+drop function if exists public.arcade_top_scores(text, int, text);
+drop function if exists public.arcade_top_scores(text, int);
+
+create function public.arcade_top_scores(
+  p_game text,
+  p_limit integer default 10
+)
+returns table (
+  rank bigint,
+  display_name text,
+  score integer,
+  created_at timestamptz,
+  mine boolean
+)
+language sql
+stable
+security definer
+set search_path = public, pg_temp
+as $$
+  select i.rank, i.display_name, i.score, i.created_at, i.mine
+  from public.arcade_top_scores_impl(p_game, p_limit, null) i;
+$$;
+
+revoke all on function public.arcade_top_scores(text, integer) from public, anon, authenticated, service_role;
+grant execute on function public.arcade_top_scores(text, integer) to anon, authenticated;
+
+-- Deployed client overload. Forwards through the same definer as the new
+-- function. `username` is the display name. user_id is not returned, so
+-- the old client's mine-highlight (it compared user_id locally) stays off
+-- until that client is updated. p_season_id null means the active season.
+create function public.arcade_top_scores(
+  p_game_id text,
+  p_limit integer default 10,
+  p_season_id text default null
+)
+returns table (
+  rank bigint,
+  username text,
+  character_id text,
+  score integer,
+  created_at timestamptz,
+  mine boolean
+)
+language sql
+stable
+security definer
+set search_path = public, pg_temp
+as $$
+  select i.rank,
+         i.display_name as username,
+         coalesce(pl.character_id, 'charlie') as character_id,
+         i.score,
+         i.created_at,
+         i.mine
+  from public.arcade_top_scores_impl(p_game_id, p_limit, p_season_id) i
+  left join public.arcade_players pl on pl.user_id = i.user_id;
+$$;
+
+revoke all on function public.arcade_top_scores(text, integer, text) from public, anon, authenticated, service_role;
 grant execute on function public.arcade_top_scores(text, integer, text) to anon, authenticated;
 
 create view public.arcade_leaderboard_all_time
 with (security_invoker = true) as
-select g.game_id, t.rank, t.display_name, t.score, t.created_at, t.mine
+select g.game_id, t.rank, t.username as display_name, t.score, t.created_at, t.mine
 from (
   values
     ('neon-chase'::text),
@@ -360,3 +655,71 @@ cross join lateral public.arcade_top_scores(g.game_id, 10, 'all-time') as t;
 
 revoke all on table public.arcade_leaderboard_all_time from public, anon, authenticated;
 grant select on table public.arcade_leaderboard_all_time to anon, authenticated;
+
+-- ---------------------------------------------------------------
+-- Counts for /api/nexus-status. Service role only. Approved scores
+-- only, so a pending forgery is not the public high score.
+-- ---------------------------------------------------------------
+create or replace function public.arcade_count_players()
+returns bigint
+language sql
+stable
+security definer
+set search_path = public, pg_temp
+as $$
+  select count(*) from public.arcade_players;
+$$;
+
+revoke all on function public.arcade_count_players() from public, anon, authenticated, service_role;
+grant execute on function public.arcade_count_players() to service_role;
+
+create or replace function public.arcade_count_scores(p_game text default null, p_since timestamptz default null)
+returns bigint
+language plpgsql
+stable
+security definer
+set search_path = public, pg_temp
+as $$
+begin
+  if p_game is not null and (char_length(p_game) > 32 or p_game !~ '^[a-z0-9-]+$') then
+    return 0;
+  end if;
+
+  return (
+    select count(*)
+    from public.arcade_scores s
+    where s.status = 'approved'
+      and (p_game is null or s.game_id = p_game)
+      and (p_since is null or s.created_at >= p_since)
+  );
+end;
+$$;
+
+revoke all on function public.arcade_count_scores(text, timestamptz) from public, anon, authenticated, service_role;
+grant execute on function public.arcade_count_scores(text, timestamptz) to service_role;
+
+create or replace function public.arcade_max_score(p_game text default null)
+returns integer
+language plpgsql
+stable
+security definer
+set search_path = public, pg_temp
+as $$
+begin
+  if p_game is not null and (char_length(p_game) > 32 or p_game !~ '^[a-z0-9-]+$') then
+    return null;
+  end if;
+
+  return (
+    select max(s.score)
+    from public.arcade_scores s
+    where s.status = 'approved'
+      and (p_game is null or s.game_id = p_game)
+  );
+end;
+$$;
+
+revoke all on function public.arcade_max_score(text) from public, anon, authenticated, service_role;
+grant execute on function public.arcade_max_score(text) to service_role;
+
+commit;

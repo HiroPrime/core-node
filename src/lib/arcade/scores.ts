@@ -69,6 +69,25 @@ export function startRun(gameId: ArcadeGameId): void {
 }
 
 /**
+ * Tell the server this signed-in run is still going, and what the score is.
+ * No-ops for guests, for a run that has already been submitted, and when a
+ * newer run has replaced this one. The server decides whether the beat counts.
+ */
+export async function checkpointRun(gameId: ArcadeGameId, score: number): Promise<void> {
+  const runPromise = pendingRuns.get(gameId);
+  if (!runPromise || !hasSupabaseEnv()) return;
+  try {
+    const runId = await runPromise;
+    if (pendingRuns.get(gameId) !== runPromise || !runId) return;
+    const value = Math.max(0, Math.floor(Number(score) || 0));
+    const supabase = createClient();
+    await supabase.rpc("arcade_checkpoint", { p_run_id: runId, p_score: value });
+  } catch {
+    /* the next beat tries again */
+  }
+}
+
+/**
  * Record a finished run.
  * - Guests (no userId): localStorage only. Never sent to Supabase, including
  *   after the guest later signs in.

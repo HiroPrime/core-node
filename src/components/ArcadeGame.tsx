@@ -6,7 +6,7 @@ import { Pinball } from "@/components/Pinball";
 import { NeonChase } from "@/components/NeonChase";
 import { VoidBeast } from "@/components/VoidBeast";
 import { characterSprites, getCharacter } from "@/lib/arcade/roster";
-import { fetchTopScores, localBest, startRun, submitScore, type ArcadeGameId, type BoardRow } from "@/lib/arcade/scores";
+import { checkpointRun, fetchTopScores, localBest, startRun, submitScore, type ArcadeGameId, type BoardRow } from "@/lib/arcade/scores";
 import { FloorPresence, type RemoteView } from "@/lib/arcade/presence";
 import { SPECTATE_ENABLED, SpectateHost } from "@/lib/arcade/spectate";
 import { SpectateWindow } from "@/components/arcade/SpectateWindow";
@@ -258,6 +258,23 @@ export function ArcadeGame({
     const t = window.setInterval(() => refreshBoards.current(), BOARD_REFRESH_MS);
     return () => window.clearInterval(t);
   }, []);
+
+  /* Signed-in runs check in with the server so an idle token cannot age into a high score. */
+  useEffect(() => {
+    if (!racing || !userId) return;
+    const gameId = cabinet;
+    let interval = 0;
+    const first = window.setTimeout(() => {
+      void checkpointRun(gameId, liveScoreRef.current);
+      interval = window.setInterval(() => {
+        void checkpointRun(gameId, liveScoreRef.current);
+      }, 5000);
+    }, 1000);
+    return () => {
+      window.clearTimeout(first);
+      window.clearInterval(interval);
+    };
+  }, [racing, userId, cabinet]);
 
   /* Live spectating (player side): listen while inside a cabinet; encode only once a viewer joins. */
   useEffect(() => {
