@@ -127,7 +127,7 @@ export async function fetchTopScores(gameId: ArcadeGameId, limit = 5): Promise<B
   if (hasSupabaseEnv()) {
     try {
       const supabase = createClient();
-      const { data, error } = await supabase.rpc("arcade_top_scores", { p_game: gameId, p_limit: limit });
+      const { data, error } = await supabase.rpc("arcade_board", { p_game: gameId, p_limit: limit });
       if (!error && Array.isArray(data)) {
         return (data as TopScoreRow[]).map((r) => ({
           rank: Number(r.rank),

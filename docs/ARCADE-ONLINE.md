@@ -13,11 +13,12 @@
    creates `arcade_seasons` (seeded with `all-time`, active), `arcade_players`, `arcade_scores`, RLS, and the
    leaderboard. `20261024043000_arcade_score_hardening.sql` removes direct inserts and public table
    reads. Scores go through `arcade_start_run`, `arcade_checkpoint` (about every 5 seconds while a
-   signed-in run is in progress), and `arcade_submit_score`. `arcade_top_scores(game, limit)` returns a
-   display name, score, date, and `mine` with no user id. A score near that game's cap, or a new number
-   one, is stored as `pending` and stays off the board until an admin approves it. The old
-   `arcade_top_scores(p_game_id, p_limit, p_season_id)` shape remains for the deployed client and also
-   returns no user id. It assumes `public.profiles(id, username)` exists (it does).
+   signed-in run is in progress), and `arcade_submit_score`. `arcade_board(game, limit)` returns a
+   display name, score, date, and `mine` with no user id. The first score on a board, any score that
+   would place in the top 3, and a score near that game's cap are stored as `pending` and stay off the
+   board until an admin approves them. The deployed client still calls
+   `arcade_top_scores(p_game_id, p_limit, p_season_id)`, which returns no user id. It assumes
+   `public.profiles(id, username)` exists (it does).
    `supabase/scripts/audit_arcade_scores.sql` is a read-only check for scores above the new caps.
 2. **Env**: set `ARCADE_ADMIN_EMAILS=you@example.com,other@example.com` on Vercel (server-only).
    `SUPABASE_SERVICE_ROLE_KEY` must already be set (it is, for /api/population).

@@ -7,6 +7,10 @@
 -- NOT applied automatically. Review, then run with `supabase db push`
 -- or paste into the Supabase SQL editor. Do not apply from the app.
 --
+-- The file is one transaction. If the runner has already issued BEGIN,
+-- this BEGIN is a no-op warning and this COMMIT commits that transaction.
+-- A later COMMIT from the runner warns and leaves the changes in place.
+--
 -- Heartbeats stop "start, sleep, submit the cap": credited time only
 -- advances across short gaps between server-timed checkpoints, and a run
 -- with no checkpoint is rejected once it is older than 15 seconds.
@@ -360,6 +364,52 @@ $$;
 revoke all on function public.arcade_checkpoint(uuid, integer) from public, anon, authenticated, service_role;
 grant execute on function public.arcade_checkpoint(uuid, integer) to authenticated;
 
+-- Where this score would sit on one board (best score per player).
+-- Null when it would not be the row on display (the player already has
+-- an equal or better approved score). Rank 1 is an empty board.
+-- Not an API.
+create or replace function public.arcade_board_rank(
+  p_game text,
+  p_season text,
+  p_user uuid,
+  p_score integer
+)
+returns integer
+language sql
+stable
+security definer
+set search_path = public, pg_temp
+as $$
+  with best as (
+    select s.user_id, max(s.score) as score
+    from public.arcade_scores s
+    where s.game_id = p_game
+      and s.status = 'approved'
+      and (p_season = 'all-time' or s.season_id = p_season)
+      and s.user_id is distinct from p_user
+    group by s.user_id
+  ),
+  mine as (
+    select max(s.score) as score
+    from public.arcade_scores s
+    where s.game_id = p_game
+      and s.status = 'approved'
+      and (p_season = 'all-time' or s.season_id = p_season)
+      and s.user_id = p_user
+  )
+  select case
+    when (select m.score from mine m) is not null
+         and (select m.score from mine m) >= p_score then null
+    else 1 + (
+      select count(*)::integer
+      from best b
+      where b.score >= p_score
+    )
+  end;
+$$;
+
+revoke all on function public.arcade_board_rank(text, text, uuid, integer) from public, anon, authenticated, service_role;
+
 -- ---------------------------------------------------------------
 -- arcade_submit_score(run_id, score) -> true when the row is stored.
 -- Pending rows are stored and return true, but public reads skip them.
@@ -387,10 +437,8 @@ declare
   v_max_age integer;
   v_review integer;
   v_season text;
-  v_season_n integer;
-  v_season_best integer;
-  v_all_n integer;
-  v_all_best integer;
+  v_season_rank integer;
+  v_all_rank integer;
   v_hold boolean;
   v_recent integer;
 begin
@@ -476,23 +524,17 @@ begin
   limit 1;
   v_season := coalesce(v_season, 'all-time');
 
-  select
-    count(*) filter (where s.season_id = v_season)::integer,
-    max(s.score) filter (where s.season_id = v_season),
-    count(*)::integer,
-    max(s.score)
-  into v_season_n, v_season_best, v_all_n, v_all_best
-  from public.arcade_scores s
-  where s.game_id = v_game
-    and s.status = 'approved';
-
-  -- Near the cap, or a new number one on a board that already has a
-  -- score. The first approved score on an empty board is not held
-  -- unless it is near the cap. Ties do not take the top (earlier
-  -- created_at wins) and are not held.
+  -- Season board and all-time board. Hold the score when either board
+  -- has no approved row yet (that first score is rank 1), or this score
+  -- would place in that board's top 3. An equal score stays behind the
+  -- earlier row, so it places only when fewer than 3 other players
+  -- already have a best score at least this high. Near the cap is held
+  -- even when it would rank lower.
+  v_season_rank := public.arcade_board_rank(v_game, v_season, auth.uid(), p_score);
+  v_all_rank := public.arcade_board_rank(v_game, 'all-time', auth.uid(), p_score);
   v_hold := p_score >= v_review
-    or (v_season_n > 0 and p_score > v_season_best)
-    or (v_all_n > 0 and p_score > v_all_best);
+    or (v_season_rank is not null and v_season_rank <= 3)
+    or (v_all_rank is not null and v_all_rank <= 3);
 
   insert into public.arcade_scores (user_id, game_id, score, status)
   values (auth.uid(), v_game, p_score, case when v_hold then 'pending' else 'approved' end);
@@ -507,14 +549,11 @@ grant execute on function public.arcade_submit_score(uuid, integer) to authentic
 -- ---------------------------------------------------------------
 -- Leaderboard. Approved rows only. No user ids leave the impl.
 --
--- PostgreSQL identifies overloads by argument types, not names, so the
--- new client function cannot also be (text, integer, text). It is
--- (p_game, p_limit) and always uses the active season. The deployed
--- client keeps calling (p_game_id, p_limit, p_season_id); that overload
--- returns username and character_id and does not return user_id.
--- Callers must pass argument names. A positional call with two arguments
--- is ambiguous because p_season_id has a default, which the deployed
--- client relies on.
+-- The new client calls arcade_board(p_game, p_limit). The deployed client
+-- keeps arcade_top_scores(p_game_id, p_limit, p_season_id), whose third
+-- argument defaults to the active season. These are different names, so
+-- arcade_top_scores('game', 10) and arcade_top_scores('game', 10, 'all-time')
+-- both resolve to that one function. user_id is not returned.
 -- ---------------------------------------------------------------
 create or replace function public.arcade_top_scores_impl(
   p_game text,
@@ -582,8 +621,9 @@ revoke all on function public.arcade_top_scores_impl(text, integer, text) from p
 drop view if exists public.arcade_leaderboard_all_time;
 drop function if exists public.arcade_top_scores(text, int, text);
 drop function if exists public.arcade_top_scores(text, int);
+drop function if exists public.arcade_board(text, int);
 
-create function public.arcade_top_scores(
+create function public.arcade_board(
   p_game text,
   p_limit integer default 10
 )
@@ -603,13 +643,13 @@ as $$
   from public.arcade_top_scores_impl(p_game, p_limit, null) i;
 $$;
 
-revoke all on function public.arcade_top_scores(text, integer) from public, anon, authenticated, service_role;
-grant execute on function public.arcade_top_scores(text, integer) to anon, authenticated;
+revoke all on function public.arcade_board(text, integer) from public, anon, authenticated, service_role;
+grant execute on function public.arcade_board(text, integer) to anon, authenticated;
 
--- Deployed client overload. Forwards through the same definer as the new
--- function. `username` is the display name. user_id is not returned, so
--- the old client's mine-highlight (it compared user_id locally) stays off
+-- Deployed client. `username` is the display name. user_id is not returned,
+-- so the old client's mine-highlight (it compared user_id locally) stays off
 -- until that client is updated. p_season_id null means the active season.
+-- This is the only arcade_top_scores, so a positional call is unambiguous.
 create function public.arcade_top_scores(
   p_game_id text,
   p_limit integer default 10,
