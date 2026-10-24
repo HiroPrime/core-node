@@ -7,7 +7,6 @@ import NexusAuthModal from "@/components/NexusAuthModal";
 import { ArcadeStartScreen } from "@/components/arcade/ArcadeStartScreen";
 import { CharacterSelect } from "@/components/arcade/CharacterSelect";
 import { loadDisplayName, loadSavedCharacter, saveCharacter } from "@/lib/arcade/player";
-import { syncGuestScores } from "@/lib/arcade/scores";
 import { createClient } from "@/lib/supabase/client";
 import { clearClaim, currentClaim, startSessionGuard, type SessionClaim } from "@/lib/session-guard";
 
@@ -45,13 +44,6 @@ export function ArcadeShell() {
       return;
     }
     kicked.current = false;
-    // Capture on login: move this browser's guest bests to the account once.
-    void syncGuestScores(u.id).then((n) => {
-      if (n > 0) {
-        setNotice(`Saved your guest high score${n > 1 ? "s" : ""} to your account`);
-        window.setTimeout(() => setNotice(null), 5000);
-      }
-    });
     const next = currentClaim(u.id, freshLogin);
     setClaim(next.claim);
     setClaimFresh(next.fresh);

@@ -12,9 +12,13 @@ import { createClient, createServiceClient } from "@/lib/supabase/server";
  *       Deletes that game's scores in the active season (default) or every season.
  *   { "action": "new-season", "name": "Season 2", "id"?: "season-2" }
  *       Ends the active season and starts a new active one. Old scores stay.
+ *   { "action": "list-pending" }
+ *       Scores held for review (near the cap, or a new number one).
+ *   { "action": "review-score", "scoreId": 123, "decision": "approved" | "rejected" }
+ *       Publishes or rejects one held score. Approved rows join the board.
  */
 
-const GAME_IDS = new Set(["neon-chase", "void-beast", "aquatic-rush"]);
+const GAME_IDS = new Set(["neon-chase", "void-beast", "aquatic-rush", "spin-ball"]);
 
 function adminEmails() {
   return (process.env.ARCADE_ADMIN_EMAILS ?? "")
@@ -39,7 +43,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Service role is not configured." }, { status: 500 });
   }
 
-  let body: { action?: string; gameId?: string; scope?: string; name?: string; id?: string };
+  let body: {
+    action?: string;
+    gameId?: string;
+    scope?: string;
+    name?: string;
+    id?: string;
+    scoreId?: number | string;
+    decision?: string;
+  };
   try {
     body = await request.json();
   } catch {
@@ -80,6 +92,33 @@ export async function POST(request: Request) {
     const { error } = await service.from("arcade_seasons").insert({ id, name, starts_at: now, is_active: true });
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ ok: true, action: "new-season", season: { id, name, starts_at: now } });
+  }
+
+  if (body.action === "list-pending") {
+    const { data, error } = await service
+      .from("arcade_scores")
+      .select("id, user_id, game_id, score, created_at, status")
+      .eq("status", "pending")
+      .order("created_at", { ascending: true })
+      .limit(50);
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ ok: true, action: "list-pending", scores: data ?? [] });
+  }
+
+  if (body.action === "review-score") {
+    const scoreId = Number(body.scoreId);
+    const decision = body.decision === "approved" || body.decision === "rejected" ? body.decision : null;
+    if (!Number.isInteger(scoreId) || scoreId < 1 || !decision) {
+      return NextResponse.json({ error: "scoreId and decision (approved or rejected) required." }, { status: 400 });
+    }
+    const { data, error } = await service
+      .from("arcade_scores")
+      .update({ status: decision })
+      .eq("id", scoreId)
+      .select("id, status, game_id, score");
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (!data?.length) return NextResponse.json({ error: "Score not found." }, { status: 404 });
+    return NextResponse.json({ ok: true, action: "review-score", score: data[0] });
   }
 
   return NextResponse.json({ error: "Unknown action." }, { status: 400 });

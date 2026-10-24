@@ -50,11 +50,14 @@ export function NeonChase({
   onExit,
   onGameOver,
   onScore,
+  onRunStart,
 }: {
   onExit: () => void;
   onGameOver?: (score: number) => void;
   /** Live score for spectators (optional). */
   onScore?: (score: number) => void;
+  /** Fired once when a run's countdown starts. */
+  onRunStart?: () => void;
 }) {
   const shellRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -66,6 +69,10 @@ export function NeonChase({
   onGameOverRef.current = onGameOver;
   const onScoreRef = useRef(onScore);
   onScoreRef.current = onScore;
+  const onRunStartRef = useRef(onRunStart);
+  useEffect(() => {
+    onRunStartRef.current = onRunStart;
+  }, [onRunStart]);
 
   useEffect(() => {
     const shell = shellRef.current;
@@ -196,12 +203,14 @@ export function NeonChase({
       phase = "count";
       countT = 0;
       held.clear();
+      onRunStartRef.current?.();
     };
     const arm = () => {
       fresh();
       countT = 0;
       held.clear();
       phase = desktop() ? "controls" : "count";
+      if (phase === "count") onRunStartRef.current?.();
     };
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.code === "Escape") {
