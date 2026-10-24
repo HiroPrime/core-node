@@ -16,8 +16,9 @@
 -- with no checkpoint is rejected once it is older than 15 seconds.
 -- A client that calls arcade_checkpoint on a timer can still climb at the
 -- sustained rate below. That is why the caps are low, each run has a
--- maximum age, only one token is open, and a score near the cap or a new
--- number one is stored as pending and left off the public board.
+-- maximum age, only one token is open, and a score near the cap, the
+-- first score on an empty board, or any score that would place in the
+-- top 3 is stored as pending and left off the public board.
 
 begin;
 
