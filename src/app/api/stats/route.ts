@@ -34,7 +34,13 @@ export async function OPTIONS(request: Request) {
 export async function GET(request: Request) {
   try {
     const supabase = createServiceClient();
-    if (!supabase) return statsResponse(request, 0);
+    if (!supabase) {
+      console.error("stats unavailable: SUPABASE_SERVICE_ROLE_KEY is not set");
+      return NextResponse.json(
+        { error: "stats unavailable" },
+        { status: 503, headers: { ...corsHeaders(request), "Cache-Control": "no-store" } }
+      );
+    }
     const { data, error } = await supabase
       .from("site_metrics")
       .select("total_unique_visitors")
