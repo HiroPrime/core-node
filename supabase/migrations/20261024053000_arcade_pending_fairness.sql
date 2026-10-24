@@ -161,3 +161,9 @@ grant execute on function public.arcade_submit_score(uuid, integer) to authentic
 
 -- Already installed. Signature is the zero-argument trigger function.
 alter function public.touch_portfolio_votes_updated_at() set search_path = public, pg_temp;
+
+-- The floor reads arcade_board. This view is unused. Its columns are
+-- game, rank, display name, score, time, and mine: no user id, and the
+-- underlying read is approved rows only. Drop it rather than leave an
+-- anon-selectable copy of the board.
+drop view if exists public.arcade_leaderboard_all_time;
