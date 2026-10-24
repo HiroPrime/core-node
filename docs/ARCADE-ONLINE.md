@@ -19,7 +19,8 @@
    display name, score, date, and `mine` with no user id. The first score on a board, any score that
    would place in the top 3, and a score near that game's cap are stored as `pending` and stay off the
    board until an admin approves them. A newer pending score replaces that player's older pending
-   score for the same game, so the review queue keeps one pending row per player per game. The deployed client still calls
+   score for the same game only when it is higher. An equal or lower score leaves the higher pending
+   row in place. The deployed client still calls
    `arcade_top_scores(p_game_id, p_limit, p_season_id)`, which returns no user id. It assumes
    `public.profiles(id, username)` exists (it does).
    `supabase/scripts/audit_arcade_scores.sql` is a read-only check for scores above the new caps.

@@ -116,7 +116,8 @@ export async function submitScore(
     const user = authResult.data.user;
     if (!user || user.id !== userId || user.is_anonymous || !runId) return "failed";
     const { data, error } = await supabase.rpc("arcade_submit_score", { p_run_id: runId, p_score: value });
-    return error || data !== true ? "failed" : "remote";
+    const accepted = data === true || data === "stored" || data === "kept";
+    return error || !accepted ? "failed" : "remote";
   } catch {
     return "failed";
   }
