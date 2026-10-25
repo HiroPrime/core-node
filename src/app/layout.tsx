@@ -57,6 +57,9 @@ export const metadata: Metadata = {
     icon: [{ url: "/icon", type: "image/png" }],
     apple: [{ url: "/apple-icon", type: "image/png" }],
   },
+  other: {
+    "p:domain_verify": "57cd3776d5c1275e26204b238056b885",
+  },
 };
 
 export const viewport: Viewport = {
