@@ -21,7 +21,11 @@ export default function LoginClient({ next }: { next: string }) {
       document.cookie = `auth_next=${encodeURIComponent(next)}; Path=/; Max-Age=600; SameSite=Lax${window.location.protocol === "https:" ? "; Secure" : ""}`;
       const { error } = await createClient().auth.signInWithOAuth({
         provider: "google",
-        options: { redirectTo: `${window.location.origin}/auth/callback` },
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+          // Backend only: always show Google's account chooser, pre-filled with the owner account (the arcade modal is untouched).
+          queryParams: { prompt: "select_account", login_hint: "basichiro@corenode.nexus" },
+        },
       });
       if (error) throw error;
     } catch {
