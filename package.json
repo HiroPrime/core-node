@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --test tests/backend-gate.test.ts tests/account-tier.test.ts"
+    "test": "node --test tests/backend-gate.test.ts tests/account-tier.test.ts tests/arcade-entry.test.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.3",

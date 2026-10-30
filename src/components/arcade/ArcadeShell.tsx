@@ -12,8 +12,8 @@ import { clearClaim, currentClaim, startSessionGuard, type SessionClaim } from "
 
 /**
  * Arcade outer shell: start screen -> sign in -> character select -> floor.
- * Signed in with a saved character: straight to the floor.
- * Guests can still play offline (scores stay on this device).
+ * The main page stays up for signed-in players; Play uses their saved character
+ * or opens character select. That is the same start path as before.
  */
 
 type Stage = "boot" | "start" | "select" | "world";
@@ -24,11 +24,9 @@ const hasSupabase = () =>
 export function ArcadeShell() {
   const [stage, setStage] = useState<Stage>(() => (hasSupabase() ? "boot" : "start"));
   const [user, setUser] = useState<User | null>(null);
-  const [authReady, setAuthReady] = useState(() => !hasSupabase());
   const [authOpen, setAuthOpen] = useState(false);
   const [name, setName] = useState<string | null>(null);
   const [characterId, setCharacterId] = useState<string | null>(null);
-  const [guest, setGuest] = useState(false);
   const booted = useRef(false);
   const wantsSelect = useRef(false);
   const userIdRef = useRef<string | null>(null);
@@ -74,7 +72,8 @@ export function ArcadeShell() {
     const saved = await loadSavedCharacter(u?.id ?? null);
     if (u) setName(await loadDisplayName(u.id, fallbackName(u)));
     setCharacterId(saved);
-    if (fromBoot) setStage(u && saved ? "world" : "start");
+    // Main page first. Play (onStart) is what enters the floor or character select.
+    if (fromBoot) setStage("start");
     else setStage(saved && !wantsSelect.current ? "world" : "select");
   }, []);
 
@@ -88,7 +87,6 @@ export function ArcadeShell() {
       userIdRef.current = u?.id ?? null;
       setUser(u);
       adopt(u, false);
-      setAuthReady(true);
       booted.current = true;
       void enterAs(u, true);
     });
@@ -101,7 +99,6 @@ export function ArcadeShell() {
       if (booted.current && u && prev !== u.id) {
         // Signed in from the modal (email/password) without leaving the page.
         setAuthOpen(false);
-        setGuest(false);
         void enterAs(u, false);
       }
     });
@@ -123,8 +120,6 @@ export function ArcadeShell() {
     setStage("world");
   };
 
-  if (stage === "boot") return <div className="arcade-boot" aria-busy="true" />;
-
   return (
     <>
       {notice && (
@@ -132,28 +127,22 @@ export function ArcadeShell() {
           {notice}
         </p>
       )}
-      {stage === "start" && (
+      {(stage === "boot" || stage === "start") && (
         <ArcadeStartScreen
-          signedIn={Boolean(user)}
-          playerName={user ? name : null}
-          authReady={authReady}
+          entryReady={stage === "start"}
           onStart={() => {
             wantsSelect.current = false;
             setStage(characterId ? "world" : "select");
           }}
-          onSignIn={() => setAuthOpen(true)}
-          onGuest={() => {
-            // Guests choose a character every time they play.
-            setGuest(true);
-            void loadSavedCharacter(null);
-            setCharacterId(null);
-            setStage("select");
+          onSignIn={() => {
+            // The modal returns OAuth to this page. /login sends people home, so it is only the fallback when Supabase is not configured.
+            if (hasSupabase()) setAuthOpen(true);
+            else window.location.assign("/login");
           }}
-          onChangeCharacter={user ? () => setStage("select") : undefined}
         />
       )}
       {stage === "select" && (
-        <CharacterSelect initial={characterId} playerName={user ? name : guest ? "GUEST" : null} onPick={pick} />
+        <CharacterSelect initial={characterId} playerName={user ? name : null} onPick={pick} />
       )}
       {stage === "world" && (
         <ArcadeGame
