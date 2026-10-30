@@ -103,8 +103,16 @@ export type Decision =
   | { action: 'notfound' }
   | { action: 'forward'; url: string; kind: 'owner' | 'watcher'; set: Record<string, string>; remove: string[] };
 
+export const BYPASS_HEADER = 'x-vercel-protection-bypass';
+
 /** Headers that must never reach nexus-control: Core Node's session cookies, and any client-supplied assertion. */
-const ALWAYS_REMOVE = ['cookie', ASSERTION_HEADER];
+const ALWAYS_REMOVE = ['cookie', ASSERTION_HEADER, BYPASS_HEADER];
+
+/** Vercel Deployment Protection automation bypass: lets this server-side rewrite reach a protected nexus-control. Optional; unset sends nothing. */
+function bypassSet(env: Env): Record<string, string> {
+  const s = env.NEXUS_CONTROL_BYPASS;
+  return typeof s === 'string' && s.length >= 16 ? { [BYPASS_HEADER]: s } : {};
+}
 
 export async function decideBackend(input: {
   pathname: string;
@@ -122,7 +130,7 @@ export async function decideBackend(input: {
   const url = `${origin}${route.target}${input.search ?? ''}`;
 
   if (route.kind === 'watcher') {
-    return bearerOk(input.authorization, env) ? { action: 'forward', url, kind: 'watcher', set: {}, remove: ALWAYS_REMOVE } : { action: 'notfound' };
+    return bearerOk(input.authorization, env) ? { action: 'forward', url, kind: 'watcher', set: bypassSet(env), remove: ALWAYS_REMOVE } : { action: 'notfound' };
   }
 
   if (!lc(env.BACKEND_ALLOWED_EMAIL)) return { action: 'notfound' };
@@ -131,5 +139,5 @@ export async function decideBackend(input: {
   if (!isBackendOwner(user, env)) return { action: 'notfound' };
   const assertion = signAssertion(lc(user!.email), env.BACKEND_PROXY_SECRET, input.nowMs);
   if (!assertion) return { action: 'notfound' };
-  return { action: 'forward', url, kind: 'owner', set: { [ASSERTION_HEADER]: assertion }, remove: [...ALWAYS_REMOVE, 'authorization'] };
+  return { action: 'forward', url, kind: 'owner', set: { [ASSERTION_HEADER]: assertion, ...bypassSet(env) }, remove: [...ALWAYS_REMOVE, 'authorization'] };
 }

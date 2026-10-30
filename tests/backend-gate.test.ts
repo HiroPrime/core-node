@@ -148,3 +148,18 @@ test('padded emails are denied: no trim anywhere in the email compare (user emai
   assert.equal(isBackendOwner(ownerUser, env), true, 'sanity: the exact owner still passes');
   assert.equal(isBackendOwner({ ...ownerUser, email: padded }, env), false);
 });
+
+test('optional Vercel protection bypass: sent upstream only when NEXUS_CONTROL_BYPASS is set; client-supplied one is stripped', async () => {
+  const secret = 'b'.repeat(24);
+  const withB = { ...env, NEXUS_CONTROL_BYPASS: secret };
+  const o = await run('/backend', ownerUser, withB);
+  assert.equal(o.action, 'forward');
+  if (o.action === 'forward') { assert.equal(o.set['x-vercel-protection-bypass'], secret); assert.ok(o.remove.includes('x-vercel-protection-bypass')); }
+  const w = await decideBackend({ pathname: '/backend/api/watch/queue', method: 'GET', authorization: 'Bearer ' + STUDIO, getUser: async () => null, env: withB });
+  assert.equal(w.action, 'forward');
+  if (w.action === 'forward') assert.equal(w.set['x-vercel-protection-bypass'], secret);
+  for (const bad of [undefined, '', 'short']) {
+    const n = await run('/backend', ownerUser, { ...env, NEXUS_CONTROL_BYPASS: bad });
+    if (n.action === 'forward') assert.equal(n.set['x-vercel-protection-bypass'], undefined, String(bad));
+  }
+});
