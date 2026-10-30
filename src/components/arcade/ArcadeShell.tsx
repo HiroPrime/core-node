@@ -12,8 +12,9 @@ import { clearClaim, currentClaim, startSessionGuard, type SessionClaim } from "
 
 /**
  * Arcade outer shell: start screen -> sign in -> character select -> floor.
- * The main page stays up for signed-in players; Play uses their saved character
- * or opens character select. That is the same start path as before.
+ * The main page stays up for signed-in players. Play uses their saved character
+ * or opens character select. Change character always opens character select.
+ * Play as guest is the offline path: pick a character, scores stay on this device.
  */
 
 type Stage = "boot" | "start" | "select" | "world";
@@ -27,6 +28,7 @@ export function ArcadeShell() {
   const [authOpen, setAuthOpen] = useState(false);
   const [name, setName] = useState<string | null>(null);
   const [characterId, setCharacterId] = useState<string | null>(null);
+  const [guest, setGuest] = useState(false);
   const booted = useRef(false);
   const wantsSelect = useRef(false);
   const userIdRef = useRef<string | null>(null);
@@ -99,6 +101,7 @@ export function ArcadeShell() {
       if (booted.current && u && prev !== u.id) {
         // Signed in from the modal (email/password) without leaving the page.
         setAuthOpen(false);
+        setGuest(false);
         void enterAs(u, false);
       }
     });
@@ -135,14 +138,24 @@ export function ArcadeShell() {
             setStage(characterId ? "world" : "select");
           }}
           onSignIn={() => {
-            // The modal returns OAuth to this page. /login sends people home, so it is only the fallback when Supabase is not configured.
+            // The modal returns OAuth to this page. /login is only the fallback when Supabase is not configured.
             if (hasSupabase()) setAuthOpen(true);
-            else window.location.assign("/login");
+            else window.location.assign("/login?next=/arcade");
+          }}
+          onGuest={() => {
+            setGuest(true);
+            void loadSavedCharacter(null);
+            setCharacterId(null);
+            setStage("select");
+          }}
+          onChangeCharacter={() => {
+            setGuest(false);
+            setStage("select");
           }}
         />
       )}
       {stage === "select" && (
-        <CharacterSelect initial={characterId} playerName={user ? name : null} onPick={pick} />
+        <CharacterSelect initial={characterId} playerName={user ? name : guest ? "GUEST" : null} onPick={pick} />
       )}
       {stage === "world" && (
         <ArcadeGame

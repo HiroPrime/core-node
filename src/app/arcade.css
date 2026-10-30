@@ -1254,7 +1254,13 @@ body:has(.game-shell) {
   }
 
   .arcade-start-ui {
-    bottom: 11%;
+    bottom: 5%;
+    gap: 6px;
+  }
+
+  .arcade-start-ui > .arcade-start-guest {
+    min-height: 40px;
+    padding: 8px 10px;
   }
 }
 
@@ -1304,11 +1310,51 @@ body:has(.game-shell) {
 }
 
 .arcade-start-guest {
-  min-height: 40px;
+  width: 100%;
+  min-height: 48px;
   font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   border-color: #7ef6ff;
   color: #7ef6ff;
   box-shadow: 0 0 12px rgba(126, 246, 255, 0.35);
+}
+
+.arcade-start-guest:hover,
+.arcade-start-guest:focus-visible {
+  background: #7ef6ff;
+  color: #140018;
+  outline: none;
+}
+
+/* Signed out: Log in and Play as guest share one row on the floor. */
+.arcade-start-row {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  width: 100%;
+}
+
+.arcade-start-row .arcade-start-btn,
+.arcade-start-row .arcade-start-guest {
+  flex: 1 1 0;
+  width: auto;
+  min-width: 0;
+  min-height: 64px;
+  padding: 12px 8px;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+@media (max-width: 899px), (orientation: portrait) and (pointer: coarse) {
+  .arcade-start-row .arcade-start-btn,
+  .arcade-start-row .arcade-start-guest {
+    min-height: 56px;
+    padding: 10px 6px;
+    font-size: 10px;
+    letter-spacing: 0.02em;
+  }
 }
 
 .arcade-start-note {
