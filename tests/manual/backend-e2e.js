@@ -1,0 +1,30 @@
+// Integration smoke test for core-node /backend (mock Supabase + mock nexus-control). Fake secrets only.
+const http=require('http'); const {spawn}=require('child_process'); const path=require('path');
+const cwd=process.argv[2]; const PU=3411, SB=3414, CN=3415;
+const SECRET='p'.repeat(40), STUDIO='s'.repeat(40);
+const owner={id:'u-owner',email:'basichiro@corenode.nexus',email_confirmed_at:'2026-01-01T00:00:00Z',is_anonymous:false,aud:'authenticated',role:'authenticated',app_metadata:{provider:'google'},user_metadata:{},created_at:'2026-01-01T00:00:00Z',identities:[{provider:'google',id:'g1',user_id:'u-owner',identity_data:{email:'basichiro@corenode.nexus',email_verified:true,sub:'g-sub-1'}}]};
+const other={...owner,id:'u-other',email:'someone@example.com',identities:[{provider:'google',id:'g2',user_id:'u-other',identity_data:{email:'someone@example.com',email_verified:true,sub:'g-sub-2'}}]};
+const users={'owner-tok':owner,'other-tok':other};
+const seen=[];
+const sb=http.createServer((q,r)=>{ if(q.url.startsWith('/auth/v1/user')){const t=(q.headers.authorization||'').replace('Bearer ','');const u=users[t]; if(u){r.setHeader('content-type','application/json');return r.end(JSON.stringify(u));} r.statusCode=401; return r.end('{"msg":"bad"}');} r.statusCode=404; r.end('{}'); }).listen(SB);
+
+const cookie=(tok,asUser)=>{const s={access_token:tok,refresh_token:'r',expires_at:Math.floor(Date.now()/1000)+3600,expires_in:3600,token_type:'bearer',user:asUser||users[tok]}; return 'sb-127-auth-token=base64-'+Buffer.from(JSON.stringify(s)).toString('base64url');};
+const env={...process.env,PORT:String(CN),NEXT_PUBLIC_SUPABASE_URL:'http://127.0.0.1:'+SB,NEXT_PUBLIC_SUPABASE_ANON_KEY:'anon',BACKEND_ALLOWED_EMAIL:'BasicHiro@CoreNode.nexus',BACKEND_PROXY_SECRET:SECRET,NEXUS_CONTROL_URL:'http://127.0.0.1:'+PU,STUDIO_SECRET:STUDIO};
+delete env.BACKEND_ALLOWED_GOOGLE_SUB;
+const srv=spawn(process.execPath,[path.join(cwd,'node_modules/next/dist/bin/next'),'start','-p',String(CN)],{cwd,env,stdio:'ignore'});
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+let fails=0; const ck=(name,ok,extra='')=>{console.log((ok?'PASS ':'FAIL ')+name+(extra?'  '+extra:'')); if(!ok) fails++;};
+const get=async(p,o={})=>{const r=await fetch('http://127.0.0.1:'+CN+p,{redirect:'manual',...o}); return {s:r.status,h:r.headers,t:await r.text()};};
+(async()=>{ await sleep(5000);
+ const ck2=(n,ok,x='')=>ck(n,ok,x);
+ let r=await get('/backend',{headers:{cookie:cookie('owner-tok')}});
+ ck('E2E owner: page served via /backend, from nexus-control', r.s===200&&r.t.includes('Generate 3 images')&&r.t.includes('Slime reference')&&r.t.includes('"apiBase\\":\\"/backend/api'), String(r.s));
+ const m=r.t.match(/\/backend\/_assets\/_next\/static\/[^"\\]+\.js/); ck('E2E page references /backend/_assets chunks', !!m, m&&m[0]);
+ r=await get(m[0],{headers:{cookie:cookie('owner-tok')}}); ck('E2E owner: chunk loads through /backend', r.s===200&&/javascript/.test(r.h.get('content-type')||''), r.s+' '+r.h.get('content-type'));
+ r=await get(m[0]); ck('E2E signed out: chunk 404', r.s===404);
+ r=await get('/backend',{headers:{cookie:cookie('other-tok')}}); ck('E2E other user: 404 and no studio', r.s===404&&!r.t.includes('Generate 3 images'));
+ r=await get('/backend/api/watch/queue',{headers:{authorization:'Bearer '+STUDIO}}); ck('E2E watcher good bearer reaches nexus-control watcher auth (503 queue not configured is expected here)', r.s===503||r.s===200, r.s+' '+r.t.slice(0,60));
+ r=await get('/backend/api/watch/queue',{headers:{authorization:'Bearer nope'}}); ck('E2E watcher bad bearer 404', r.s===404);
+ r=await get('/backend/api/generate',{method:'POST',headers:{cookie:cookie('owner-tok')}}); ck('E2E owner API call accepted by nexus-control (503 = kill switch/queue off, not 401)', r.s===503||r.s===400||r.s===200, r.s+' '+r.t.slice(0,80));
+ console.log(fails?'FAILED '+fails:'ALL PASSED'); srv.kill(); sb.close(); process.exit(fails?1:0);
+})();

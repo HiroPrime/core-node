@@ -1,11 +1,18 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { SITE_ID, VISITOR_COOKIE } from "@/lib/site-ids";
+import { BACKEND_BASE } from "@/lib/backend-gate";
+import { backendProxy } from "@/lib/backend-proxy";
 
 const ONE_YEAR = 60 * 60 * 24 * 365;
 
 export default async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // /backend is owner-only and decided entirely by backendProxy (404 unless allowed). It runs before every other rule on purpose.
+  if (pathname === BACKEND_BASE || pathname.startsWith(BACKEND_BASE + "/")) {
+    return backendProxy(request);
+  }
 
   if (
     pathname.startsWith("/api") ||
