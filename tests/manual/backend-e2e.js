@@ -19,6 +19,7 @@ const get=async(p,o={})=>{const r=await fetch('http://127.0.0.1:'+CN+p,{redirect
  const ck2=(n,ok,x='')=>ck(n,ok,x);
  let r=await get('/backend',{headers:{cookie:cookie('owner-tok')}});
  ck('E2E owner: page served via /backend, from nexus-control', r.s===200&&r.t.includes('Generate 3 images')&&r.t.includes('Slime reference')&&r.t.includes('"apiBase\\":\\"/backend/api'), String(r.s));
+ ck('E2E page CSP header survives the /backend rewrite (self + supabase connect + blob img)', /default-src 'self'/.test(r.h.get('content-security-policy')||'')&&/img-src 'self' blob: data:/.test(r.h.get('content-security-policy')||''), (r.h.get('content-security-policy')||'').slice(0,60));
  const m=r.t.match(/\/backend\/_assets\/_next\/static\/[^"\\]+\.js/); ck('E2E page references /backend/_assets chunks', !!m, m&&m[0]);
  r=await get(m[0],{headers:{cookie:cookie('owner-tok')}}); ck('E2E owner: chunk loads through /backend', r.s===200&&/javascript/.test(r.h.get('content-type')||''), r.s+' '+r.h.get('content-type'));
  r=await get(m[0]); ck('E2E signed out: chunk 404', r.s===404);

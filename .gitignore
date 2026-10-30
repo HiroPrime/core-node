@@ -51,3 +51,7 @@ launch-kit/
 
 # images moved out of public/ by the 2026-10-20 cleanup (local only, large)
 /assets-unused/
+
+# local secrets folder (never commit)
+.secrets
+.secrets/

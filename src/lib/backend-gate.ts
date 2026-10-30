@@ -28,12 +28,13 @@ export type GateUser = {
 } | null;
 type Env = Record<string, string | undefined>;
 
-const lc = (s: unknown) => (typeof s === 'string' ? s.trim().toLowerCase() : '');
+// Exact, lower-cased comparison only. No trim: a padded email (' owner@x ') is a different string and is denied.
+const lc = (s: unknown) => (typeof s === 'string' ? s.toLowerCase() : '');
 
 /** True only for the one allowed owner account. */
 export function isBackendOwner(user: GateUser | undefined, env: Env = process.env): boolean {
   const allowed = lc(env.BACKEND_ALLOWED_EMAIL);
-  if (!allowed || !user || user.is_anonymous || !user.email_confirmed_at) return false;
+  if (!/\S/.test(allowed) || !user || user.is_anonymous || !user.email_confirmed_at) return false;
   if (lc(user.email) !== allowed) return false;
   const pin = env.BACKEND_ALLOWED_GOOGLE_SUB?.trim();
   return (user.identities ?? []).some((i) => {

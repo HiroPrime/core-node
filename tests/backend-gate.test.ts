@@ -136,3 +136,15 @@ test('source check: src/proxy.ts hands /backend to the gate before anything else
 test('source check: /backend is not advertised in robots or the sitemap', () => {
   for (const f of ['../src/app/robots.ts', '../src/app/sitemap.ts']) assert.doesNotMatch(readFileSync(new URL(f, import.meta.url), 'utf8'), /backend/i);
 });
+
+test('padded emails are denied: no trim anywhere in the email compare (user email, identity email, or the allowed env value)', async () => {
+  const padded = ' ' + OWNER + ' ';
+  for (const u of [
+    { ...ownerUser, email: padded },
+    { ...ownerUser, email: OWNER + '\n' },
+    { ...ownerUser, identities: [google(padded)] },
+  ] as GateUser[]) assert.deepEqual(await run('/backend', u), { action: 'notfound' }, JSON.stringify(u?.email));
+  assert.deepEqual(await run('/backend', ownerUser, { ...env, BACKEND_ALLOWED_EMAIL: padded }), { action: 'notfound' }, 'padded env value denies everyone');
+  assert.equal(isBackendOwner(ownerUser, env), true, 'sanity: the exact owner still passes');
+  assert.equal(isBackendOwner({ ...ownerUser, email: padded }, env), false);
+});
