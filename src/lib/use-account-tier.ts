@@ -9,6 +9,8 @@ export type AccountState = { ready: boolean; tier: Tier; signedIn: boolean };
 /**
  * Client hook for the shared Core Node session. `signedIn` follows the browser Supabase session (display only);
  * `tier` always comes from the server (/api/account/tier), so a tampered client can show UI but cannot gain access.
+ * Until `ready` is true the state is always { tier: "guest", signedIn: false }: nothing is reported as signed in before the server has answered.
+ * If the server cannot be reached the hook fails CLOSED (ready, guest, signedIn false). This is UI state only; real access is always checked on the server.
  */
 export function useAccountTier(): AccountState {
   const [state, setState] = useState<AccountState>({ ready: false, tier: "guest", signedIn: false });
@@ -20,14 +22,13 @@ export function useAccountTier(): AccountState {
       const { data } = await supabase.auth.getSession();
       if (!alive) return;
       if (!data.session) return setState({ ready: true, tier: "guest", signedIn: false });
-      setState((s) => ({ ...s, signedIn: true }));
       try {
         const r = await fetch("/api/account/tier", { cache: "no-store", credentials: "same-origin" });
         const j = (await r.json()) as { tier?: Tier };
         const tier: Tier = j.tier === "owner" || j.tier === "basic" ? j.tier : "guest";
         if (alive) setState({ ready: true, tier, signedIn: tier !== "guest" });
       } catch {
-        if (alive) setState({ ready: true, tier: "basic", signedIn: true });
+        if (alive) setState({ ready: true, tier: "guest", signedIn: false });
       }
     };
     void refresh();

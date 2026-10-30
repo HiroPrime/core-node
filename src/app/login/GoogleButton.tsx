@@ -5,10 +5,10 @@ import { createClient } from "@/lib/supabase/client";
 import { markFreshSignIn } from "@/lib/session-guard";
 
 /**
- * Same Google flow the arcade modal uses (same redirectTo=/auth/callback, same auth_next cookie), returning to the homepage.
+ * Same Google flow the arcade modal uses (same redirectTo=/auth/callback, same auth_next cookie), returning to `next` (already validated by safeSiteNext on the server; "/" by default).
  * prompt=select_account makes Google show the account chooser. No login_hint on purpose, so any account can be picked.
  */
-export default function GoogleButton() {
+export default function GoogleButton({ next = "/" }: { next?: string }) {
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
 
@@ -17,7 +17,7 @@ export default function GoogleButton() {
     setFailed(false);
     try {
       markFreshSignIn();
-      document.cookie = `auth_next=${encodeURIComponent("/")}; Path=/; Max-Age=600; SameSite=Lax${window.location.protocol === "https:" ? "; Secure" : ""}`;
+      document.cookie = `auth_next=${encodeURIComponent(next)}; Path=/; Max-Age=600; SameSite=Lax${window.location.protocol === "https:" ? "; Secure" : ""}`;
       const { error } = await createClient().auth.signInWithOAuth({
         provider: "google",
         options: {

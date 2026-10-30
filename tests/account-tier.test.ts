@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { atLeast, tierForUser } from '../src/lib/account-tier.ts';
+import { safeSiteNext } from '../src/lib/safe-next.ts';
 import type { GateUser } from '../src/lib/backend-gate.ts';
 
 const OWNER = 'basichiro@corenode.nexus';
@@ -51,6 +52,21 @@ test('google button: select_account, no login_hint, returns home; arcade modal +
   const src = readFileSync(new URL('../src/app/login/GoogleButton.tsx', import.meta.url), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
   assert.match(src, /prompt:\s*"select_account"/);
   assert.doesNotMatch(src, /login_hint/);
-  assert.match(src, /encodeURIComponent\("\/"\)/);
+  assert.match(src, /encodeURIComponent\(next\)/);
   assert.match(src, /\/auth\/callback/);
+});
+
+test('safeSiteNext: same-site relative paths only', () => {
+  for (const ok of ['/', '/arcade', '/arcade?x=1', '/select', '/backend', '/stack/a']) assert.equal(safeSiteNext(ok), ok, ok);
+  assert.equal(safeSiteNext(encodeURIComponent('/arcade?x=1')), '/arcade?x=1');
+  for (const bad of [undefined, null, 7, '', 'arcade', 'https://evil.com', 'http://evil.com/a', '//evil.com', '///evil.com', '/\\evil.com', '/a\\b', 'javascript:alert(1)', '/%2F/evil.com', '%2F%2Fevil.com', '/%5Cevil.com', '/a/../b', '/a#x', '/a\nb', '/a\rb', '/%',
+    '/login', '/login?next=/x', '/Login/x', '/auth/callback', '/api/account/tier', '/_next/x', '/__backend-not-found', ' /arcade', '/' + 'a'.repeat(300)])
+    assert.equal(safeSiteNext(bad), '/', String(bad));
+});
+
+test('useAccountTier: reports signedIn only after ready, fails closed (static guard)', () => {
+  const src = readFileSync(new URL('../src/lib/use-account-tier.ts', import.meta.url), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+  assert.doesNotMatch(src, /\.\.\.s,\s*signedIn:\s*true/);
+  assert.doesNotMatch(src, /tier:\s*"basic",\s*signedIn:\s*true\s*\}\)/);
+  assert.match(src, /\{ ready: false, tier: "guest", signedIn: false \}/);
 });
