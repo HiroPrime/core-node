@@ -1,6 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import { decideBackend, type GateUser } from "./backend-gate.ts";
+import { decideBackend, isLoginRoute, type GateUser } from "./backend-gate.ts";
 
 /** Sent on every /backend answer, allowed or not: never indexed, never cached. */
 const PRIVATE_HEADERS = {
@@ -14,6 +14,8 @@ const PRIVATE_HEADERS = {
  * Rules live in src/lib/backend-gate.ts (and are unit-tested there).
  */
 export async function backendProxy(request: NextRequest): Promise<NextResponse> {
+  // Hidden sign-in entry: handled by this app's own page (src/app/backend/login). Nothing about it is forwarded or gated; it only starts the existing Google sign-in.
+  if (isLoginRoute(request.nextUrl.pathname, request.method)) return NextResponse.next({ headers: PRIVATE_HEADERS });
   const pending: { name: string; value: string; options?: Parameters<NextResponse["cookies"]["set"]>[2] }[] = [];
 
   const getUser = async (): Promise<GateUser> => {

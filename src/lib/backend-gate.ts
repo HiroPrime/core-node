@@ -15,6 +15,25 @@
 import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
 
 export const BACKEND_BASE = '/backend';
+/** Hidden owner sign-in entry. Not linked from anywhere. Served locally (never forwarded), noindex, GET/HEAD only. */
+export const LOGIN_PATH = '/backend/login';
+export function isLoginRoute(pathname: string, method = 'GET'): boolean {
+  return pathname === LOGIN_PATH && (method === 'GET' || method === 'HEAD');
+}
+/**
+ * Where to send the browser after Google sign-in: ONLY '/backend' or a same-site '/backend/...' or '/backend?...' path.
+ * Anything else (other paths, absolute URLs, '//host', backslashes, dot segments, encoded tricks) becomes plain '/backend', so this can never be an open redirect.
+ */
+export function safeBackendReturn(value: unknown): string {
+  if (typeof value !== 'string' || value.length === 0 || value.length > 200) return BACKEND_BASE;
+  let v = value;
+  try { v = decodeURIComponent(value); } catch { return BACKEND_BASE; }
+  if (/[\u0000-\u001f\u007f\\#%]/.test(v) || v.includes('//') || v.includes('..')) return BACKEND_BASE;
+  if (v === BACKEND_BASE) return v;
+  if (!v.startsWith(BACKEND_BASE)) return BACKEND_BASE;
+  const next = v[BACKEND_BASE.length];
+  return next === '/' || next === '?' ? v : BACKEND_BASE;
+}
 export const ASSERTION_HEADER = 'x-nexus-backend-assertion';
 const ASSERTION_TTL_SECONDS = 60;
 const MIN_SECRET_CHARS = 32;

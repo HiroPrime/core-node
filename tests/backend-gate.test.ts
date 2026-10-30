@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { ASSERTION_HEADER, bearerOk, decideBackend, isBackendOwner, mapBackendPath, signAssertion, type GateUser } from '../src/lib/backend-gate.ts';
+import { ASSERTION_HEADER, bearerOk, decideBackend, isBackendOwner, isLoginRoute, LOGIN_PATH, mapBackendPath, safeBackendReturn, signAssertion, type GateUser } from '../src/lib/backend-gate.ts';
 
 const OWNER = 'basichiro@corenode.nexus';
 const STUDIO = 's'.repeat(40);
@@ -162,4 +162,23 @@ test('optional Vercel protection bypass: sent upstream only when NEXUS_CONTROL_B
     const n = await run('/backend', ownerUser, { ...env, NEXUS_CONTROL_BYPASS: bad });
     if (n.action === 'forward') assert.equal(n.set['x-vercel-protection-bypass'], undefined, String(bad));
   }
+});
+
+test('/backend/login: only that exact path, GET/HEAD; everything else under /backend is still gated; it is never mapped upstream', async () => {
+  assert.equal(LOGIN_PATH, '/backend/login');
+  assert.equal(isLoginRoute('/backend/login'), true);
+  assert.equal(isLoginRoute('/backend/login', 'HEAD'), true);
+  for (const p of ['/backend/login/', '/backend/login/x', '/backend/loginx', '/backend', '/backend/', '/login', '/BACKEND/login', '/backend/api/login']) assert.equal(isLoginRoute(p), false, p);
+  for (const m of ['POST', 'PUT', 'DELETE', 'PATCH']) assert.equal(isLoginRoute('/backend/login', m), false, m);
+  assert.deepEqual(await run('/backend/login', null), { action: 'notfound' }, 'never forwarded upstream, even for the owner');
+  assert.deepEqual(await run('/backend/login', ownerUser), { action: 'notfound' });
+  assert.deepEqual(await run('/backend', null), { action: 'notfound' }, 'signed-out /backend is still a 404');
+});
+
+test('safeBackendReturn: only /backend paths; no open redirect', () => {
+  for (const ok of ['/backend', '/backend/', '/backend/api/x', '/backend?x=1', '/backend/a?b=c']) assert.equal(safeBackendReturn(ok), ok, ok);
+  assert.equal(safeBackendReturn(encodeURIComponent('/backend/a?b=c')), '/backend/a?b=c');
+  for (const bad of [undefined, null, 5, '', 'backend', '/', '/arcade', '/backendx', '/backend@evil.com', '//evil.com', '/\\evil.com', '/backend\\x', 'https://evil.com', 'https://evil.com/backend', 'javascript:alert(1)',
+    '/backend//evil.com', '/backend/../arcade', '/backend/%2e%2e/arcade', '/backend/%252e%252e/x', '/backend%2F..%2F..', '/backend\n/x', '/backend\r', '/backend/x#frag', '/backend/%', '%2F%2Fevil.com', '/arcade/backend', ' /backend', '/backend/' + 'a'.repeat(300)])
+    assert.equal(safeBackendReturn(bad), '/backend', String(bad));
 });
