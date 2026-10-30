@@ -1273,6 +1273,24 @@ body:has(.game-shell) {
   touch-action: manipulation;
 }
 
+/* One control on the floor: Log in, Play, or the loading hold. Same box so it does not jump. */
+.arcade-start-btn {
+  width: 100%;
+  min-height: 72px;
+  padding: 16px 28px;
+  font-size: 18px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 899px), (orientation: portrait) and (pointer: coarse) {
+  .arcade-start-btn {
+    min-height: 64px;
+    padding: 14px 18px;
+    font-size: 16px;
+  }
+}
+
 .arcade-start-btn:disabled {
   opacity: 0.6;
   cursor: wait;

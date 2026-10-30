@@ -1,89 +1,72 @@
 "use client";
 
 /**
- * ============================================================================
- * PLACEHOLDER START SCREEN  (BasicHiro is building the real one)
- * ============================================================================
- * Replace this component freely. The contract ArcadeShell relies on is just
- * the props below:
- *   - signedIn / playerName: who is here (null name = guest)
- *   - onStart():   continue (signed in -> character select / world)
- *   - onSignIn():  open the existing Google/Discord sign-in modal
- *   - onGuest():   play offline as a guest (scores stay on this device)
+ * Arcade main page. useAccountTier() picks the one control:
+ *   - ready false (or character still loading): neither Log in nor Play
+ *   - signed out: Log in, which opens the arcade's existing sign-in modal
+ *   - signed in (basic or owner): Play, which starts the arcade
  *
- * Background art: /arcade/start/arcadestart.webp (desktop, letterboxed to fit)
- * and /arcade/start/arcadestartmobile.webp (width < 900px, or portrait touch).
- * The art box keeps the image aspect; the UI is positioned inside that box. The art already
- * paints "PRESS START", so the buttons sit low, on the floor below the arch,
- * clear of the title, the arch, and the characters.
- * ============================================================================
+ * Art: /arcade/start/arcadestart.webp (desktop) and
+ * /arcade/start/arcadestartmobile.webp (width < 900px, or portrait touch).
+ * The art box keeps the image aspect; the control sits on the floor below the arch.
  */
 
 import Link from "next/link";
 import { useEffect, useRef } from "react";
+import { ARCADE_ENTRY_LABEL, arcadeEntryAction } from "@/lib/arcade/entry-action";
+import { useAccountTier } from "@/lib/use-account-tier";
 
 export type ArcadeStartScreenProps = {
-  signedIn: boolean;
-  playerName: string | null;
-  authReady: boolean;
+  /** False while the shell is still loading the saved character. */
+  entryReady: boolean;
   onStart: () => void;
+  /** Opens the existing arcade sign-in modal (Google / email / Discord). */
   onSignIn: () => void;
-  onGuest: () => void;
-  /** Signed-in only: open character select (optional). */
-  onChangeCharacter?: () => void;
 };
 
-export function ArcadeStartScreen({
-  signedIn,
-  playerName,
-  authReady,
-  onStart,
-  onSignIn,
-  onGuest,
-  onChangeCharacter,
-}: ArcadeStartScreenProps) {
+export function ArcadeStartScreen({ entryReady, onStart, onSignIn }: ArcadeStartScreenProps) {
+  const account = useAccountTier();
+  const action = arcadeEntryAction(account, entryReady);
   const primaryRef = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
+    if (action === "wait") return;
     primaryRef.current?.focus();
-  }, [signedIn, authReady]);
+  }, [action]);
 
   return (
-    <div className="arcade-start" role="dialog" aria-label="Arcade Nexus start screen">
+    <div
+      className="arcade-start"
+      role="dialog"
+      aria-label="Arcade Nexus start screen"
+      aria-busy={action === "wait"}
+      data-arcade-entry={action}
+    >
       <div className="arcade-start-box">
-      <picture className="arcade-start-art">
-        <source media="(max-width: 899px), (orientation: portrait) and (pointer: coarse)" srcSet="/arcade/start/arcadestartmobile.webp" />
-        <img src="/arcade/start/arcadestart.webp" alt="Arcade Nexus. Press start." />
-      </picture>
-      <div className="arcade-start-ui">
-        {signedIn ? (
-          <>
+        <picture className="arcade-start-art">
+          <source media="(max-width: 899px), (orientation: portrait) and (pointer: coarse)" srcSet="/arcade/start/arcadestartmobile.webp" />
+          <img src="/arcade/start/arcadestart.webp" alt="Arcade Nexus. Press start." />
+        </picture>
+        <div className="arcade-start-ui">
+          {action === "play" ? (
             <button ref={primaryRef} type="button" className="arcade-start-btn" onClick={onStart}>
-              PRESS START
+              {ARCADE_ENTRY_LABEL.play}
             </button>
-            {onChangeCharacter && (
-              <button type="button" className="arcade-start-guest" onClick={onChangeCharacter}>
-                CHANGE CHARACTER
-              </button>
-            )}
-            <p className="arcade-start-note">PLAYING AS {(playerName || "PLAYER").toUpperCase()}</p>
-          </>
-        ) : (
-          <>
-            <button ref={primaryRef} type="button" className="arcade-start-btn" onClick={onSignIn} disabled={!authReady}>
-              {authReady ? "PRESS START" : "LOADING..."}
+          ) : action === "login" ? (
+            <button ref={primaryRef} type="button" className="arcade-start-btn" onClick={onSignIn}>
+              {ARCADE_ENTRY_LABEL.login}
             </button>
-            <button type="button" className="arcade-start-guest" onClick={onGuest}>
-              PLAY AS GUEST
+          ) : (
+            <button type="button" className="arcade-start-btn" disabled aria-busy="true" aria-label="Loading">
+              <span aria-hidden="true">…</span>
             </button>
-          </>
-        )}
-        <nav className="arcade-start-legal" aria-label="Legal">
-          <Link href="/privacy">Privacy</Link>
-          <span aria-hidden="true">&middot;</span>
-          <Link href="/terms">Terms</Link>
-        </nav>
-      </div>
+          )}
+          <nav className="arcade-start-legal" aria-label="Legal">
+            <Link href="/privacy">Privacy</Link>
+            <span aria-hidden="true">&middot;</span>
+            <Link href="/terms">Terms</Link>
+          </nav>
+        </div>
       </div>
     </div>
   );
