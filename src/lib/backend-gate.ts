@@ -67,6 +67,8 @@ export function isBackendOwner(user: GateUser | undefined, env: Env = process.en
 
 const UUID = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}';
 const OWNER_API = [new RegExp(`^generate$`), new RegExp(`^jobs/${UUID}$`, 'i'), new RegExp(`^jobs/${UUID}/image/[0-2]$`, 'i')];
+/** Read-only owner endpoints: GET/HEAD only at the proxy, even though the other owner API routes allow POST/DELETE. `gallery` lists finished batches (nexus-control GET /api/art-studio/gallery). */
+const READONLY_OWNER_API = [/^gallery$/];
 const WATCH_API = [/^jobs$/, new RegExp(`^jobs/${UUID}$`, 'i'), new RegExp(`^jobs/${UUID}/upload$`, 'i'), /^queue$/, /^reap$/];
 const ASSET_TAIL = /^[A-Za-z0-9_\-./~%[\]()@+]{1,300}$/;
 const METHODS: Record<'owner' | 'watcher', readonly string[]> = { owner: ['GET', 'HEAD', 'POST', 'DELETE'], watcher: ['GET', 'POST'] };
@@ -74,7 +76,7 @@ const METHODS: Record<'owner' | 'watcher', readonly string[]> = { owner: ['GET',
 export const BACKEND_PAGES = ['sandbox', 'savepoint', 'primeportal', 'corenode', 'apparel', 'marketing', 'splattor', 'audit', 'art-studio'] as const;
 const PAGE_METHODS: readonly string[] = ['GET', 'HEAD'];
 
-export type BackendRoute = { kind: 'owner' | 'watcher'; target: string; pageOnly?: boolean };
+export type BackendRoute = { kind: 'owner' | 'watcher'; target: string; pageOnly?: boolean; readOnly?: boolean };
 
 /** Allowlisted map from a corenode.nexus path to the nexus-control path. Anything not listed is null (404). */
 export function mapBackendPath(pathname: string, method = 'GET'): BackendRoute | null {
@@ -86,6 +88,7 @@ export function mapBackendPath(pathname: string, method = 'GET'): BackendRoute |
   } else if (pathname.startsWith(`${BACKEND_BASE}/api/`)) {
     const rest = pathname.slice(`${BACKEND_BASE}/api/`.length);
     if (OWNER_API.some((r) => r.test(rest))) route = { kind: 'owner', target: `/api/art-studio/${rest}` };
+    else if (READONLY_OWNER_API.some((r) => r.test(rest))) route = { kind: 'owner', target: `/api/art-studio/${rest}`, readOnly: true };
   } else if (pathname.startsWith(`${BACKEND_BASE}/_assets/_next/static/`)) {
     const rest = pathname.slice(`${BACKEND_BASE}/_assets/_next/static/`.length);
     let decoded = rest;
@@ -96,7 +99,7 @@ export function mapBackendPath(pathname: string, method = 'GET'): BackendRoute |
     const m = /^\/backend\/([a-z-]{1,20})\/?$/.exec(pathname);
     if (m && (BACKEND_PAGES as readonly string[]).includes(m[1])) route = { kind: 'owner', target: `/${m[1]}`, pageOnly: true };
   }
-  return route && (route.pageOnly ? PAGE_METHODS : METHODS[route.kind]).includes(method.toUpperCase()) ? route : null;
+  return route && (route.pageOnly || route.readOnly ? PAGE_METHODS : METHODS[route.kind]).includes(method.toUpperCase()) ? route : null;
 }
 
 /** `Authorization: Bearer <STUDIO_SECRET>`, constant time (both sides hashed so lengths always match). Unset secret = never. */

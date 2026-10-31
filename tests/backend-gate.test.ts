@@ -36,6 +36,26 @@ test('owner allowed: page, api and assets are forwarded to nexus-control with a 
   }
 });
 
+test('gallery list: owner GET/HEAD forwards to /api/art-studio/gallery (query passes through); POST/DELETE/PUT/PATCH, subpaths and look-alikes are 404; signed-out and other users are 404', async () => {
+  const d = await run('/backend/api/gallery', ownerUser, env, { method: 'GET', search: '?before=2026-10-30T12%3A00%3A00.000Z' });
+  assert.equal(d.action, 'forward');
+  if (d.action === 'forward') {
+    assert.equal(d.url, 'https://control.example.com/api/art-studio/gallery?before=2026-10-30T12%3A00%3A00.000Z');
+    assert.equal(d.kind, 'owner');
+    assert.ok(d.set[ASSERTION_HEADER].startsWith('v1.'));
+    assert.ok(d.remove.includes('cookie') && d.remove.includes('authorization'));
+  }
+  assert.equal((await run('/backend/api/gallery', ownerUser, env, { method: 'HEAD' })).action, 'forward');
+  for (const m of ['POST', 'DELETE', 'PUT', 'PATCH', 'OPTIONS']) assert.equal(mapBackendPath('/backend/api/gallery', m), null, m);
+  for (const m of ['POST', 'DELETE']) assert.deepEqual(await run('/backend/api/gallery', ownerUser, env, { method: m }), { action: 'notfound' }, m);
+  for (const p of ['/backend/api/gallery/', '/backend/api/gallery/x', '/backend/api/gallery/../generate', '/backend/api/Gallery', '/backend/api/gallery.json', '/backend/api/gallery%2Fx', '/backend/gallery', '/backend/api/watch/gallery'])
+    assert.deepEqual(await run(p, ownerUser, env, { authorization: `Bearer ${STUDIO}` }), { action: 'notfound' }, p);
+  assert.deepEqual(await run('/backend/api/gallery', null, env), { action: 'notfound' });
+  assert.deepEqual(await run('/backend/api/gallery', otherUser, env), { action: 'notfound' });
+  assert.deepEqual(await run('/backend/api/gallery', null, env, { authorization: `Bearer ${STUDIO}` }), { action: 'notfound' }); // the watcher bearer does not open it
+  assert.deepEqual(await run('/backend/api/gallery', ownerUser, { ...env, BACKEND_PROXY_SECRET: undefined }), { action: 'notfound' });
+});
+
 test('other signed-in user gets 404 (also unverified email, anonymous, non-Google identity, email only on a different identity)', async () => {
   assert.deepEqual(await run('/backend', otherUser), { action: 'notfound' });
   for (const u of [
