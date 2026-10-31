@@ -1,4 +1,5 @@
-// Owner-only gate and path map for /backend, which serves nexus-control's hidden Art Studio on corenode.nexus.
+// Owner-only gate and path map for /backend (DOT), which serves the whole nexus-control site on corenode.nexus:
+// /backend = Nexus Control (analytics dashboard), /backend/sandbox = tools (Art Studio, Core Node), /backend/<page> = its detail pages, /backend/art-studio = Art Studio.
 // Pure decision logic (no Next imports, relative imports only) so node:test can load it. src/proxy.ts applies it before anything else runs.
 //
 // What decides access (server-side, on every request, no client-side check anywhere):
@@ -69,13 +70,16 @@ const OWNER_API = [new RegExp(`^generate$`), new RegExp(`^jobs/${UUID}$`, 'i'), 
 const WATCH_API = [/^jobs$/, new RegExp(`^jobs/${UUID}$`, 'i'), new RegExp(`^jobs/${UUID}/upload$`, 'i'), /^queue$/, /^reap$/];
 const ASSET_TAIL = /^[A-Za-z0-9_\-./~%[\]()@+]{1,300}$/;
 const METHODS: Record<'owner' | 'watcher', readonly string[]> = { owner: ['GET', 'HEAD', 'POST', 'DELETE'], watcher: ['GET', 'POST'] };
+/** nexus-control pages the owner may see (read-only: GET/HEAD only). Anything else under /backend that is not api/_assets/login is 404. */
+export const BACKEND_PAGES = ['sandbox', 'savepoint', 'primeportal', 'corenode', 'apparel', 'marketing', 'splattor', 'audit', 'art-studio'] as const;
+const PAGE_METHODS: readonly string[] = ['GET', 'HEAD'];
 
-export type BackendRoute = { kind: 'owner' | 'watcher'; target: string };
+export type BackendRoute = { kind: 'owner' | 'watcher'; target: string; pageOnly?: boolean };
 
 /** Allowlisted map from a corenode.nexus path to the nexus-control path. Anything not listed is null (404). */
 export function mapBackendPath(pathname: string, method = 'GET'): BackendRoute | null {
   let route: BackendRoute | null = null;
-  if (pathname === BACKEND_BASE || pathname === `${BACKEND_BASE}/`) route = { kind: 'owner', target: '/art-studio' };
+  if (pathname === BACKEND_BASE || pathname === `${BACKEND_BASE}/`) route = { kind: 'owner', target: '/', pageOnly: true };
   else if (pathname.startsWith(`${BACKEND_BASE}/api/watch/`)) {
     const rest = pathname.slice(`${BACKEND_BASE}/api/watch/`.length);
     if (WATCH_API.some((r) => r.test(rest))) route = { kind: 'watcher', target: `/api/art-studio/watch/${rest}` };
@@ -88,7 +92,11 @@ export function mapBackendPath(pathname: string, method = 'GET'): BackendRoute |
     try { decoded = decodeURIComponent(rest); } catch { return null; }
     if (ASSET_TAIL.test(rest) && !decoded.split('/').some((s) => s === '..' || s === '.' || s === '') && !/[\\]/.test(decoded)) route = { kind: 'owner', target: `${BACKEND_BASE}/_assets/_next/static/${rest}` };
   }
-  return route && METHODS[route.kind].includes(method.toUpperCase()) ? route : null;
+  else {
+    const m = /^\/backend\/([a-z-]{1,20})\/?$/.exec(pathname);
+    if (m && (BACKEND_PAGES as readonly string[]).includes(m[1])) route = { kind: 'owner', target: `/${m[1]}`, pageOnly: true };
+  }
+  return route && (route.pageOnly ? PAGE_METHODS : METHODS[route.kind]).includes(method.toUpperCase()) ? route : null;
 }
 
 /** `Authorization: Bearer <STUDIO_SECRET>`, constant time (both sides hashed so lengths always match). Unset secret = never. */

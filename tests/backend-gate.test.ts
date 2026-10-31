@@ -17,12 +17,14 @@ test('owner allowed: page, api and assets are forwarded to nexus-control with a 
   const page = await run('/backend', ownerUser);
   assert.equal(page.action, 'forward');
   if (page.action !== 'forward') return;
-  assert.equal(page.url, 'https://control.example.com/art-studio');
+  assert.equal(page.url, 'https://control.example.com/');
   assert.ok(page.set[ASSERTION_HEADER].startsWith('v1.'));
   assert.ok(page.remove.includes('cookie') && page.remove.includes('authorization'));
   const B = '0b8f3a52-1c3e-4d3a-9d41-6f0c1d2e3f40';
   for (const [p, t] of [
-    ['/backend/', '/art-studio'],
+    ['/backend/', '/'],
+    ['/backend/sandbox', '/sandbox'], ['/backend/sandbox/', '/sandbox'], ['/backend/savepoint', '/savepoint'], ['/backend/primeportal', '/primeportal'], ['/backend/corenode', '/corenode'],
+    ['/backend/apparel', '/apparel'], ['/backend/marketing', '/marketing'], ['/backend/splattor', '/splattor'], ['/backend/audit', '/audit'], ['/backend/art-studio', '/art-studio'],
     ['/backend/api/generate', '/api/art-studio/generate'],
     [`/backend/api/jobs/${B}`, `/api/art-studio/jobs/${B}`],
     [`/backend/api/jobs/${B}/image/2`, `/api/art-studio/jobs/${B}/image/2`],
@@ -98,11 +100,13 @@ test('anything not allowlisted is 404, even for the owner (no traversal, no othe
   const B = '0b8f3a52-1c3e-4d3a-9d41-6f0c1d2e3f40';
   for (const p of [
     '/backend/api', '/backend/api/', '/backend/api/whoami', '/backend/api/health', '/backend/api/generate/x', '/backend/api/jobs', '/backend/api/jobs/not-a-uuid', `/backend/api/jobs/${B}/image/3`,
-    '/backend/api/watch', '/backend/api/watch/', '/backend/api/watch/other', '/backend/login', '/backend/savepoint', '/backend/x', '/backendx', '/backend/api/../savepoint',
+    '/backend/api/watch', '/backend/api/watch/', '/backend/api/watch/other', '/backend/login', '/backend/x', '/backend/Sandbox', '/backend/sandbox/x', '/backend/sandbox//', '/backend/art-studio/x', '/backend/art-studio.js', '/backend/sandbox%2F', '/backend/health', '/backend/whoami', '/backend/api-x', '/backend/..', '/backend/%2e%2e/sandbox', '/backend/savepoint/../login', '/backend/login/', '/backendx', '/backend/api/../savepoint',
     '/backend/_assets/_next/static/../../api/health', '/backend/_assets/_next/static/%2e%2e/x.js', '/backend/_assets/_next/static/a//b.js', '/backend/_assets/_next/static/', '/backend/_assets/other', '/backend/_assets/_next/image',
     '/Backend', '/backend%2Fapi%2Fgenerate',
   ]) assert.deepEqual(await run(p, ownerUser, env, { authorization: `Bearer ${STUDIO}` }), { action: 'notfound' }, p);
   assert.equal(mapBackendPath('/backend', 'PUT'), null);
+  for (const p of ['/backend', '/backend/', '/backend/sandbox', '/backend/savepoint', '/backend/art-studio']) for (const m of ['POST', 'DELETE', 'PATCH']) assert.equal(mapBackendPath(p, m), null, m + ' ' + p);
+  for (const p of ['/backend', '/backend/sandbox', '/backend/audit']) { assert.ok(mapBackendPath(p, 'GET')); assert.ok(mapBackendPath(p, 'HEAD')); }
   assert.equal(mapBackendPath('/backend', 'OPTIONS'), null);
   assert.equal(mapBackendPath('/backend/api/watch/queue', 'DELETE'), null);
 });

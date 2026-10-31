@@ -1,4 +1,9 @@
-# /backend: owner-only door to nexus-control's Art Studio
+# /backend (DOT): owner-only door to the whole nexus-control site
+
+Owner rule (2026-10-30): `/backend` is the full main Nexus Control site. Page map (all GET/HEAD, owner only, everything else 404):
+`/backend` = Nexus Control (analytics dashboard), `/backend/sandbox` = tools (Art Studio card, Core Node card), `/backend/{savepoint,primeportal,corenode,apparel,marketing,splattor,audit}` = detail pages,
+`/backend/art-studio` = Art Studio (its API calls stay at `/backend/api/*`). Allowlist: `BACKEND_PAGES` in `src/lib/backend-gate.ts`. nexus-control verifies the signed assertion for each page (middleware + page guard).
+# (original Art Studio notes below)
 
 `https://corenode.nexus/backend` is a proxy REWRITE (the URL in the browser never changes) to the hidden Art Studio page served by nexus-control.
 No menu, link, robots or sitemap entry. Every answer carries `X-Robots-Tag: noindex...` and `Cache-Control: private, no-store`.
