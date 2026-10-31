@@ -1,7 +1,7 @@
 # /backend (DOT): owner-only door to the whole nexus-control site
 
 Owner rule (2026-10-30): `/backend` is the full main Nexus Control site. Page map (all GET/HEAD, owner only, everything else 404):
-`/backend` = Nexus Control (analytics dashboard), `/backend/sandbox` = tools (Art Studio card, Core Node card), `/backend/{savepoint,primeportal,corenode,apparel,marketing,splattor,audit}` = detail pages,
+`/backend` = Nexus Control (analytics dashboard, Core Node is one of its cards), `/backend/sandbox` = Sandbox (Art Studio card only; Art Studio is reached only from here at `/backend/art-studio`), `/backend/{savepoint,primeportal,corenode,apparel,marketing,splattor,audit}` = detail pages,
 `/backend/art-studio` = Art Studio (its API calls stay at `/backend/api/*`). Allowlist: `BACKEND_PAGES` in `src/lib/backend-gate.ts`. nexus-control verifies the signed assertion for each page (middleware + page guard).
 # (original Art Studio notes below)
 
